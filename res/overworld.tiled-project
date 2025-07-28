@@ -10,5 +10,43 @@
     "properties": [
     ],
     "propertyTypes": [
+        {
+            "color": "#ff19a447",
+            "drawFill": true,
+            "id": 1,
+            "members": [
+                {
+                    "name": "Impassable",
+                    "type": "bool",
+                    "value": false
+                },
+                {
+                    "name": "ImpassableDirections",
+                    "propertyType": "Direction",
+                    "type": "int",
+                    "value": 0
+                }
+            ],
+            "name": "BattleSdkTile",
+            "type": "class",
+            "useAs": [
+                "property",
+                "tile",
+                "project"
+            ]
+        },
+        {
+            "id": 2,
+            "name": "Direction",
+            "storageType": "int",
+            "type": "enum",
+            "values": [
+                "Down",
+                "Right",
+                "Up",
+                "Left"
+            ],
+            "valuesAsFlags": true
+        }
     ]
 }

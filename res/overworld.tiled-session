@@ -10,12 +10,52 @@
         "maps"
     ],
     "fileStates": {
+        "E:/projects/pokemon - kaisa versions/psdk/test/Data/Tiled/Maps/002 Intro.tmx": {
+            "scale": 0.8349609375,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 511.40116959064335,
+                "y": 511.4011695906433
+            }
+        },
+        "E:/projects/pokemon - kaisa versions/psdk/test/Data/Tiled/Maps/005 River.tmx": {
+            "scale": 1,
+            "selectedLayer": 82,
+            "viewCenter": {
+                "x": 1023,
+                "y": 971
+            }
+        },
+        "E:/projects/pokemon - kaisa versions/psdk/test/Data/Tiled/Tilesets/TECH-Assets.tsx": {
+            "scaleInDock": 1
+        },
+        "E:/projects/pokemon - kaisa versions/psdk/test/Data/Tiled/Tilesets/TECH-Buildings.tsx": {
+            "scaleInDock": 1
+        },
+        "E:/projects/pokemon - kaisa versions/psdk/test/Data/Tiled/Tilesets/TECH-Misc..tsx": {
+            "scaleInDock": 1
+        },
+        "E:/projects/pokemon - kaisa versions/psdk/test/Data/Tiled/Tilesets/TECH-Mounts.tsx": {
+            "scaleInDock": 1
+        },
+        "E:/projects/pokemon - kaisa versions/psdk/test/Data/Tiled/Tilesets/TECH-Nature.tsx": {
+            "scaleInDock": 1
+        },
+        "E:/projects/pokemon - kaisa versions/psdk/test/Data/Tiled/Tilesets/TECH-borders.tsx": {
+            "scaleInDock": 1
+        },
+        "E:/projects/pokemon - kaisa versions/psdk/test/Data/Tiled/Tilesets/passages.tsx": {
+            "scaleInDock": 1
+        },
+        "E:/projects/pokemon - kaisa versions/psdk/test/Data/Tiled/Tilesets/systemtags.tsx": {
+            "scaleInDock": 1
+        },
         "maps/test-map-1.tmx": {
             "scale": 2.1849999999999996,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 239.81693363844397,
-                "y": 160.1830663615561
+                "x": 398.1693363844395,
+                "y": 232.9519450800916
             }
         },
         "tilesets/test-terrain.tsx": {
@@ -26,13 +66,17 @@
             "scaleInDock": 1
         }
     },
+    "last.exportedFilePath": "E:/repos/battlesdk/res/tilesets",
+    "lastUsedTilesetExportFilter": "JSON tileset files (*.tsj *.json)",
     "map.tileHeight": 16,
     "map.tileWidth": 16,
     "openFiles": [
         "maps/test-map-1.tmx"
     ],
     "project": "overworld.tiled-project",
+    "property.type": "Direction",
     "recentFiles": [
-        "maps/test-map-1.tmx"
+        "maps/test-map-1.tmx",
+        "E:/projects/pokemon - kaisa versions/psdk/test/Data/Tiled/Maps/002 Intro.tmx"
     ]
 }
