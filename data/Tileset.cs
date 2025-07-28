@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 using TiledCS;
 
 namespace battlesdk.data;
-public class Tileset {
+public class Tileset : INameable {
     /// <summary>
     /// The name of the tileset.
     /// </summary>
@@ -28,6 +29,8 @@ public class Tileset {
     /// </summary>
     public int TileCount { get; private init; }
 
+    public List<TileProperties> Tiles { get; } = [];
+
     public Tileset (string name, string path) {
         Name = name;
 
@@ -43,5 +46,10 @@ public class Tileset {
         Width = tiled.Image.width / tiled.TileWidth;
         Height = tiled.Image.height / tiled.TileHeight;
         TileCount = tiled.TileCount;
+
+        for (int i = 0; i < TileCount; i++) {
+            var tiledTile = Array.Find(tiled.Tiles, t => t.id == i);
+            Tiles.Add(new(tiledTile));
+        }
     }
 }

@@ -7,17 +7,13 @@ using TiledCS;
 
 namespace battlesdk.data;
 
-public readonly record struct Tile (int TilesetId, int TileId) {
-    public static Tile Empty = new(-1, -1);
-}
-
-public class Map {
+public class Map : INameable {
     private string _path;
 
     public string Name { get; private init; }
     public int Width { get; private set; } 
     public int Height { get; private set; }
-    public List<MapLayer> Layers { get; private init; } = [];
+    public List<TileLayer> Layers { get; } = [];
 
     public Map (string name, string path) {
         Name = name;
@@ -37,7 +33,7 @@ public class Map {
         foreach (var ts in map.Tilesets) {
             var name = GetTilesetName(ts.source);
             
-            if (Registry.TilesetIndices.TryGetValue(name, out var index) == false) {
+            if (Registry.Tilesets.Indices.TryGetValue(name, out var index) == false) {
                 throw new($"Unknown tileset: '{name}' (path: '{ts.source}').");
             }
 
@@ -57,18 +53,40 @@ public class Map {
                     int gid = rawGid & 0x1fffffff;
 
                     if (gid == 0) {
-                        Layers[^1][x, y] = Tile.Empty;
+                        Layers[^1][x, y] = MapTile.Empty;
                         continue;
                     }
 
-                    for (int i = 0; i < firstGids.Count; i++) {
+                    int tsIndex = -1;
+                    for (int i = firstGids.Count - 1; i >= 0; i--) {
                         if (firstGids[i] <= gid) {
-                            Layers[^1][x, y] = new(i, gid - firstGids[i]);
+                            tsIndex = i;
+                            break;
                         }
                     }
+
+                    if (tsIndex == -1) throw new Exception(
+                        $"Invalid tile at layer '{layer.name}'[{x}, {y}]."
+                    );
+
+                    int tileId = gid - firstGids[tsIndex];
+
+                    Layers[^1][x, y] = new(
+                        tsIndex,
+                        tileId,
+                        Registry.Tilesets.Elements[tilesetIds[tsIndex]].Tiles[tileId]
+                    );
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Returns true if the position given is within the bounds of this map.
+    /// </summary>
+    /// <param name="pos">The position to check.</param>
+    public bool IsWithinBounds (IVec2 pos) {
+        return pos.X >= 0 && pos.X < Width && pos.Y >= 0 && pos.Y < Height;
     }
 
     private string GetTilesetName (string path) {
@@ -76,18 +94,5 @@ public class Map {
         string targetPath = Path.GetFullPath(Path.Combine("res/maps", path));
 
         return Path.GetRelativePath(basePath, targetPath);
-    }
-}
-
-public class MapLayer {
-    private Tile[,] _tiles;
-
-    public MapLayer (int width, int height) {
-        _tiles = new Tile[width, height];
-    }
-
-    public Tile this[int x, int y] {
-        get => _tiles[x, y];
-        set => _tiles[x, y] = value;
     }
 }

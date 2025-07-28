@@ -16,8 +16,8 @@ public unsafe class TilesetTexture {
     public TilesetTexture (SDLRenderer* renderer, string path) {
         var surface = SDLImage.Load(path);
 
-        Width = surface->W / 16;
-        Height = surface->H / 16;
+        Width = surface->W / Constants.TILE_SIZE;
+        Height = surface->H / Constants.TILE_SIZE;
 
         Texture = SDL.CreateTextureFromSurface(renderer, surface);
         if (Texture == null) throw new Exception("No tex.");
