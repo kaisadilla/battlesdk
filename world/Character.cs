@@ -7,6 +7,11 @@ public abstract class Character {
     public int Sprite { get; private set; }
 
     /// <summary>
+    /// The z position of the character, which indicates the height at which it
+    /// currently is.
+    /// </summary>
+    public int Z { get; private set; } = 0;
+    /// <summary>
     /// True while the player is moving from one tile into another.
     /// </summary>
     public bool IsMoving { get; private set; } = false;
@@ -77,14 +82,16 @@ public abstract class Character {
             _ => Position,
         };
 
-        var originTiles = G.World.GetTilesAt(Position);
-        var dstTiles = G.World.GetTilesAt(destination);
+        var originTiles = G.World.GetTilesAt(Position, Z);
+        var dstTiles = G.World.GetTilesAt(destination, Z);
 
-        bool moveAllowed = true;
-        foreach (var t in originTiles) {
-            if (t.ImpassableAt(direction)) {
-                moveAllowed = false;
-                break;
+        bool moveAllowed = dstTiles.Count > 0;
+        if (moveAllowed) {
+            foreach (var t in originTiles) {
+                if (t.ImpassableAt(direction)) {
+                    moveAllowed = false;
+                    break;
+                }
             }
         }
         if (moveAllowed) {
@@ -101,9 +108,19 @@ public abstract class Character {
             IsMoving = true;
             MoveProgress = Constants.WALK_SPEED * Time.DeltaTime;
             Position = destination;
+            LandAtTile();
         }
         else {
             Collided = true;
         }
+    }
+
+    protected void LandAtTile () {
+        if (G.World is null) return;
+
+        var zWarp = G.World.GetZWarpAt(Position);
+        if (zWarp is null) return;
+
+        Z = zWarp.Value;
     }
 }

@@ -39,12 +39,16 @@ public unsafe class Renderer {
         }
 
         if (G.World is not null) {
-            foreach (var l in G.World.ActiveMaps[0].LayersBelowPlayer) {
-                DrawLayer(l);
-            }
-            DrawPlayer();
-            foreach (var l in G.World.ActiveMaps[0].LayersAbovePlayer) {
-                DrawLayer(l);
+            // TODO: Dynamically adapt to arbitrary amount of z indices.
+            for (int i = 0; i < 6; i++) {
+                foreach (var l in G.World.ActiveMaps[0].Layers) {
+                    if (l.ZIndex == i) {
+                        DrawLayer(l);
+                    }
+                }
+                if (G.World.Player.Z == i) {
+                    DrawPlayer();
+                }
             }
         }
 
@@ -80,7 +84,7 @@ public unsafe class Renderer {
 
                 MapTile tile = layer[x, y];
 
-                if (tile == MapTile.Empty) continue;
+                if (tile is null) continue;
 
                 var ts = Registry.Tilesets[tile.TilesetId];
                 var tex = _tilesetTexes[tile.TilesetId];

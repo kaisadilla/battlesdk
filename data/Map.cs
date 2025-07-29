@@ -4,8 +4,7 @@ using TiledCS;
 namespace battlesdk.data;
 
 public class Map : INameable {
-    private const string ABOVE_PLAYER_LAYER_NAME = "AbovePlayer";
-    private const string BELOW_PLAYER_LAYER_NAME = "BelowPlayer";
+    private const string Z_INDICES_LAYER_NAME = "ZIndices";
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -14,8 +13,8 @@ public class Map : INameable {
     public string Name { get; private init; }
     public int Width { get; private set; }
     public int Height { get; private set; }
-    public List<TileLayer> LayersBelowPlayer { get; } = [];
-    public List<TileLayer> LayersAbovePlayer { get; } = [];
+    public List<TileLayer> Layers { get; } = [];
+    public ZWarpMap ZWarps { get; private set; } = new(0, 0);
 
     public Map (string name, string path) {
         Name = name;
@@ -29,6 +28,7 @@ public class Map : INameable {
 
         Width = map.Width;
         Height = map.Height;
+        ZWarps = new(Width, Height);
 
         List<int> tilesetIds = [];
         List<int> firstGids = [];
@@ -44,16 +44,25 @@ public class Map : INameable {
         }
 
         foreach (var g in map.Groups) {
-            if (g.name == ABOVE_PLAYER_LAYER_NAME) {
+            if (g.name.StartsWith("Z=")) {
+                if (int.TryParse(g.name.Substring(2), out int zIndex) == false) {
+                    _logger.Error(
+                        "Invalid z-index layer value. Layer name must be 'Z=' " +
+                        "followed by an integer and nothing else."
+                    );
+                    continue;
+                }
+
                 foreach (var l in g.layers) {
-                    var layer = _BuildLayer(l);
-                    if (layer is not null) LayersAbovePlayer.Add(layer);
+                    var layer = _BuildLayer(l, zIndex);
+                    if (layer is not null) Layers.Add(layer);
                 }
             }
-            else if (g.name == BELOW_PLAYER_LAYER_NAME) {
+            else if (g.name == "Flags") {
                 foreach (var l in g.layers) {
-                    var layer = _BuildLayer(l);
-                    if (layer is not null) LayersBelowPlayer.Add(layer);
+                    if (l.name == Z_INDICES_LAYER_NAME) {
+                        _ReadZIndices(l);
+                    }
                 }
             }
             else {
@@ -61,10 +70,10 @@ public class Map : INameable {
             }
         }
 
-        TileLayer? _BuildLayer (TiledLayer tiledLayer) {
+        TileLayer? _BuildLayer (TiledLayer tiledLayer, int zIndex) {
             if (tiledLayer.type != TiledLayerType.TileLayer) return null;
 
-            TileLayer layer = new(Width, Height);
+            TileLayer layer = new(Width, Height, zIndex);
 
             for (int y = 0; y < map.Height; y++) {
                 for (int x = 0; x < map.Width; x++) {
@@ -73,7 +82,7 @@ public class Map : INameable {
                     int gid = rawGid & 0x1fffffff;
 
                     if (gid == 0) {
-                        layer[x, y] = MapTile.Empty;
+                        layer[x, y] = null;
                         continue;
                     }
 
@@ -91,15 +100,55 @@ public class Map : INameable {
 
                     int tileId = gid - firstGids[tsIndex];
 
-                    layer[x, y] = new(
-                        tsIndex,
-                        tileId,
-                        Registry.Tilesets.Elements[tilesetIds[tsIndex]].Tiles[tileId]
-                    );
+                    var tileset = Registry.Tilesets[tilesetIds[tsIndex]];
+
+                    if (tileset.Kind != TilesetKind.Normal) continue;
+
+                    layer[x, y] = new() {
+                        TilesetId = tilesetIds[tsIndex],
+                        TileId = tileId,
+                        Properties = tileset.Tiles[tileId],
+                        ZIndex = 0,
+                        Flags = [],
+                    };
                 }
             }
 
             return layer;
+        }
+
+        void _ReadZIndices (TiledLayer tiledLayer) {
+            if (tiledLayer.type != TiledLayerType.TileLayer) return;
+
+            for (int y = 0; y < map.Height; y++) {
+                for (int x = 0; x < map.Width; x++) {
+                    int index = y * map.Width + x;
+                    int rawGid = tiledLayer.data[index];
+                    int gid = rawGid & 0x1fffffff;
+
+                    if (gid == 0) continue;
+
+                    int tsIndex = -1;
+                    for (int i = firstGids.Count - 1; i >= 0; i--) {
+                        if (firstGids[i] <= gid) {
+                            tsIndex = i;
+                            break;
+                        }
+                    }
+
+                    if (tsIndex == -1) throw new Exception(
+                        $"Invalid tile at layer '{tiledLayer.name}'[{x}, {y}]."
+                    );
+
+                    int tileId = gid - firstGids[tsIndex];
+
+                    var tileset = Registry.Tilesets[tilesetIds[tsIndex]];
+
+                    if (tileset.Kind != TilesetKind.ZIndices) continue;
+
+                    ZWarps.SetWarp(x, y, tileId);
+                }
+            }
         }
     }
 

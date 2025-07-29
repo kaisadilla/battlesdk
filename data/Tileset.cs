@@ -1,13 +1,9 @@
-﻿using NLog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TiledCS;
+﻿using TiledCS;
 
 namespace battlesdk.data;
 public class Tileset : INameable {
+    private const string CLASS_FLAGS = "TileFlags";
+    private const string CLASS_Z_INDICES = "TileZIndices";
     /// <summary>
     /// The name of the tileset.
     /// </summary>
@@ -16,6 +12,7 @@ public class Tileset : INameable {
     /// The absolute path to the image contained by this tileset.
     /// </summary>
     public string TexturePath { get; private init; }
+    public TilesetKind Kind { get; private set; } = TilesetKind.Normal;
     /// <summary>
     /// The width of the tileset, in tiles.
     /// </summary>
@@ -47,9 +44,23 @@ public class Tileset : INameable {
         Height = tiled.Image.height / tiled.TileHeight;
         TileCount = tiled.TileCount;
 
-        for (int i = 0; i < TileCount; i++) {
-            var tiledTile = Array.Find(tiled.Tiles, t => t.id == i);
-            Tiles.Add(new(tiledTile));
+        if (tiled.Class == CLASS_FLAGS) {
+            Kind = TilesetKind.Flags;
+        }
+        else if (tiled.Class == CLASS_Z_INDICES) {
+            Kind = TilesetKind.ZIndices;
+        }
+        else {
+            for (int i = 0; i < TileCount; i++) {
+                var tiledTile = Array.Find(tiled.Tiles, t => t.id == i);
+                Tiles.Add(new(tiledTile));
+            }
         }
     }
+}
+
+public enum TilesetKind {
+    Normal,
+    Flags,
+    ZIndices,
 }
