@@ -3,7 +3,8 @@
 namespace battlesdk.data;
 public class Tileset : INameable {
     private const string CLASS_FLAGS = "TileFlags";
-    private const string CLASS_Z_INDICES = "TileZIndices";
+    private const string CLASS_Z_WARPS = "TileZWarps";
+
     /// <summary>
     /// The name of the tileset.
     /// </summary>
@@ -25,7 +26,10 @@ public class Tileset : INameable {
     /// The amount of tiles in this tileset.
     /// </summary>
     public int TileCount { get; private init; }
-
+    /// <summary>
+    /// Maps each tile id with the properties of said tile. This list only
+    /// contains values for tilesets whose kind is "Normal".
+    /// </summary>
     public List<TileProperties> Tiles { get; } = [];
 
     public Tileset (string name, string path) {
@@ -33,8 +37,8 @@ public class Tileset : INameable {
 
         var tiled = new TiledTileset(path);
 
-        var dir = Path.GetDirectoryName(path);
-        if (dir is null) throw new Exception("Invalid directory.");
+        var dir = Path.GetDirectoryName(path)
+            ?? throw new Exception("Invalid directory.");
 
         string texPath = Path.Combine(dir, tiled.Image.source);
         texPath = Path.GetFullPath(texPath);
@@ -47,8 +51,8 @@ public class Tileset : INameable {
         if (tiled.Class == CLASS_FLAGS) {
             Kind = TilesetKind.Flags;
         }
-        else if (tiled.Class == CLASS_Z_INDICES) {
-            Kind = TilesetKind.ZIndices;
+        else if (tiled.Class == CLASS_Z_WARPS) {
+            Kind = TilesetKind.ZWarps;
         }
         else {
             for (int i = 0; i < TileCount; i++) {
@@ -60,7 +64,16 @@ public class Tileset : INameable {
 }
 
 public enum TilesetKind {
+    /// <summary>
+    /// A tileset that contains regular terrain.
+    /// </summary>
     Normal,
+    /// <summary>
+    /// A tileset that contains flags to be applied to the terrain.
+    /// </summary>
     Flags,
-    ZIndices,
+    /// <summary>
+    /// A tileset that contains z warp flags.
+    /// </summary>
+    ZWarps,
 }
