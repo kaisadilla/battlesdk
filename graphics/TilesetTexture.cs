@@ -1,10 +1,5 @@
 ﻿using Hexa.NET.SDL2;
 using Hexa.NET.SDL2.Image;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace battlesdk.graphics;
 public unsafe class TilesetTexture {

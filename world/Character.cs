@@ -96,9 +96,9 @@ public abstract class Character {
             }
         }
 
+        Direction = direction;
         if (moveAllowed) {
             IsMoving = true;
-            Direction = direction;
             MoveProgress = Constants.WALK_SPEED * Time.DeltaTime;
             Position = destination;
         }

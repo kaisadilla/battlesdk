@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace battlesdk.world;
+﻿namespace battlesdk.world;
 public class Player : Character {
     private const float MOVE_INPUT_DELAY = 0.1f;
+
+    private PlayerSoundManager _sounds = new();
 
     private float _leftKeyStart = float.MinValue;
     private float _rightKeyStart = float.MinValue;
@@ -59,6 +55,10 @@ public class Player : Character {
                 if (Time.TotalTime - _downKeyStart > MOVE_INPUT_DELAY) {
                     Move(Direction.Down);
                 }
+            }
+
+            if (Collided) {
+                _sounds.PlayCollision();
             }
         }
 
