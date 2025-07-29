@@ -1,9 +1,4 @@
-﻿using Hexa.NET.SDL2;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using SDL;
 
 namespace battlesdk;
 
@@ -37,21 +32,21 @@ public static class Controls {
     /// have an action that is not mapped to any key (although this will make
     /// said action unavailable).
     /// </summary>
-    private static readonly Dictionary<SDLScancode, ActionKey> _bindings = new() {
-        [SDLScancode.X] = ActionKey.Primary,
-        [SDLScancode.C] = ActionKey.Secondary,
-        [SDLScancode.Up] = ActionKey.Up,
-        [SDLScancode.Kp8] = ActionKey.Up,
-        [SDLScancode.Down] = ActionKey.Down,
-        [SDLScancode.Kp2] = ActionKey.Down,
-        [SDLScancode.Left] = ActionKey.Left,
-        [SDLScancode.Kp4] = ActionKey.Left,
-        [SDLScancode.Right] = ActionKey.Right,
-        [SDLScancode.Kp6] = ActionKey.Right,
-        [SDLScancode.Z] = ActionKey.Menu,
-        [SDLScancode.Return] = ActionKey.Enter,
-        [SDLScancode.KpEnter] = ActionKey.Enter,
-        [SDLScancode.Escape] = ActionKey.Escape,
+    private static readonly Dictionary<SDL_Scancode, ActionKey> _bindings = new() {
+        [SDL_Scancode.SDL_SCANCODE_X] = ActionKey.Primary,
+        [SDL_Scancode.SDL_SCANCODE_C] = ActionKey.Secondary,
+        [SDL_Scancode.SDL_SCANCODE_UP] = ActionKey.Up,
+        [SDL_Scancode.SDL_SCANCODE_KP_8] = ActionKey.Up,
+        [SDL_Scancode.SDL_SCANCODE_DOWN] = ActionKey.Down,
+        [SDL_Scancode.SDL_SCANCODE_KP_2] = ActionKey.Down,
+        [SDL_Scancode.SDL_SCANCODE_LEFT] = ActionKey.Left,
+        [SDL_Scancode.SDL_SCANCODE_KP_4] = ActionKey.Left,
+        [SDL_Scancode.SDL_SCANCODE_RIGHT] = ActionKey.Right,
+        [SDL_Scancode.SDL_SCANCODE_KP_6] = ActionKey.Right,
+        [SDL_Scancode.SDL_SCANCODE_Z] = ActionKey.Menu,
+        [SDL_Scancode.SDL_SCANCODE_RETURN] = ActionKey.Enter,
+        [SDL_Scancode.SDL_SCANCODE_KP_ENTER] = ActionKey.Enter,
+        [SDL_Scancode.SDL_SCANCODE_ESCAPE] = ActionKey.Escape,
     };
 
     public static void Update () {
@@ -65,15 +60,15 @@ public static class Controls {
         }
     }
 
-    public static void RegisterEvent (SDLEvent evt) {
-        if (_bindings.TryGetValue(evt.Key.Keysym.Scancode, out var action) == false) {
+    public static void RegisterEvent (SDL_Event evt) {
+        if (_bindings.TryGetValue(evt.key.scancode, out var action) == false) {
             return;
         }
 
-        if (evt.Type == (uint)SDLEventType.Keydown && evt.Key.Repeat == 0) {
+        if (evt.Type == SDL_EventType.SDL_EVENT_KEY_DOWN && evt.key.repeat == false) {
             _currentActions.Add(action);
         }
-        else if (evt.Type == (uint)SDLEventType.Keyup) {
+        else if (evt.Type == SDL_EventType.SDL_EVENT_KEY_UP) {
             _currentActions.Remove(action);
         }
     }

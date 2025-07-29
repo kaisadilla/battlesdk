@@ -15,6 +15,7 @@ const float ZOOM = 3f;
 BuildRegistry();
 G.LoadGame();
 
+Audio.Init();
 Audio.RegisterSounds();
 var win = new Window(WIDTH, HEIGHT, ZOOM);
 

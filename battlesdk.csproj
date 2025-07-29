@@ -9,10 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Hexa.NET.SDL2" Version="1.2.14" />
-    <PackageReference Include="Hexa.NET.SDL2.Image" Version="1.0.1" />
     <PackageReference Include="MoonSharp" Version="2.0.0" />
     <PackageReference Include="NLog" Version="6.0.2" />
+    <PackageReference Include="ppy.SDL3-CS" Version="2025.703.0" />
+    <PackageReference Include="ppy.SDL3_image-CS" Version="2025.703.0" />
+    <PackageReference Include="ppy.SDL3_mixer-CS" Version="2025.703.0" />
+    <PackageReference Include="ppy.SDL3_ttf-CS" Version="2025.703.0" />
     <PackageReference Include="TiledCS" Version="3.3.3" />
   </ItemGroup>
 

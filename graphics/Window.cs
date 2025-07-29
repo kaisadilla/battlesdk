@@ -1,30 +1,19 @@
-﻿using battlesdk.data;
-using Hexa.NET.SDL2;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
+﻿using SDL;
 
 namespace battlesdk.graphics;
 public class Window {
-    private unsafe SDLWindow* _window;
+    private unsafe SDL_Window* _window;
     private Renderer _renderer;
-
-    private WorldScene _worldScene;
 
     public bool CloseRequested { get; private set; } = false;
 
     public int TargetFps { get; set; } = 60;
 
     public unsafe Window (int width, int height, float scale) {
-        SDL.Init(SDL.SDL_INIT_VIDEO);
+        SDL3.SDL_Init(SDL_InitFlags.SDL_INIT_VIDEO);
 
-        _window = SDL.CreateWindow(
+        _window = SDL3.SDL_CreateWindow(
             "BattleSDK",
-            (int)SDL.SDL_WINDOWPOS_CENTERED_MASK,
-            (int)SDL.SDL_WINDOWPOS_CENTERED_MASK,
             (int)(width * scale),
             (int)(height * scale),
             0
@@ -37,21 +26,21 @@ public class Window {
         Time.Update();
         Controls.Update();
 
-        var frameStart = SDL.GetTicks();
+        var frameStart = SDL3.SDL_GetTicks();
 
-        SDLEvent evt;
-        while (SDL.PollEvent(&evt) != 0) {
+        SDL_Event evt;
+        while (SDL3.SDL_PollEvent(&evt)) {
             Controls.RegisterEvent(evt);
-            if (evt.Type == (uint)SDLEventType.Quit) {
+            if (evt.Type == SDL_EventType.SDL_EVENT_QUIT) {
                 CloseRequested = true;
             }
         }
 
-        var frameTime = (int)(SDL.GetTicks() - frameStart);
+        var frameTime = (int)(SDL3.SDL_GetTicks() - frameStart);
         var delay = 1000 / TargetFps;
 
         if (frameTime < delay) {
-            SDL.Delay((uint)(delay - frameTime));
+            SDL3.SDL_Delay((uint)(delay - frameTime));
         }
     }
 
@@ -61,7 +50,7 @@ public class Window {
 
     public unsafe void Destroy () {
         _renderer.Destroy();
-        SDL.DestroyWindow(_window);
-        SDL.Quit();
+        SDL3.SDL_DestroyWindow(_window);
+        SDL3.SDL_Quit();
     }
 }

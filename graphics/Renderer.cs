@@ -1,10 +1,10 @@
 ﻿using battlesdk.data;
-using Hexa.NET.SDL2;
+using SDL;
 
 namespace battlesdk.graphics;
 
 public unsafe class Renderer {
-    private unsafe SDLRenderer* _renderer;
+    private unsafe SDL_Renderer* _renderer;
 
     private Dictionary<int, TilesetTexture> _tilesetTexes = [];
     private Dictionary<int, CharacterTexture> _charTexes = [];
@@ -13,13 +13,13 @@ public unsafe class Renderer {
     private int _height;
     private Camera _camera;
 
-    public Renderer (SDLWindow* window, int width, int height) {
-        _renderer = SDL.CreateRenderer(window, -1, 0);
+    public Renderer (SDL_Window* window, int width, int height) {
+        _renderer = SDL3.SDL_CreateRenderer(window, (string?)null);
         _width = width;
         _height = height;
         _camera = new(width, height, IVec2.Zero);
 
-        SDL.RenderSetLogicalSize(_renderer, width, height);
+        SDL3.SDL_SetRenderLogicalPresentation(_renderer, width, height, SDL_RendererLogicalPresentation.SDL_LOGICAL_PRESENTATION_INTEGER_SCALE);
 
         foreach (var t in Registry.Tilesets) {
             LoadTileset(t);
@@ -31,8 +31,8 @@ public unsafe class Renderer {
     }
 
     public unsafe void Render () {
-        SDL.SetRenderDrawColor(_renderer, 0, 0, 0, 255);
-        SDL.RenderClear(_renderer);
+        SDL3.SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
+        SDL3.SDL_RenderClear(_renderer);
 
         if (G.World is not null) {
             _camera.Center = G.World.Player.Subposition;
@@ -41,11 +41,11 @@ public unsafe class Renderer {
         DrawWorld();
         DrawPlayer();
 
-        SDL.RenderPresent(_renderer);
+        SDL3.SDL_RenderPresent(_renderer);
     }
 
     public unsafe void Destroy () {
-        SDL.DestroyRenderer(_renderer);
+        SDL3.SDL_DestroyRenderer(_renderer);
     }
 
     private unsafe void LoadTileset (Tileset tileset) {
@@ -82,22 +82,22 @@ public unsafe class Renderer {
                     var ts = Registry.Tilesets[tile.TilesetId];
                     var tex = _tilesetTexes[tile.TilesetId];
 
-                    SDLRect src = new() {
-                        X = (tile.TileId % ts.Width) * Constants.TILE_SIZE,
-                        Y = (tile.TileId / ts.Width) * Constants.TILE_SIZE,
-                        H = Constants.TILE_SIZE,
-                        W = Constants.TILE_SIZE,
+                    SDL_FRect src = new() {
+                        x = (tile.TileId % ts.Width) * Constants.TILE_SIZE,
+                        y = (tile.TileId / ts.Width) * Constants.TILE_SIZE,
+                        h = Constants.TILE_SIZE,
+                        w = Constants.TILE_SIZE,
                     };
 
-                    SDLRect dst = new() {
-                        X = xPos,
-                        Y = yPos,
-                        H = Constants.TILE_SIZE,
-                        W = Constants.TILE_SIZE,
+                    SDL_FRect dst = new() {
+                        x = xPos,
+                        y = yPos,
+                        h = Constants.TILE_SIZE,
+                        w = Constants.TILE_SIZE,
                     };
 
                     unsafe {
-                        SDL.RenderCopy(_renderer, tex.Texture, ref src, ref dst);
+                        SDL3.SDL_RenderTexture(_renderer, tex.Texture, &src, &dst);
                     }
                 }
             }

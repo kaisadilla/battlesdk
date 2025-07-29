@@ -1,10 +1,5 @@
 ﻿using battlesdk.world;
-using Hexa.NET.SDL2;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using SDL;
 
 namespace battlesdk.graphics;
 public class WorldScene {
@@ -14,7 +9,7 @@ public class WorldScene {
         _world = world;
     }
 
-    public unsafe void Draw (SDLRenderer* renderer) {
+    public unsafe void Draw (SDL_Renderer* renderer) {
 
     }
 }
