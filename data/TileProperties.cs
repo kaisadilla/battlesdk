@@ -1,9 +1,4 @@
 ﻿using NLog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TiledCS;
 
 namespace battlesdk.data;
@@ -38,11 +33,15 @@ public class TileProperties {
                 }
             }
             if (prop.name == "Impassable") {
-                impassable = (int)(DirectionMask.Down
+                if (bool.TryParse(prop.value, out var isImpassable) == false) {
+                    _logger.Warn("Tile property 'Impassable' has an invalid value.");
+                }
+
+                impassable = isImpassable ? (int)(DirectionMask.Down
                     | DirectionMask.Right
                     | DirectionMask.Up
                     | DirectionMask.Left
-                );
+                ) : 0;
             }
         }
 

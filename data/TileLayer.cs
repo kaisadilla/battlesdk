@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace battlesdk.data;
+﻿namespace battlesdk.data;
 
 public readonly record struct MapTile (
     int TilesetId, int TileId, TileProperties Properties
@@ -14,13 +8,14 @@ public readonly record struct MapTile (
 
 public class TileLayer {
     private MapTile[,] _tiles;
-    private int _width;
-    private int _height;
+
+    public int Width { get; private init; }
+    public int Height { get; private init; }
 
     public TileLayer (int width, int height) {
         _tiles = new MapTile[width, height];
-        _width = width;
-        _height = height;
+        Width = width;
+        Height = height;
     }
 
     public MapTile this[int x, int y] {
@@ -37,10 +32,10 @@ public class TileLayer {
     /// Returns an exact (deep) copy of this layer.
     /// </summary>
     public TileLayer Clone () {
-        TileLayer clone = new(_width, _height);
+        TileLayer clone = new(Width, Height);
 
-        for (int x = 0; x < _width; x++) {
-            for (int y = 0; y < _height; y++) {
+        for (int x = 0; x < Width; x++) {
+            for (int y = 0; y < Height; y++) {
                 clone[x, y] = this[x, y];
             }
         }

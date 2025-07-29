@@ -1,19 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using NLog;
 using TiledCS;
 
 namespace battlesdk.data;
 
 public class Map : INameable {
+    private const string ABOVE_PLAYER_LAYER_NAME = "AbovePlayer";
+    private const string BELOW_PLAYER_LAYER_NAME = "BelowPlayer";
+
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
     private string _path;
 
     public string Name { get; private init; }
-    public int Width { get; private set; } 
+    public int Width { get; private set; }
     public int Height { get; private set; }
-    public List<TileLayer> Layers { get; } = [];
+    public List<TileLayer> LayersBelowPlayer { get; } = [];
+    public List<TileLayer> LayersAbovePlayer { get; } = [];
 
     public Map (string name, string path) {
         Name = name;
@@ -32,7 +34,7 @@ public class Map : INameable {
         List<int> firstGids = [];
         foreach (var ts in map.Tilesets) {
             var name = GetTilesetName(ts.source);
-            
+
             if (Registry.Tilesets.Indices.TryGetValue(name, out var index) == false) {
                 throw new($"Unknown tileset: '{name}' (path: '{ts.source}').");
             }
@@ -41,19 +43,37 @@ public class Map : INameable {
             firstGids.Add(ts.firstgid);
         }
 
-        foreach (var layer in map.Layers) {
-            if (layer.type != TiledLayerType.TileLayer) continue;
+        foreach (var g in map.Groups) {
+            if (g.name == ABOVE_PLAYER_LAYER_NAME) {
+                foreach (var l in g.layers) {
+                    var layer = _BuildLayer(l);
+                    if (layer is not null) LayersAbovePlayer.Add(layer);
+                }
+            }
+            else if (g.name == BELOW_PLAYER_LAYER_NAME) {
+                foreach (var l in g.layers) {
+                    var layer = _BuildLayer(l);
+                    if (layer is not null) LayersBelowPlayer.Add(layer);
+                }
+            }
+            else {
+                _logger.Warn($"Unrecognized map group label: '{g.name}'.");
+            }
+        }
 
-            Layers.Add(new(Width, Height));
+        TileLayer? _BuildLayer (TiledLayer tiledLayer) {
+            if (tiledLayer.type != TiledLayerType.TileLayer) return null;
+
+            TileLayer layer = new(Width, Height);
 
             for (int y = 0; y < map.Height; y++) {
                 for (int x = 0; x < map.Width; x++) {
                     int index = y * map.Width + x;
-                    int rawGid = layer.data[index];
+                    int rawGid = tiledLayer.data[index];
                     int gid = rawGid & 0x1fffffff;
 
                     if (gid == 0) {
-                        Layers[^1][x, y] = MapTile.Empty;
+                        layer[x, y] = MapTile.Empty;
                         continue;
                     }
 
@@ -66,18 +86,20 @@ public class Map : INameable {
                     }
 
                     if (tsIndex == -1) throw new Exception(
-                        $"Invalid tile at layer '{layer.name}'[{x}, {y}]."
+                        $"Invalid tile at layer '{tiledLayer.name}'[{x}, {y}]."
                     );
 
                     int tileId = gid - firstGids[tsIndex];
 
-                    Layers[^1][x, y] = new(
+                    layer[x, y] = new(
                         tsIndex,
                         tileId,
                         Registry.Tilesets.Elements[tilesetIds[tsIndex]].Tiles[tileId]
                     );
                 }
             }
+
+            return layer;
         }
     }
 

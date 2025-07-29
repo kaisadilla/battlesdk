@@ -38,8 +38,15 @@ public unsafe class Renderer {
             _camera.Center = G.World.Player.Subposition;
         }
 
-        DrawWorld();
-        DrawPlayer();
+        if (G.World is not null) {
+            foreach (var l in G.World.ActiveMaps[0].LayersBelowPlayer) {
+                DrawLayer(l);
+            }
+            DrawPlayer();
+            foreach (var l in G.World.ActiveMaps[0].LayersAbovePlayer) {
+                DrawLayer(l);
+            }
+        }
 
         SDL3.SDL_RenderPresent(_renderer);
     }
@@ -58,47 +65,42 @@ public unsafe class Renderer {
         _charTexes[Registry.CharSprites.Indices[sprite.Name]] = tex;
     }
 
-    private void DrawWorld () {
-        if (G.World is null) return;
-        if (G.World.ActiveMaps.Count == 0) return;
+    private void DrawLayer (TileLayer layer) {
+        for (int y = 0; y < layer.Height; y++) {
+            int yPos = _camera.GetScreenY(y);
 
-        foreach (var layer in G.World.ActiveMaps[0].Layers) {
-            for (int y = 0; y < G.World.ActiveMaps[0].Map.Height; y++) {
-                int yPos = _camera.GetScreenY(y);
+            if (yPos + Constants.TILE_SIZE < 0) continue;
+            if (yPos >= _height) continue;
 
-                if (yPos + Constants.TILE_SIZE < 0) continue;
-                if (yPos >= _height) continue;
+            for (int x = 0; x < layer.Width; x++) {
+                int xPos = _camera.GetScreenX(x);
 
-                for (int x = 0; x < G.World.ActiveMaps[0].Map.Width; x++) {
-                    int xPos = _camera.GetScreenX(x);
+                if (xPos + Constants.TILE_SIZE < 0) continue;
+                if (xPos >= _width) continue;
 
-                    if (xPos + Constants.TILE_SIZE < 0) continue;
-                    if (xPos >= _width) continue;
+                MapTile tile = layer[x, y];
 
-                    MapTile tile = layer[x, y];
+                if (tile == MapTile.Empty) continue;
 
-                    if (tile == MapTile.Empty) continue;
+                var ts = Registry.Tilesets[tile.TilesetId];
+                var tex = _tilesetTexes[tile.TilesetId];
 
-                    var ts = Registry.Tilesets[tile.TilesetId];
-                    var tex = _tilesetTexes[tile.TilesetId];
+                SDL_FRect src = new() {
+                    x = (tile.TileId % ts.Width) * Constants.TILE_SIZE,
+                    y = (tile.TileId / ts.Width) * Constants.TILE_SIZE,
+                    h = Constants.TILE_SIZE,
+                    w = Constants.TILE_SIZE,
+                };
 
-                    SDL_FRect src = new() {
-                        x = (tile.TileId % ts.Width) * Constants.TILE_SIZE,
-                        y = (tile.TileId / ts.Width) * Constants.TILE_SIZE,
-                        h = Constants.TILE_SIZE,
-                        w = Constants.TILE_SIZE,
-                    };
+                SDL_FRect dst = new() {
+                    x = xPos,
+                    y = yPos,
+                    h = Constants.TILE_SIZE,
+                    w = Constants.TILE_SIZE,
+                };
 
-                    SDL_FRect dst = new() {
-                        x = xPos,
-                        y = yPos,
-                        h = Constants.TILE_SIZE,
-                        w = Constants.TILE_SIZE,
-                    };
-
-                    unsafe {
-                        SDL3.SDL_RenderTexture(_renderer, tex.Texture, &src, &dst);
-                    }
+                unsafe {
+                    SDL3.SDL_RenderTexture(_renderer, tex.Texture, &src, &dst);
                 }
             }
         }

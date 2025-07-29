@@ -1,9 +1,4 @@
 ﻿using battlesdk.data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace battlesdk.world;
 
@@ -31,7 +26,11 @@ public class World {
 
         List<TileProperties> tiles = [];
 
-        foreach (var l in ActiveMaps[0].Layers) {
+        foreach (var l in ActiveMaps[0].LayersAbovePlayer) {
+            tiles.Add(l[pos].Properties);
+        }
+
+        foreach (var l in ActiveMaps[0].LayersBelowPlayer) {
             tiles.Add(l[pos].Properties);
         }
 
