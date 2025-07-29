@@ -13,7 +13,6 @@
     <PackageReference Include="Hexa.NET.SDL2.Image" Version="1.0.1" />
     <PackageReference Include="MoonSharp" Version="2.0.0" />
     <PackageReference Include="NLog" Version="6.0.2" />
-    <PackageReference Include="SDL-Sharp_64-bits" Version="1.4.1" />
     <PackageReference Include="TiledCS" Version="3.3.3" />
   </ItemGroup>
 

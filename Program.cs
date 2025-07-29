@@ -15,6 +15,7 @@ const float ZOOM = 3f;
 BuildRegistry();
 G.LoadGame();
 
+Audio.RegisterSounds();
 var win = new Window(WIDTH, HEIGHT, ZOOM);
 
 while (win.CloseRequested == false) {
@@ -73,7 +74,7 @@ void BuildRegistry () {
     }
 
     var soundFiles = Directory.GetFiles("res/sounds", "*.wav").Select(Path.GetFileName);
-    foreach (var f in mapFiles) {
+    foreach (var f in soundFiles) {
         if (f is null) continue;
 
         try {

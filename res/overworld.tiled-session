@@ -52,7 +52,7 @@
         },
         "maps/test-map-1.tmx": {
             "scale": 2.1849999999999996,
-            "selectedLayer": 0,
+            "selectedLayer": 1,
             "viewCenter": {
                 "x": 398.1693363844395,
                 "y": 232.9519450800916
