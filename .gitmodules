@@ -1,0 +1,4 @@
+[submodule "res"]
+	path = res
+	url = https://github.com/kaisadilla/battlesdk-example-res-folder.git
+	branch = main
