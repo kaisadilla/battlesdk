@@ -1,27 +1,27 @@
-﻿using Hexa.NET.SDL2;
-using Hexa.NET.SDL2.Image;
+﻿using SDL;
 
 namespace battlesdk.graphics;
 public unsafe class TilesetTexture {
-    public SDLTexture* Texture { get; private init; }
+    public SDL_Texture* Texture { get; private init; }
 
     public int Width { get; private init; }
     public int Height { get; private init; }
 
-    public TilesetTexture (SDLRenderer* renderer, string path) {
-        var surface = SDLImage.Load(path);
+    public TilesetTexture (SDL_Renderer* renderer, string path) {
+        var surface = SDL3_image.IMG_Load(path);
 
-        Width = surface->W / Constants.TILE_SIZE;
-        Height = surface->H / Constants.TILE_SIZE;
+        Width = surface->w / Constants.TILE_SIZE;
+        Height = surface->h / Constants.TILE_SIZE;
 
-        Texture = SDL.CreateTextureFromSurface(renderer, surface);
+        Texture = SDL3.SDL_CreateTextureFromSurface(renderer, surface);
         if (Texture == null) throw new Exception("No tex.");
 
-        SDL.FreeSurface(surface);
-        SDL.SetTextureBlendMode(Texture, SDLBlendMode.Blend);
+        SDL3.SDL_DestroySurface(surface);
+        SDL3.SDL_SetTextureBlendMode(Texture, SDL_BlendMode.SDL_BLENDMODE_BLEND);
+        SDL3.SDL_SetTextureScaleMode(Texture, SDL_ScaleMode.SDL_SCALEMODE_NEAREST);
     }
 
     public void Destroy () {
-        SDL.DestroyTexture(Texture);
+        SDL3.SDL_DestroyTexture(Texture);
     }
 }

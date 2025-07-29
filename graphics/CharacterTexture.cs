@@ -1,10 +1,9 @@
 ﻿using battlesdk.data;
-using Hexa.NET.SDL2;
-using Hexa.NET.SDL2.Image;
+using SDL;
 
 namespace battlesdk.graphics;
 public unsafe class CharacterTexture {
-    public SDLTexture* Texture { get; private init; }
+    public SDL_Texture* Texture { get; private init; }
 
     public int Width { get; private init; }
     public int Height { get; private init; }
@@ -12,47 +11,48 @@ public unsafe class CharacterTexture {
     private int _offsetX;
     private int _offsetY;
 
-    public CharacterTexture (SDLRenderer* renderer, AssetFile sprite) {
-        var surface = SDLImage.Load(sprite.Path);
+    public CharacterTexture (SDL_Renderer* renderer, AssetFile sprite) {
+        var surface = SDL3_image.IMG_Load(sprite.Path);
 
-        Width = surface->W / Constants.DEFAULT_CHAR_SIZE;
-        Height = surface->H / Constants.DEFAULT_CHAR_SIZE;
+        Width = surface->w / Constants.DEFAULT_CHAR_SIZE;
+        Height = surface->h / Constants.DEFAULT_CHAR_SIZE;
 
         _offsetX = -((Constants.DEFAULT_CHAR_SIZE - Constants.TILE_SIZE) / 2);
         _offsetY = -(Constants.DEFAULT_CHAR_SIZE - Constants.TILE_SIZE);
 
-        Texture = SDL.CreateTextureFromSurface(renderer, surface);
+        Texture = SDL3.SDL_CreateTextureFromSurface(renderer, surface);
         if (Texture == null) throw new Exception("No tex.");
 
-        SDL.FreeSurface(surface);
-        SDL.SetTextureBlendMode(Texture, SDLBlendMode.Blend);
+        SDL3.SDL_DestroySurface(surface);
+        SDL3.SDL_SetTextureBlendMode(Texture, SDL_BlendMode.SDL_BLENDMODE_BLEND);
+        SDL3.SDL_SetTextureScaleMode(Texture, SDL_ScaleMode.SDL_SCALEMODE_NEAREST);
     }
 
-    public SDLRect GetSprite (Direction dir, int set, int frame) {
+    public SDL_FRect GetSprite (Direction dir, int set, int frame) {
         return new() {
-            X = frame * Constants.DEFAULT_CHAR_SIZE + (set * 3 * Constants.DEFAULT_CHAR_SIZE),
-            Y = (int)dir * Constants.DEFAULT_CHAR_SIZE,
-            W = Constants.DEFAULT_CHAR_SIZE,
-            H = Constants.DEFAULT_CHAR_SIZE,
+            x = frame * Constants.DEFAULT_CHAR_SIZE + (set * 3 * Constants.DEFAULT_CHAR_SIZE),
+            y = (int)dir * Constants.DEFAULT_CHAR_SIZE,
+            w = Constants.DEFAULT_CHAR_SIZE,
+            h = Constants.DEFAULT_CHAR_SIZE,
         };
     }
 
     public unsafe void Draw (
-        SDLRenderer* renderer, Vec2 position, Direction dir, int set, int frame
+        SDL_Renderer* renderer, Vec2 position, Direction dir, int set, int frame
     ) {
         var src = GetSprite(dir, set, frame);
 
-        SDLRect dst = new() {
-            X = (int)position.X + _offsetX,
-            Y = (int)position.Y + _offsetY,
-            W = Constants.DEFAULT_CHAR_SIZE,
-            H = Constants.DEFAULT_CHAR_SIZE,
+        SDL_FRect dst = new() {
+            x = (int)position.X + _offsetX,
+            y = (int)position.Y + _offsetY,
+            w = Constants.DEFAULT_CHAR_SIZE,
+            h = Constants.DEFAULT_CHAR_SIZE,
         };
 
-        SDL.RenderCopy(renderer, Texture, ref src, ref dst);
+        SDL3.SDL_RenderTexture(renderer, Texture, &src, &dst);
     }
 
     public void Destroy () {
-        SDL.DestroyTexture(Texture);
+        SDL3.SDL_DestroyTexture(Texture);
     }
 }
