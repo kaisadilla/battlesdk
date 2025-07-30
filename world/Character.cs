@@ -12,10 +12,17 @@ public abstract class Character {
     /// </summary>
     public int Z { get; private set; } = 0;
     /// <summary>
-    /// True while the player is moving from one tile into another.
+    /// True while the character is moving from one tile into another.
     /// </summary>
     public bool IsMoving { get; private set; } = false;
+    /// <summary>
+    /// True while the character is running.
+    /// </summary>
     public bool IsRunning { get; protected set; } = false;
+    /// <summary>
+    /// True if the character is moving by jumping.
+    /// </summary>
+    public bool IsJumping { get; protected set; } = false;
     /// <summary>
     /// A value from 0 to 1 representing the progress of the movement being made.
     /// </summary>
@@ -31,11 +38,13 @@ public abstract class Character {
         get {
             if (IsMoving == false) return Position;
 
+            int offset = IsJumping ? 2 : 1;
+
             return (Vec2)Position + (Direction switch {
-                Direction.Down => new(0, -1),
-                Direction.Right => new(-1, 0),
-                Direction.Up => new(0, 1),
-                Direction.Left => new(1, 0),
+                Direction.Down => new(0, -offset),
+                Direction.Right => new(-offset, 0),
+                Direction.Up => new(0, offset),
+                Direction.Left => new(offset, 0),
                 _ => Vec2.Zero,
             } * (1f - MoveProgress));
         }
@@ -52,7 +61,10 @@ public abstract class Character {
 
     public virtual void Update () {
         if (IsMoving) {
-            if (IsRunning) {
+            if (IsJumping) {
+                MoveProgress += Time.DeltaTime / Constants.LEDGE_JUMP_SPEED;
+            }
+            else if (IsRunning) {
                 MoveProgress += Time.DeltaTime / Constants.RUN_SPEED;
             }
             else {
@@ -63,6 +75,7 @@ public abstract class Character {
         if (MoveProgress >= 1f) {
             MoveProgress = 0;
             IsMoving = false;
+            IsJumping = false;
         }
     }
 
@@ -86,6 +99,7 @@ public abstract class Character {
         var dstTiles = G.World.GetTilesAt(destination, Z);
 
         bool moveAllowed = dstTiles.Count > 0;
+        Direction jumpDir = Direction.None;
         if (moveAllowed) {
             foreach (var t in originTiles) {
                 if (t.ImpassableAt(direction)) {
@@ -100,14 +114,31 @@ public abstract class Character {
                     moveAllowed = false;
                     break;
                 }
+                if (t.Jump && t.JumpDirection != Direction.None) {
+                    jumpDir = t.JumpDirection;
+                }
             }
         }
 
         Direction = direction;
         if (moveAllowed) {
-            IsMoving = true;
-            MoveProgress = Constants.WALK_SPEED * Time.DeltaTime;
-            Position = destination;
+            if (jumpDir == Direction.None) {
+                IsMoving = true;
+                MoveProgress = 0; //Constants.WALK_SPEED* Time.DeltaTime;
+                Position = destination;
+            }
+            else {
+                IsMoving = true;
+                IsJumping = true;
+                MoveProgress = 0;
+                Position = jumpDir switch {
+                    Direction.Down => destination + new IVec2(0, 1),
+                    Direction.Right => destination + new IVec2(1, 0),
+                    Direction.Up => destination + new IVec2(0, -1),
+                    Direction.Left => destination + new IVec2(-1, 0),
+                    _ => destination,
+                };
+            }
             LandAtTile();
         }
         else {

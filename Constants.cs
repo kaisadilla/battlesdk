@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace battlesdk;
+﻿namespace battlesdk;
 
 public class Constants {
     /// <summary>
@@ -26,4 +20,9 @@ public class Constants {
     /// (including the player) to move one tile when running.
     /// </summary>
     public const float RUN_SPEED = 9f / 60f;
+    /// <summary>
+    /// The amount of time, in seconds, that it takes for a normal character
+    /// (including the player) to complete a ledge jump.
+    /// </summary>
+    public const float LEDGE_JUMP_SPEED = 32f / 60f;
 }

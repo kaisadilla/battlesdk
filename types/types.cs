@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace battlesdk.types;
+﻿namespace battlesdk.types;
 
 public readonly record struct IVec2 (int X, int Y) {
     public readonly static IVec2 Zero = new(0, 0);
@@ -63,6 +57,7 @@ public enum Direction {
     Right,
     Up,
     Left,
+    None,
 };
 
 [Flags]

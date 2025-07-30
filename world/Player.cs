@@ -9,7 +9,7 @@ public class Player : Character {
     private float _upKeyStart = float.MinValue;
     private float _downKeyStart = float.MinValue;
 
-    public Player (IVec2 position) : base(position, "may.png") { }
+    public Player (IVec2 position) : base(position, "dawn.png") { }
 
     public override void Update () {
         base.Update();

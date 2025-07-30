@@ -9,6 +9,8 @@ public class TileProperties {
     public const string PROP_IMPASSABLE_DIRECTIONS = "ImpassableDirections";
 
     public int Impassable { get; init; } = 0;
+    public bool Jump { get; init; } = false;
+    public Direction JumpDirection { get; init; } = Direction.None;
 
     public bool ImpassableDown => (Impassable & (int)DirectionMask.Down) != 0;
     public bool ImpassableRight => (Impassable & (int)DirectionMask.Right) != 0;
@@ -32,7 +34,7 @@ public class TileProperties {
                     _logger.Warn("Tile property 'ImpassableDirections' has an invalid value.");
                 }
             }
-            if (prop.name == "Impassable") {
+            else if (prop.name == "Impassable") {
                 if (bool.TryParse(prop.value, out var isImpassable) == false) {
                     _logger.Warn("Tile property 'Impassable' has an invalid value.");
                 }
@@ -42,6 +44,24 @@ public class TileProperties {
                     | DirectionMask.Up
                     | DirectionMask.Left
                 ) : 0;
+            }
+            else if (prop.name == "Jump") {
+                if (bool.TryParse(prop.value, out var jump) == false) {
+                    _logger.Warn("Tile property 'Jump' has an invalid value.");
+                }
+
+                Jump = jump;
+            }
+            else if (prop.name == "JumpDirection") {
+                if (int.TryParse(prop.value, out var jumpDir) == false) {
+                    _logger.Warn("Tile property 'JumpDirection' has an invalid value.");
+                }
+                else if (jumpDir < 0 || jumpDir > (int)Direction.None) {
+                    _logger.Warn("Tile property 'JumpDirection' has an invalid value.");
+                }
+                else {
+                    JumpDirection = (Direction)jumpDir;
+                }
             }
         }
 

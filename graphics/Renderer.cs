@@ -1,4 +1,5 @@
 ﻿using battlesdk.data;
+using battlesdk.world;
 using SDL;
 
 namespace battlesdk.graphics;
@@ -82,7 +83,7 @@ public unsafe class Renderer {
                 if (xPos + Constants.TILE_SIZE < 0) continue;
                 if (xPos >= _width) continue;
 
-                MapTile tile = layer[x, y];
+                MapTile? tile = layer[x, y];
 
                 if (tile is null) continue;
 
@@ -112,20 +113,36 @@ public unsafe class Renderer {
 
     private void DrawPlayer () {
         if (G.World is null) return;
+        DrawCharacter(G.World.Player);
+    }
 
-        var player = G.World.Player;
-
+    private void DrawCharacter (Character character) {
         int frame = 0;
-        if (player.IsMoving && player.MoveProgress >= 0.25f && player.MoveProgress < 0.75f) {
-            frame = (player.Position.X + player.Position.Y) % 2 == 0 ? 1 : 2;
+        if (
+            character.IsMoving
+            && character.MoveProgress >= 0.25f
+            && character.MoveProgress < 0.75f
+        ) {
+            frame = (character.Position.X + character.Position.Y) % 2 == 0 ? 1 : 2;
+        }
+
+        var subpos = character.Subposition;
+
+        if (character.IsJumping) {
+            if (character.MoveProgress < 0.5) {
+                subpos += new Vec2(0, -2 * character.MoveProgress);
+            }
+            else {
+                subpos += new Vec2(0, -2 * (1 - character.MoveProgress));
+            }
         }
 
         unsafe {
             _charTexes[0].Draw(
                 _renderer,
-                _camera.GetScreenPos(player.Subposition),
-                player.Direction,
-                (player.IsMoving && player.IsRunning) ? 1 : 0,
+                _camera.GetScreenPos(subpos),
+                character.Direction,
+                (character.IsMoving && !character.IsJumping && character.IsRunning) ? 1 : 0,
                 frame
             );
         }

@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Betwixt" Version="1.4.1" />
     <PackageReference Include="MoonSharp" Version="2.0.0" />
     <PackageReference Include="NLog" Version="6.0.2" />
     <PackageReference Include="ppy.SDL3-CS" Version="2025.703.0" />

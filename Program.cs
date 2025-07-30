@@ -3,7 +3,6 @@ global using static battlesdk.types.TypesUtils;
 
 using battlesdk;
 using battlesdk.data;
-using battlesdk.graphics;
 using NLog;
 
 Logger _logger = LogManager.GetCurrentClassLogger();
@@ -12,12 +11,14 @@ const int WIDTH = 340;
 const int HEIGHT = 240;
 const float ZOOM = 3f;
 
+_logger.Info("Launching BattleSDK.");
+
 BuildRegistry();
 G.LoadGame();
 
 Audio.Init();
 Audio.RegisterSounds();
-var win = new Window(WIDTH, HEIGHT, ZOOM);
+var win = new battlesdk.graphics.Window(WIDTH, HEIGHT, ZOOM);
 
 while (win.CloseRequested == false) {
     win.ProcessEvents();
