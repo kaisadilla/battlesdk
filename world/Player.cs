@@ -85,5 +85,9 @@ public class Player : Character {
         if (Controls.GetKeyUp(ActionKey.Secondary)) {
             IsRunning = false;
         }
+
+        if (IsMoving) {
+            G.World.LoadAround(Position);
+        }
     }
 }

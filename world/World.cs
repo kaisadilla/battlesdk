@@ -75,21 +75,23 @@ public class World {
         }
     }
 
+    private void AddMap (MapData mapData, int x, int y) {
+        foreach (var m in Maps) {
+            if (m.Data.Id == mapData.Id) return;
+        }
+
+        Maps.Add(new(mapData, x, y));
+        _logger.Info($"Added map '{mapData.Name}'.");
+    }
+
     private void RemoveMap (int id) {
         for (int i = 0; i < Maps.Count; i++) {
-            if (Maps[i].MapId == id) {
+            if (Maps[i].Data.Id == id) {
+                _logger.Info($"Removed map '{Maps[i].Data.Name}'.");
                 Maps.RemoveAt(i);
                 break;
             }
         }
-    }
-
-    private void AddMap (MapData mapData, int x, int y) {
-        foreach (var m in Maps) {
-            if (m.MapId == mapData.Id) return;
-        }
-
-        Maps.Add(new(mapData, x, y));
     }
 
     public List<TileProperties> GetTilesAt (IVec2 worldPos) {
@@ -148,7 +150,7 @@ public class World {
 
         List<TileProperties> tiles = [];
 
-        var zWarp = GetZWarpAt(localPos);
+        var zWarp = GetZWarpAt(worldPos);
 
         foreach (var l in map.Terrain) {
             // Check that any of the conditions apply, or else skip this tile.

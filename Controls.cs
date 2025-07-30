@@ -47,6 +47,7 @@ public static class Controls {
         [SDL_Scancode.SDL_SCANCODE_RETURN] = ActionKey.Enter,
         [SDL_Scancode.SDL_SCANCODE_KP_ENTER] = ActionKey.Enter,
         [SDL_Scancode.SDL_SCANCODE_ESCAPE] = ActionKey.Escape,
+        [SDL_Scancode.SDL_SCANCODE_F3] = ActionKey.ToggleDebugInfo,
     };
 
     public static void Update () {
@@ -105,4 +106,5 @@ public enum ActionKey {
     Menu,
     Enter,
     Escape,
+    ToggleDebugInfo,
 }

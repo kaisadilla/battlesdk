@@ -1,10 +1,13 @@
 ﻿using battlesdk.data;
 using battlesdk.world;
+using NLog;
 using SDL;
 
 namespace battlesdk.graphics;
 
 public unsafe class Renderer {
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
     private unsafe SDL_Renderer* _renderer;
 
     private Dictionary<int, TilesetTexture> _tilesetTexes = [];
@@ -13,15 +16,17 @@ public unsafe class Renderer {
 
     private int _width;
     private int _height;
+    private float _scale;
     private Camera _camera;
 
-    public Renderer (SDL_Window* window, int width, int height) {
+    public Renderer (SDL_Window* window, int width, int height, float scale) {
         _renderer = SDL3.SDL_CreateRenderer(window, (string?)null);
         _width = width;
         _height = height;
+        _scale = scale;
         _camera = new(width, height, IVec2.Zero);
 
-        SDL3.SDL_SetRenderLogicalPresentation(_renderer, width, height, SDL_RendererLogicalPresentation.SDL_LOGICAL_PRESENTATION_INTEGER_SCALE);
+        EnableScale();
 
         foreach (var t in Registry.Tilesets) {
             LoadTileset(t);
@@ -34,6 +39,24 @@ public unsafe class Renderer {
         foreach (var ch in Registry.MiscSprites) {
             LoadMiscSprite(ch);
         }
+    }
+
+    public void EnableScale () {
+        SDL3.SDL_SetRenderLogicalPresentation(
+            _renderer,
+            _width,
+            _height,
+            SDL_RendererLogicalPresentation.SDL_LOGICAL_PRESENTATION_INTEGER_SCALE
+        );
+    }
+
+    public void DisableScale () {
+        SDL3.SDL_SetRenderLogicalPresentation(
+            _renderer,
+            (int)(_width * _scale),
+            (int)(_height * _scale),
+            SDL_RendererLogicalPresentation.SDL_LOGICAL_PRESENTATION_INTEGER_SCALE
+        );
     }
 
     public unsafe void Render () {
@@ -54,6 +77,10 @@ public unsafe class Renderer {
                 DrawPlayer();
             }
         }
+
+        DisableScale();
+        Debug.Draw(_renderer);
+        EnableScale();
 
         SDL3.SDL_RenderPresent(_renderer);
     }

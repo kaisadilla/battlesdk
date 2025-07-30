@@ -3,7 +3,7 @@
 namespace battlesdk.world;
 
 public class GameMap {
-    public int MapId { get; }
+    public MapData Data { get; }
 
     public int Width { get; }
     public int Height { get; }
@@ -17,7 +17,7 @@ public class GameMap {
     public ZWarpMap ZWarps { get; }
 
     public GameMap (MapData map, int x, int y) {
-        MapId = map.Id;
+        Data = map;
 
         Width = map.Width;
         Height = map.Height;
