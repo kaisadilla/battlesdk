@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace battlesdk.types;
 public class Collection<T> : IEnumerable<T> where T : INameable {
@@ -43,7 +38,7 @@ public class Collection<T> : IEnumerable<T> where T : INameable {
         return _elements.Count - 1;
     }
 
-    public bool TryGetTilesetByName (
+    public bool TryGetElementByName (
         string name, [NotNullWhen(true)] out T? element
     ) {
         if (_indices.TryGetValue(name, out int index) == false) {

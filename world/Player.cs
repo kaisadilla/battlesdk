@@ -9,7 +9,7 @@ public class Player : Character {
     private float _upKeyStart = float.MinValue;
     private float _downKeyStart = float.MinValue;
 
-    public Player (IVec2 position) : base(position, "dawn.png") { }
+    public Player (IVec2 position) : base(position, "dawn") { }
 
     public override void Update () {
         base.Update();
@@ -59,6 +59,9 @@ public class Player : Character {
 
             if (Collided) {
                 _sounds.PlayCollision();
+            }
+            if (IsJumping) {
+                _sounds.PlayJump();
             }
         }
 

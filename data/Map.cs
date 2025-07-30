@@ -44,7 +44,7 @@ public class Map : INameable {
         List<int> firstGids = [];
 
         foreach (var ts in map.Tilesets) {
-            var name = GetTilesetName(ts.source);
+            var name = Registry.GetAssetName(Registry.FOLDER_TILESETS, ts.source);
 
             // We should be able to locate a tileset with the name given in
             // the registry. Otherwise, this map cannot be used by BattleSDK.
@@ -184,15 +184,5 @@ public class Map : INameable {
     /// <param name="pos">The position to check.</param>
     public bool IsWithinBounds (IVec2 pos) {
         return pos.X >= 0 && pos.X < Width && pos.Y >= 0 && pos.Y < Height;
-    }
-
-    /// <summary>
-    /// Given a path to a tileset, returns its expected name in the registry.
-    /// </summary>
-    private string GetTilesetName (string path) {
-        string basePath = Path.GetFullPath("res/tilesets");
-        string targetPath = Path.GetFullPath(Path.Combine("res/maps", path));
-
-        return Path.GetRelativePath(basePath, targetPath);
     }
 }

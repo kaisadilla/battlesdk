@@ -9,6 +9,7 @@ public unsafe class Renderer {
 
     private Dictionary<int, TilesetTexture> _tilesetTexes = [];
     private Dictionary<int, CharacterTexture> _charTexes = [];
+    private Dictionary<int, StdTexture> _miscTexes = [];
 
     private int _width;
     private int _height;
@@ -28,6 +29,10 @@ public unsafe class Renderer {
 
         foreach (var ch in Registry.CharSprites) {
             LoadCharacterSprite(ch);
+        }
+
+        foreach (var ch in Registry.MiscSprites) {
+            LoadMiscSprite(ch);
         }
     }
 
@@ -68,6 +73,11 @@ public unsafe class Renderer {
     private unsafe void LoadCharacterSprite (AssetFile sprite) {
         CharacterTexture tex = new(_renderer, sprite);
         _charTexes[Registry.CharSprites.Indices[sprite.Name]] = tex;
+    }
+
+    private unsafe void LoadMiscSprite (AssetFile sprite) {
+        StdTexture tex = new(_renderer, sprite);
+        _miscTexes[Registry.MiscSprites.Indices[sprite.Name]] = tex;
     }
 
     private void DrawLayer (TileLayer layer) {
@@ -138,6 +148,13 @@ public unsafe class Renderer {
         }
 
         unsafe {
+            if (Registry.CharSpriteShadow != -1) {
+                _miscTexes[Registry.CharSpriteShadow].Draw(
+                    _renderer,
+                    _camera.GetScreenPos(character.Subposition) + new IVec2(0, 8)
+                );
+            }
+
             _charTexes[0].Draw(
                 _renderer,
                 _camera.GetScreenPos(subpos),

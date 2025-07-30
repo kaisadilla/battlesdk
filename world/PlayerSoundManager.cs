@@ -7,7 +7,11 @@ public class PlayerSoundManager {
     public void PlayCollision () {
         if (Time.TotalTime - _collisionTimestamp >= COLLISION_CD) {
             _collisionTimestamp = Time.TotalTime;
-            Audio.PlaySound("collision.wav");
+            Audio.PlaySound("collision");
         }
+    }
+
+    public void PlayJump () {
+        Audio.PlaySound("jump");
     }
 }
