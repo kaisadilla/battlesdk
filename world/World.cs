@@ -1,16 +1,30 @@
 ﻿using battlesdk.data;
+using NLog;
+using System.Diagnostics.CodeAnalysis;
 
 namespace battlesdk.world;
 
 public class World {
-    public List<GameMap> ActiveMaps { get; } = [];
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
+    /// <summary>
+    /// The world the player is currently in, if any. This value will be null
+    /// when the player is in a map that doesn't belong to any world.
+    /// </summary>
+    public WorldData? CurrentWorld { get; private set; } = null;
+    /// <summary>
+    /// A list that contains all the maps that are currently loaded in the world.
+    /// This includes the map the player is currently in, as well as any map
+    /// nearby enough to the player to be loaded.
+    /// </summary>
+    public List<GameMap> Maps { get; } = [];
+    /// <summary>
+    /// The character the player controls.
+    /// </summary>
     public Player Player { get; }
 
-    public World (Map startingMap, IVec2 pos) {
-        ActiveMaps.Add(new GameMap(startingMap));
-
-        Player = new(pos);
+    public World () {
+        Player = new(new(0, 0));
     }
 
     public void OnFrameStart () {
@@ -21,13 +35,70 @@ public class World {
         Player.Update();
     }
 
-    public List<TileProperties> GetTilesAt (IVec2 pos) {
-        if (ActiveMaps[0].Map.IsWithinBounds(pos) == false) return [];
+    /// <summary>
+    /// Loads the world given, placing the player at the position given.
+    /// </summary>
+    /// <param name="world"></param>
+    public void TransferTo (WorldData world, IVec2 position) {
+        _logger.Info($"Player transferred to world '{world.Name}' at pos {position}.");
+
+        CurrentWorld = world;
+        Player.SetPosition(position);
+        LoadAround(Player.Position);
+    }
+
+    public void TransferTo (MapData map, IVec2 position) {
+        throw new NotImplementedException();
+    }
+
+    public void LoadAround (IVec2 position) {
+        if (CurrentWorld is null) return;
+
+        foreach (var worldMap in CurrentWorld.Maps) {
+            if (Registry.Maps.TryGetElement(worldMap.Id, out var mapData) == false) {
+                _logger.Error($"Couldn't find map with id '{worldMap.Id}'.");
+                continue;
+            }
+
+            bool isInside = position.X >= (worldMap.Position.X - Constants.LOAD_DISTANCE_X)
+                && position.X < (worldMap.Position.X + mapData.Width + Constants.LOAD_DISTANCE_X)
+                && position.Y >= (worldMap.Position.Y - Constants.LOAD_DISTANCE_Y)
+                && position.Y < (worldMap.Position.Y + mapData.Height + Constants.LOAD_DISTANCE_Y);
+
+            if (isInside == false) {
+                RemoveMap(worldMap.Id);
+                continue;
+            }
+            else {
+                AddMap(mapData, worldMap.Position.X, worldMap.Position.Y);
+            }
+        }
+    }
+
+    private void RemoveMap (int id) {
+        for (int i = 0; i < Maps.Count; i++) {
+            if (Maps[i].MapId == id) {
+                Maps.RemoveAt(i);
+                break;
+            }
+        }
+    }
+
+    private void AddMap (MapData mapData, int x, int y) {
+        foreach (var m in Maps) {
+            if (m.MapId == mapData.Id) return;
+        }
+
+        Maps.Add(new(mapData, x, y));
+    }
+
+    public List<TileProperties> GetTilesAt (IVec2 worldPos) {
+        if (TryGetMapAt(worldPos, out var map) == false) return [];
 
         List<TileProperties> tiles = [];
 
-        foreach (var l in ActiveMaps[0].Layers) {
-            var props = l[pos];
+        foreach (var l in map.Terrain) {
+            var props = l[worldPos];
             if (props is not null) {
                 tiles.Add(props.Properties);
             }
@@ -37,13 +108,31 @@ public class World {
     }
 
     /// <summary>
+    /// Gets the game map at the position given, if there's any.
+    /// </summary>
+    /// <param name="worldPos">The position in the world</param>
+    /// <param name="map">The map at that position.</param>
+    /// <returns></returns>
+    public bool TryGetMapAt (IVec2 worldPos, [NotNullWhen(true)] out GameMap? map) {
+        foreach (var m in Maps) {
+            if (m.IsInsideBounds(worldPos)) {
+                map = m;
+                return true;
+            }
+        }
+
+        map = null;
+        return false;
+    }
+
+    /// <summary>
     /// Returns all the tiles at the given position that are interactable from
     /// the given z position.
     /// </summary>
-    /// <param name="pos">The position to check.</param>
+    /// <param name="worldPos">The position to check.</param>
     /// <param name="zIndex">The z position to check.</param>
     /// <returns></returns>
-    public List<TileProperties> GetTilesAt (IVec2 pos, int zIndex) {
+    public List<TileProperties> GetTilesAt (IVec2 worldPos, int zIndex) {
         /*
          * A tile is interactable from a given z position if one of three
          * conditions apply:
@@ -54,17 +143,18 @@ public class World {
          *   entering the tile will transfer you to that z position.
          */
 
-        if (ActiveMaps[0].Map.IsWithinBounds(pos) == false) return [];
+        if (TryGetMapAt(worldPos, out var map) == false) return [];
+        var localPos = map.GetLocalPos(worldPos);
 
         List<TileProperties> tiles = [];
 
-        var zWarp = GetZWarpAt(pos);
+        var zWarp = GetZWarpAt(localPos);
 
-        foreach (var l in ActiveMaps[0].Layers) {
+        foreach (var l in map.Terrain) {
             // Check that any of the conditions apply, or else skip this tile.
             if (l.ZIndex != zIndex && l.ZIndex != zWarp && zWarp != zIndex) continue;
 
-            var props = l[pos];
+            var props = l[localPos];
             if (props is not null) {
                 tiles.Add(props.Properties);
             }
@@ -77,12 +167,14 @@ public class World {
     /// Returns the z warp present at the given tile, or null if the tile
     /// doesn't have any.
     /// </summary>
-    /// <param name="pos">The position to check.</param>
-    public int? GetZWarpAt (IVec2 pos) {
-        if (ActiveMaps[0].Map.IsWithinBounds(pos) == false) return null;
+    /// <param name="worldPos">The position to check.</param>
+    public int? GetZWarpAt (IVec2 worldPos) {
+        if (TryGetMapAt(worldPos, out var map) == false) return null;
 
-        if (ActiveMaps[0].ZWarps.IsWarp(pos.X, pos.Y) == false) return null;
+        var localPos = map.GetLocalPos(worldPos);
 
-        return ActiveMaps[0].ZWarps[pos];
+        if (map.ZWarps.IsWarp(localPos.X, localPos.Y) == false) return null;
+
+        return map.ZWarps[localPos];
     }
 }

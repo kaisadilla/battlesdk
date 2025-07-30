@@ -52,7 +52,12 @@ public abstract class Character {
 
     public Character (IVec2 position, string sprite) {
         Position = position;
-        Sprite = Registry.CharSprites.Indices[sprite];
+        if (Registry.CharSprites.TryGetId(sprite, out var spriteId)) {
+            Sprite = spriteId;
+        }
+        else {
+            throw new Exception($"Sprite '{sprite}' doesn't exist.");
+        }
     }
 
     public virtual void OnFrameStart () {
@@ -77,6 +82,10 @@ public abstract class Character {
             IsMoving = false;
             IsJumping = false;
         }
+    }
+
+    public virtual void SetPosition (IVec2 position) {
+        Position = position;
     }
 
     public virtual void SetDirection (Direction direction) {

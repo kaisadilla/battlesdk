@@ -3,29 +3,49 @@ using TiledCS;
 
 namespace battlesdk.data;
 
-public class Map : INameable {
+/// <summary>
+/// Contains the data used to build a given map.
+/// </summary>
+public class MapData : INameable {
     private const string METADATA_GROUP_NAME = "Metadata";
     private const string Z_WARPS_LAYER_NAME = "ZWarps";
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    private string _path;
-
     public string Name { get; private init; }
+    public int Id { get; private set; } = -1;
+    public string Path { get; private init; }
+
+    /// <summary>
+    /// The width of this map, in tiles.
+    /// </summary>
     public int Width { get; private set; }
+    /// <summary>
+    /// The height of this map, in tiles.
+    /// </summary>
     public int Height { get; private set; }
-    public List<TileLayer> Layers { get; } = [];
+    /// <summary>
+    /// Each layer of tiles that make up this map's terrain.
+    /// </summary>
+    public List<TileLayer> Terrain { get; } = [];
+    /// <summary>
+    /// A map of the z warps present in this map.
+    /// </summary>
     public ZWarpMap ZWarps { get; private set; } = new(0, 0);
 
-    public Map (string name, string path) {
+    public MapData (string name, string path) {
         Name = name;
-        _path = path;
+        Path = path;
 
         Init();
     }
 
+    public void SetId (int id) {
+        Id = id;
+    }
+
     protected void Init () {
-        var map = new TiledMap(_path);
+        var map = new TiledMap(Path);
 
         Width = map.Width;
         Height = map.Height;
@@ -48,11 +68,11 @@ public class Map : INameable {
 
             // We should be able to locate a tileset with the name given in
             // the registry. Otherwise, this map cannot be used by BattleSDK.
-            if (Registry.Tilesets.Indices.TryGetValue(name, out var index) == false) {
+            if (Registry.Tilesets.TryGetId(name, out var id) == false) {
                 throw new($"Unknown tileset: '{name}' (path: '{ts.source}').");
             }
 
-            tilesetIds.Add(index);
+            tilesetIds.Add(id);
             firstGids.Add(ts.firstgid);
         }
 
@@ -75,7 +95,7 @@ public class Map : INameable {
 
                 foreach (var l in g.layers) {
                     var layer = _BuildLayer(l, zIndex);
-                    if (layer is not null) Layers.Add(layer);
+                    if (layer is not null) Terrain.Add(layer);
                 }
             }
             // A group named "Metadata" contains the metadata for the tiles.

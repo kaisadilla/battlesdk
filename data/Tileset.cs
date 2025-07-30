@@ -5,10 +5,8 @@ public class Tileset : INameable {
     private const string CLASS_FLAGS = "TileFlags";
     private const string CLASS_Z_WARPS = "TileZWarps";
 
-    /// <summary>
-    /// The name of the tileset.
-    /// </summary>
     public string Name { get; private init; }
+    public int Id { get; private set; } = -1;
     /// <summary>
     /// The absolute path to the image contained by this tileset.
     /// </summary>
@@ -60,6 +58,10 @@ public class Tileset : INameable {
                 Tiles.Add(new(tiledTile));
             }
         }
+    }
+
+    public void SetId (int id) {
+        Id = id;
     }
 }
 

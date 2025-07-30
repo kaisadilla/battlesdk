@@ -25,4 +25,15 @@ public class Constants {
     /// (including the player) to complete a ledge jump.
     /// </summary>
     public const float LEDGE_JUMP_SPEED = 32f / 60f;
+
+    /// <summary>
+    /// The distance from the player (in the horizontal axis) at which a map
+    /// is loaded and included in the world.
+    /// </summary>
+    public const int LOAD_DISTANCE_X = 32;
+    /// <summary>
+    /// The distance from the player (in the vertical axis) at which a map is
+    /// loaded and included in the world.
+    /// </summary>
+    public const int LOAD_DISTANCE_Y = 24;
 }

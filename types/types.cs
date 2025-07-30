@@ -24,6 +24,10 @@ public readonly record struct IVec2 (int X, int Y) {
     public static Vec2 operator * (IVec2 a, float n) {
         return new(a.X * n, a.Y * n);
     }
+
+    public override string ToString () {
+        return $"({X}, {Y})";
+    }
 }
 
 public readonly record struct Vec2 (float X, float Y) {
@@ -49,6 +53,18 @@ public readonly record struct Vec2 (float X, float Y) {
 
     public static Vec2 operator * (Vec2 a, float n) {
         return new(a.X * n, a.Y * n);
+    }
+
+    public override string ToString () {
+        return $"({X}, {Y})";
+    }
+}
+
+public readonly record struct IRect (int Top, int Left, int Bottom, int Right) {
+    public readonly static IRect Zero = new(0, 0, 0, 0);
+
+    public override string ToString () {
+        return $"(top: {Top}, left: {Left}, bottom: {Bottom}, right: {Right})";
     }
 }
 

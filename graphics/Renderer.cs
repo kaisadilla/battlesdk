@@ -40,21 +40,18 @@ public unsafe class Renderer {
         SDL3.SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
         SDL3.SDL_RenderClear(_renderer);
 
-        if (G.World is not null) {
-            _camera.Center = G.World.Player.Subposition;
-        }
-
-        if (G.World is not null) {
-            // TODO: Dynamically adapt to arbitrary amount of z indices.
-            for (int i = 0; i < 6; i++) {
-                foreach (var l in G.World.ActiveMaps[0].Layers) {
+        _camera.Center = G.World.Player.Subposition;
+        // TODO: Dynamically adapt to arbitrary amount of z indices.
+        for (int i = 0; i < 8; i++) {
+            foreach (var map in G.World.Maps) {
+                foreach (var l in map.Terrain) {
                     if (l.ZIndex == i) {
-                        DrawLayer(l);
+                        DrawLayer(l, map.WorldPos.Left, map.WorldPos.Top);
                     }
                 }
-                if (G.World.Player.Z == i) {
-                    DrawPlayer();
-                }
+            }
+            if (G.World.Player.Z == i) {
+                DrawPlayer();
             }
         }
 
@@ -66,29 +63,35 @@ public unsafe class Renderer {
     }
 
     private unsafe void LoadTileset (Tileset tileset) {
-        TilesetTexture tex = new(_renderer, tileset.TexturePath);
-        _tilesetTexes[Registry.Tilesets.Indices[tileset.Name]] = tex;
+        if (Registry.Tilesets.TryGetId(tileset.Name, out int id)) {
+            TilesetTexture tex = new(_renderer, tileset.TexturePath);
+            _tilesetTexes[id] = tex;
+        }
     }
 
     private unsafe void LoadCharacterSprite (AssetFile sprite) {
-        CharacterTexture tex = new(_renderer, sprite);
-        _charTexes[Registry.CharSprites.Indices[sprite.Name]] = tex;
+        if (Registry.CharSprites.TryGetId(sprite.Name, out int id)) {
+            CharacterTexture tex = new(_renderer, sprite);
+            _charTexes[id] = tex;
+        }
     }
 
     private unsafe void LoadMiscSprite (AssetFile sprite) {
-        StdTexture tex = new(_renderer, sprite);
-        _miscTexes[Registry.MiscSprites.Indices[sprite.Name]] = tex;
+        if (Registry.MiscSprites.TryGetId(sprite.Name, out int id)) {
+            StdTexture tex = new(_renderer, sprite);
+            _miscTexes[id] = tex;
+        }
     }
 
-    private void DrawLayer (TileLayer layer) {
+    private void DrawLayer (TileLayer layer, int xOffset, int yOffset) {
         for (int y = 0; y < layer.Height; y++) {
-            int yPos = _camera.GetScreenY(y);
+            int yPos = _camera.GetScreenY(y + yOffset);
 
             if (yPos + Constants.TILE_SIZE < 0) continue;
             if (yPos >= _height) continue;
 
             for (int x = 0; x < layer.Width; x++) {
-                int xPos = _camera.GetScreenX(x);
+                int xPos = _camera.GetScreenX(x + xOffset);
 
                 if (xPos + Constants.TILE_SIZE < 0) continue;
                 if (xPos >= _width) continue;

@@ -13,13 +13,15 @@ public static class Registry {
     public const string FOLDER_GRAPHICS_MISC = "graphics/misc";
     public const string FOLDER_GRAPHICS_TILESETS = "graphics/tilesets";
     public const string FOLDER_MAPS = "maps";
+    public const string FOLDER_WORLDS = "worlds";
     public const string FOLDER_SOUNDS = "sounds";
     public const string FOLDER_TILESETS = "tilesets";
 
     public static string ResFolderPath { get; private set; } = "res";
 
     public static Collection<Tileset> Tilesets { get; } = new();
-    public static Collection<Map> Maps { get; } = new();
+    public static Collection<MapData> Maps { get; } = new();
+    public static Collection<WorldData> Worlds { get; } = new();
     public static Collection<AssetFile> CharSprites { get; } = new();
     public static Collection<AssetFile> MiscSprites { get; } = new();
     public static Collection<AssetFile> Sounds { get; } = new();
@@ -54,13 +56,14 @@ public static class Registry {
     public static void BuildRegistry () {
         LoadTilesets();
         LoadMaps();
+        LoadWorlds();
         LoadCharSprites();
         LoadMiscSprites();
         LoadSounds();
 
-        int index = -1;
-        if (MiscSprites.Indices.TryGetValue("char_shadow", out index)) {
-            CharSpriteShadow = index;
+        int id = -1;
+        if (MiscSprites.TryGetId("char_shadow", out id)) {
+            CharSpriteShadow = id;
         }
     }
 
@@ -80,7 +83,17 @@ public static class Registry {
             FOLDER_MAPS,
             [".tmx"],
             Maps,
-            (name, path) => new Map(name, path)
+            (name, path) => new MapData(name, path)
+        );
+    }
+
+    private static void LoadWorlds () {
+        LoadAssets(
+            AssetType.World,
+            FOLDER_WORLDS,
+            [".world"],
+            Worlds,
+            (name, path) => new WorldData(name, path)
         );
     }
 
@@ -191,4 +204,5 @@ public enum AssetType {
     Map,
     Sound,
     Tileset,
+    World,
 }
