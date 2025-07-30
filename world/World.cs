@@ -23,8 +23,11 @@ public class World {
     /// </summary>
     public Player Player { get; }
 
+    public List<Npc> Npcs { get; } = [];
+
     public World () {
         Player = new(new(0, 0));
+        Npcs.Add(new(new(8, 2), "winona"));
     }
 
     public void OnFrameStart () {
@@ -107,6 +110,14 @@ public class World {
         }
 
         return tiles;
+    }
+
+    public Character? GetCharacterAt (IVec2 worldPos) {
+        foreach (var ch in Npcs) {
+            if (ch.Position == worldPos) return ch;
+        }
+
+        return null;
     }
 
     /// <summary>

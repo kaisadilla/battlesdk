@@ -13,6 +13,7 @@ public static class Registry {
     public const string FOLDER_GRAPHICS_MISC = "graphics/misc";
     public const string FOLDER_GRAPHICS_TILESETS = "graphics/tilesets";
     public const string FOLDER_MAPS = "maps";
+    public const string FOLDER_MUSIC = "music";
     public const string FOLDER_WORLDS = "worlds";
     public const string FOLDER_SOUNDS = "sounds";
     public const string FOLDER_TILESETS = "tilesets";
@@ -24,6 +25,7 @@ public static class Registry {
     public static Collection<WorldData> Worlds { get; } = new();
     public static Collection<AssetFile> CharSprites { get; } = new();
     public static Collection<AssetFile> MiscSprites { get; } = new();
+    public static Collection<MusicFile> Music { get; } = new();
     public static Collection<AssetFile> Sounds { get; } = new();
 
     public static int FlagsTilesetIndex { get; private set; } = -1;
@@ -59,6 +61,7 @@ public static class Registry {
         LoadWorlds();
         LoadCharSprites();
         LoadMiscSprites();
+        LoadMusic();
         LoadSounds();
 
         int id = -1;
@@ -114,6 +117,16 @@ public static class Registry {
             [".png"],
             MiscSprites,
             (name, path) => new AssetFile(name, path)
+        );
+    }
+
+    private static void LoadMusic () {
+        LoadAssets(
+            AssetType.Music,
+            FOLDER_MUSIC,
+            [".ogg", ".mp3"],
+            Music,
+            (name, path) => new MusicFile(name, path)
         );
     }
 
@@ -202,6 +215,7 @@ public enum AssetType {
     MiscSprite,
     TilesetSprite,
     Map,
+    Music,
     Sound,
     Tileset,
     World,

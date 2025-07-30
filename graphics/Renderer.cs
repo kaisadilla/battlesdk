@@ -73,8 +73,22 @@ public unsafe class Renderer {
                     }
                 }
             }
+
+            List<Character> chars = [];
+
+            foreach (var npc in G.World.Npcs) {
+                if (npc.Z == i) {
+                    chars.Add(npc);
+                }
+            }
             if (G.World.Player.Z == i) {
-                DrawPlayer();
+                chars.Add(G.World.Player);
+            }
+
+            chars.Sort(((a, b) => a.Subposition.Y.CompareTo(b.Subposition.Y)));
+
+            foreach (var ch in chars) {
+                DrawCharacter(ch);
             }
         }
 
@@ -185,7 +199,7 @@ public unsafe class Renderer {
                 );
             }
 
-            _charTexes[0].Draw(
+            _charTexes[character.Sprite].Draw(
                 _renderer,
                 _camera.GetScreenPos(subpos),
                 character.Direction,

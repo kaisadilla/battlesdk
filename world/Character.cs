@@ -105,19 +105,19 @@ public abstract class Character {
         };
 
         var originTiles = G.World.GetTilesAt(Position, Z);
-        var dstTiles = G.World.GetTilesAt(destination, Z);
 
-        bool moveAllowed = dstTiles.Count > 0;
+        bool moveAllowed = true;
         Direction jumpDir = Direction.None;
-        if (moveAllowed) {
-            foreach (var t in originTiles) {
-                if (t.ImpassableAt(direction)) {
-                    moveAllowed = false;
-                    break;
-                }
+        foreach (var t in originTiles) {
+            if (t.ImpassableAt(direction)) {
+                moveAllowed = false;
+                break;
             }
         }
         if (moveAllowed) {
+            var dstTiles = G.World.GetTilesAt(destination, Z);
+            if (dstTiles.Count == 0) moveAllowed = false;
+
             foreach (var t in dstTiles) {
                 if (t.ImpassableAt(direction.Opposite())) {
                     moveAllowed = false;
@@ -127,6 +127,10 @@ public abstract class Character {
                     jumpDir = t.JumpDirection;
                 }
             }
+        }
+        if (moveAllowed) {
+            var ch = G.World.GetCharacterAt(destination);
+            if (ch is not null) moveAllowed = false;
         }
 
         Direction = direction;

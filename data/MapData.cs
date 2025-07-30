@@ -203,6 +203,6 @@ public class MapData : INameable {
     /// </summary>
     /// <param name="pos">The position to check.</param>
     public bool IsWithinBounds (IVec2 pos) {
-        return pos.X >= 0 && pos.X < Width && pos.Y >= 0 && pos.Y < Height;
+        return (pos.X >= 0 && pos.X < Width) && pos.Y >= 0 && pos.Y < Height;
     }
 }

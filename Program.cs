@@ -24,6 +24,10 @@ var win = new battlesdk.graphics.Window(
     Constants.DEFAULT_SCREEN_SCALE
 );
 
+if (Registry.Music.TryGetElementByName("lgpe_pallet_town", out var track)) {
+    Music.PlayMusic(track);
+}
+
 while (win.CloseRequested == false) {
     var frameStart = SDL3.SDL_GetTicks();
 
@@ -33,6 +37,7 @@ while (win.CloseRequested == false) {
 
     ProcessInput();
 
+    Music.Update();
     G.World.Update();
 
     win.Render();
@@ -66,7 +71,11 @@ unsafe void InitSdl () {
 
     SDL_AudioSpec spec = new();
 
-    SDL3_mixer.Mix_Init(SDL3_mixer.MIX_INIT_WAVPACK);
+    SDL3_mixer.Mix_Init(
+        SDL3_mixer.MIX_INIT_WAVPACK
+        | SDL3_mixer.MIX_INIT_OGG
+        | SDL3_mixer.MIX_INIT_MP3
+    );
 
     if (SDL3_mixer.Mix_OpenAudio(0, &spec)) {
         _logger.Info("Audio device opened.");
@@ -75,6 +84,9 @@ unsafe void InitSdl () {
         _logger.Fatal($"Failed to open audio device: {SDL3.SDL_GetError()}.");
         SDL3.SDL_Quit();
     }
+
+    SDL3_mixer.Mix_AllocateChannels(32);
+    SDL3_mixer.Mix_VolumeMusic(128);
 }
 
 unsafe void ProcessInput () {
