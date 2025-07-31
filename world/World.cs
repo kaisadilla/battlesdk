@@ -39,6 +39,15 @@ public class World {
 
     public void Update () {
         Player.Update();
+
+        if (TryGetMapAt(_focus, out var currentMap)
+            && Registry.Music.TryGetElement(currentMap.Data.BackgroundMusic, out var track)
+        ) {
+            int trackId = Music.GetTrackId();
+            if (trackId == -1 || trackId != track.Id) {
+                _ = Music.FadeInMusic(track);
+            }
+        }
     }
 
     /// <summary>
@@ -60,8 +69,6 @@ public class World {
     public void SetFocus (IVec2 worldPos) {
         if (CurrentWorld is null) return;
 
-        TryGetMapAt(_focus, out var prevMap);
-
         _focus = worldPos;
 
         foreach (var worldMap in CurrentWorld.Maps) {
@@ -81,13 +88,6 @@ public class World {
             }
             else {
                 AddMap(mapData, worldMap.Position.X, worldMap.Position.Y);
-            }
-        }
-
-        TryGetMapAt(_focus, out var currentMap);
-        if (currentMap is not null && (prevMap?.Data.Id != currentMap.Data.Id)) {
-            if (Registry.Music.TryGetElement(currentMap.Data.BackgroundMusic, out var track)) {
-                _ = Music.FadeInMusic(track, true);
             }
         }
     }

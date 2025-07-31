@@ -17,43 +17,51 @@ public static class Music {
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
+
     /// <summary>
-    /// The music memory object current playing.
+    /// The track that is currently playing.
     /// </summary>
-    private static unsafe Mix_Music* _current = null;
+    private static MusicFile? _currentTrack = null;
     /// <summary>
-    /// The music file that is currently playing.
+    /// The SDL music object current playing.
     /// </summary>
-    private static MusicFile? _currentFile = null;
-    /// <summary>
-    /// A lock that MUST be used every time <see cref="_current"/> or
-    /// <see cref="_currentFile"/> are accessed.
-    /// </summary>
-    private static readonly object _musicLock = new();
+    private static unsafe Mix_Music* _currentObj = null;
     /// <summary>
     /// A resolve source for <see cref="FadeOutMusic"/>
     /// </summary>
     private static TaskCompletionSource<bool>? _fadeOutResolve = null;
-
-    private static bool _isTransitioning = false;
-    private static MusicFile? _transitionTarget = null;
+    /// <summary>
+    /// A lock that MUST be used every time <see cref="_currentObj"/> or
+    /// <see cref="_currentTrack"/> are accessed.
+    /// </summary>
+    private static readonly object _musicLock = new();
 
     public static unsafe void Update () {
         lock (_musicLock) {
             // If no music is playing, do nothing.
-            if (_current is null || _currentFile is null) return;
+            if (_currentObj is null || _currentTrack is null) return;
 
-            var ms = SDL3_mixer.Mix_GetMusicPosition(_current) * 1000;
-            double loopEnd = _currentFile.LoopEnd ?? double.PositiveInfinity;
+            var ms = SDL3_mixer.Mix_GetMusicPosition(_currentObj) * 1000;
+            double loopEnd = _currentTrack.LoopEnd ?? double.PositiveInfinity;
 
             // When the position in the track is beyond the end of the loop.
             if (ms >= loopEnd) {
                 _logger.Debug("Music looped.");
 
                 // Move the position back to the start of the loop.
-                double loopStart = _currentFile.LoopStart ?? 0.0f;
+                double loopStart = _currentTrack.LoopStart ?? 0.0f;
                 SDL3_mixer.Mix_SetMusicPosition(loopStart / 1000d);
             }
+        }
+    }
+
+    /// <summary>
+    /// Returns the id of the track this is currently playing, or -1 if no
+    /// track is playing.
+    /// </summary>
+    public static int GetTrackId () {
+        lock (_musicLock) {
+            return _currentTrack?.Id ?? -1;
         }
     }
 
@@ -62,47 +70,15 @@ public static class Music {
     /// already playing, that music will be stopped.
     /// </summary>
     /// <param name="file"></param>
-    public static async Task FadeInMusic (MusicFile file, bool fadeOutCurrent) {
-        // TODO: This still may mix up tracks.
-        lock (_musicLock) {
-            // If the music currently playing is the one provided, do nothing.
-            if (_transitionTarget is not null && _currentFile?.Id == _transitionTarget?.Id) {
-                return;
-            }
-
-            _transitionTarget = file;
-
-            if (_isTransitioning) return;
-            _isTransitioning = true;
-        }
-
-        Task? fadeOutTask = null;
+    public static async Task FadeInMusic (MusicFile file) {
+        await FadeOutMusic();
 
         lock (_musicLock) {
-            if (_currentFile is not null) {
-                // These methods clean up the music.
-                if (fadeOutCurrent) {
-                    fadeOutTask = FadeOutMusic();
-                }
-                else {
-                    StopMusic();
-                }
-            }
-        }
-
-        if (fadeOutTask is not null) await fadeOutTask;
-
-        lock (_musicLock) {
-            var target = _transitionTarget;
-            _EndTransition();
-
-            if (target is null) return;
-
             unsafe {
-                var track = SDL3_mixer.Mix_LoadMUS(target.Path);
+                var track = SDL3_mixer.Mix_LoadMUS(file.Path);
                 if (track is null) {
                     _logger.Error(
-                        $"Failed to load music file '{target.Path}'. " +
+                        $"Failed to load music file '{file.Path}'. " +
                         $"Error: {SDL3.SDL_GetError()}"
                     );
                     return;
@@ -110,7 +86,7 @@ public static class Music {
 
                 if (SDL3_mixer.Mix_FadeInMusic(track, 1, FADE_IN_MS) == false) {
                     _logger.Error(
-                        $"Failed to play music '{target.Name}'. Error: {SDL3.SDL_GetError()}"
+                        $"Failed to play music '{file.Name}'. Error: {SDL3.SDL_GetError()}"
                     );
                     SDL3_mixer.Mix_FreeMusic(track);
                     return;
@@ -119,15 +95,9 @@ public static class Music {
                 // We only set these if nothing failed, since the way we check
                 // when music is currently playing is by checking whether these
                 // are null or not.
-                _current = track;
-                _currentFile = file;
+                _currentObj = track;
+                _currentTrack = file;
             }
-        }
-
-        // NOTE: Only call when music is locked.
-        void _EndTransition () {
-            _isTransitioning = false;
-            _transitionTarget = null;
         }
     }
 
@@ -137,19 +107,20 @@ public static class Music {
     /// </summary>
     public static async Task FadeOutMusic () {
         lock (_musicLock) {
-            if (_currentFile is null) return;
+            if (_currentTrack is null) return;
+        }
 
-            unsafe {
-                // This will resolve _fadeOutResolve when the fade out ends.
-                SDL3_mixer.Mix_HookMusicFinished(&_OnMusicFinished);
+        unsafe {
+            // This will resolve _fadeOutResolve when the fade out ends.
+            SDL3_mixer.Mix_HookMusicFinished(&_OnMusicFinished);
 
-                // Try to fade out the music. If the action fails, clean up
-                // immediately and return.
-                if (SDL3_mixer.Mix_FadeOutMusic(FADE_OUT_MS) == false) {
-                    _logger.Warn("Failed to fade out music.");
-                    _CleanUp();
-                    return;
-                }
+            // Try to fade out the music. If the action fails, clean up
+            // immediately and return.
+            if (SDL3_mixer.Mix_FadeOutMusic(FADE_OUT_MS) == false) {
+                _logger.Warn("Failed to fade out music.");
+                SDL3_mixer.Mix_HookMusicFinished(null);
+                SDL3_mixer.Mix_FreeMusic(_currentObj);
+                return;
             }
 
             _fadeOutResolve = new();
@@ -159,14 +130,10 @@ public static class Music {
         _fadeOutResolve = null;
 
         lock (_musicLock) {
-            _CleanUp();
-        }
-
-        unsafe void _CleanUp () {
-            SDL3_mixer.Mix_HookMusicFinished(null);
-            SDL3_mixer.Mix_FreeMusic(_current);
-            _current = null;
-            _currentFile = null;
+            unsafe {
+                _currentTrack = null;
+                _currentObj = null;
+            }
         }
     }
 
@@ -177,9 +144,9 @@ public static class Music {
         lock (_musicLock) {
             unsafe {
                 SDL3_mixer.Mix_HaltMusic();
-                SDL3_mixer.Mix_FreeMusic(_current);
-                _current = null;
-                _currentFile = null;
+                SDL3_mixer.Mix_FreeMusic(_currentObj);
+                _currentObj = null;
+                _currentTrack = null;
             }
         }
     }
