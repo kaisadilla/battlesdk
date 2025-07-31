@@ -7,6 +7,8 @@ namespace battlesdk.world;
 public class World {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
+    private IVec2 _focus = IVec2.Zero;
+
     /// <summary>
     /// The world the player is currently in, if any. This value will be null
     /// when the player is in a map that doesn't belong to any world.
@@ -28,6 +30,7 @@ public class World {
     public World () {
         Player = new(new(0, 0));
         Npcs.Add(new(new(8, 2), "winona"));
+        Npcs.Add(new(new(9, 6), "lorelei"));
     }
 
     public void OnFrameStart () {
@@ -47,15 +50,19 @@ public class World {
 
         CurrentWorld = world;
         Player.SetPosition(position);
-        LoadAround(Player.Position);
+        SetFocus(Player.Position);
     }
 
     public void TransferTo (MapData map, IVec2 position) {
         throw new NotImplementedException();
     }
 
-    public void LoadAround (IVec2 position) {
+    public void SetFocus (IVec2 worldPos) {
         if (CurrentWorld is null) return;
+
+        TryGetMapAt(_focus, out var prevMap);
+
+        _focus = worldPos;
 
         foreach (var worldMap in CurrentWorld.Maps) {
             if (Registry.Maps.TryGetElement(worldMap.Id, out var mapData) == false) {
@@ -63,10 +70,10 @@ public class World {
                 continue;
             }
 
-            bool isInside = position.X >= (worldMap.Position.X - Constants.LOAD_DISTANCE_X)
-                && position.X < (worldMap.Position.X + mapData.Width + Constants.LOAD_DISTANCE_X)
-                && position.Y >= (worldMap.Position.Y - Constants.LOAD_DISTANCE_Y)
-                && position.Y < (worldMap.Position.Y + mapData.Height + Constants.LOAD_DISTANCE_Y);
+            bool isInside = worldPos.X >= (worldMap.Position.X - Constants.LOAD_DISTANCE_X)
+                && worldPos.X < (worldMap.Position.X + mapData.Width + Constants.LOAD_DISTANCE_X)
+                && worldPos.Y >= (worldMap.Position.Y - Constants.LOAD_DISTANCE_Y)
+                && worldPos.Y < (worldMap.Position.Y + mapData.Height + Constants.LOAD_DISTANCE_Y);
 
             if (isInside == false) {
                 RemoveMap(worldMap.Id);
@@ -74,6 +81,13 @@ public class World {
             }
             else {
                 AddMap(mapData, worldMap.Position.X, worldMap.Position.Y);
+            }
+        }
+
+        TryGetMapAt(_focus, out var currentMap);
+        if (currentMap is not null && (prevMap?.Data.Id != currentMap.Data.Id)) {
+            if (Registry.Music.TryGetElement(currentMap.Data.BackgroundMusic, out var track)) {
+                _ = Music.FadeInMusic(track, true);
             }
         }
     }

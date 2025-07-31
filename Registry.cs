@@ -56,13 +56,16 @@ public static class Registry {
     }
 
     public static void BuildRegistry () {
-        LoadTilesets();
-        LoadMaps();
-        LoadWorlds();
+        // NOTE: The order in which the resources are loaded is important, as
+        // some resources depend on other resources.
+
         LoadCharSprites();
         LoadMiscSprites();
         LoadMusic();
         LoadSounds();
+        LoadTilesets();
+        LoadMaps();
+        LoadWorlds();
 
         int id = -1;
         if (MiscSprites.TryGetId("char_shadow", out id)) {

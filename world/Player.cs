@@ -87,7 +87,7 @@ public class Player : Character {
         }
 
         if (IsMoving) {
-            G.World.LoadAround(Position);
+            G.World.SetFocus(Position);
         }
     }
 }

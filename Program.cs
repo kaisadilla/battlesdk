@@ -24,10 +24,6 @@ var win = new battlesdk.graphics.Window(
     Constants.DEFAULT_SCREEN_SCALE
 );
 
-if (Registry.Music.TryGetElementByName("lgpe_pallet_town", out var track)) {
-    Music.PlayMusic(track);
-}
-
 while (win.CloseRequested == false) {
     var frameStart = SDL3.SDL_GetTicks();
 
@@ -86,7 +82,7 @@ unsafe void InitSdl () {
     }
 
     SDL3_mixer.Mix_AllocateChannels(32);
-    SDL3_mixer.Mix_VolumeMusic(128);
+    SDL3_mixer.Mix_VolumeMusic(32); // volume 0 to 128.
 }
 
 unsafe void ProcessInput () {

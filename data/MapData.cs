@@ -7,8 +7,9 @@ namespace battlesdk.data;
 /// Contains the data used to build a given map.
 /// </summary>
 public class MapData : INameable {
-    private const string METADATA_GROUP_NAME = "Metadata";
-    private const string Z_WARPS_LAYER_NAME = "ZWarps";
+    private const string GROUP_NAME_METADATA = "Metadata";
+    private const string LAYER_NAME_Z_WARPS = "ZWarps";
+    private const string PROP_NAME_BACKGROUND_MUSIC = "BackgroundMusic";
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -32,6 +33,8 @@ public class MapData : INameable {
     /// A map of the z warps present in this map.
     /// </summary>
     public ZWarpMap ZWarps { get; private set; } = new(0, 0);
+
+    public int BackgroundMusic { get; private set; } = -1;
 
     public MapData (string name, string path) {
         Name = name;
@@ -99,11 +102,11 @@ public class MapData : INameable {
                 }
             }
             // A group named "Metadata" contains the metadata for the tiles.
-            else if (g.name == METADATA_GROUP_NAME) {
+            else if (g.name == GROUP_NAME_METADATA) {
                 // If the layer is named "ZWarps", the data contained are the
                 // z warps present in the map.
                 foreach (var l in g.layers) {
-                    if (l.name == Z_WARPS_LAYER_NAME) {
+                    if (l.name == LAYER_NAME_Z_WARPS) {
                         _ReadZIndices(l);
                     }
                 }
@@ -112,6 +115,20 @@ public class MapData : INameable {
             // they are ignored.
             else {
                 _logger.Warn($"Unrecognized map group label: '{g.name}'.");
+            }
+        }
+
+        foreach (var prop in map.Properties) {
+            if (prop.name == PROP_NAME_BACKGROUND_MUSIC) {
+                if (Registry.Music.TryGetId(prop.value, out int id)) {
+                    BackgroundMusic = id;
+                }
+                else {
+                    _logger.Warn(
+                        $"Music track '{prop.value}' in map '{Name}' does not exist. " +
+                        "The map will be loaded, but no music will play."
+                    );
+                }
             }
         }
 
