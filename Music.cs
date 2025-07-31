@@ -5,6 +5,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace battlesdk;
+
+// TODO: This class's async code is poorly implemented.
 public static class Music {
     /// <summary>
     /// The amount of time, in ms, that it takes to fade in a soundtrack.
@@ -16,7 +18,6 @@ public static class Music {
     private const int FADE_OUT_MS = 5000;
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
 
     /// <summary>
     /// The track that is currently playing.
@@ -35,6 +36,8 @@ public static class Music {
     /// <see cref="_currentTrack"/> are accessed.
     /// </summary>
     private static readonly object _musicLock = new();
+
+    public static bool IsFadingOut { get; private set; } = false;
 
     public static unsafe void Update () {
         lock (_musicLock) {
@@ -67,14 +70,18 @@ public static class Music {
 
     /// <summary>
     /// Plays the music file given by fading it normally. If there's music
-    /// already playing, that music will be stopped.
+    /// already playing, that music will be stopped abruptly.
     /// </summary>
     /// <param name="file"></param>
-    public static async Task FadeInMusic (MusicFile file) {
-        await FadeOutMusic();
-
+    public static void FadeIn (MusicFile file) {
         lock (_musicLock) {
             unsafe {
+                if (_currentObj is not null) {
+                    SDL3_mixer.Mix_HaltMusic();
+                    SDL3_mixer.Mix_HookMusicFinished(null);
+                    SDL3_mixer.Mix_FreeMusic(_currentObj);
+                }
+
                 var track = SDL3_mixer.Mix_LoadMUS(file.Path);
                 if (track is null) {
                     _logger.Error(
@@ -107,7 +114,10 @@ public static class Music {
     /// </summary>
     public static async Task FadeOutMusic () {
         lock (_musicLock) {
+            if (IsFadingOut) return;
             if (_currentTrack is null) return;
+
+            IsFadingOut = true;
         }
 
         unsafe {
@@ -118,6 +128,7 @@ public static class Music {
             // immediately and return.
             if (SDL3_mixer.Mix_FadeOutMusic(FADE_OUT_MS) == false) {
                 _logger.Warn("Failed to fade out music.");
+                SDL3_mixer.Mix_HaltMusic();
                 SDL3_mixer.Mix_HookMusicFinished(null);
                 SDL3_mixer.Mix_FreeMusic(_currentObj);
                 return;
@@ -134,6 +145,7 @@ public static class Music {
                 _currentTrack = null;
                 _currentObj = null;
             }
+            IsFadingOut = false;
         }
     }
 

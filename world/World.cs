@@ -43,9 +43,14 @@ public class World {
         if (TryGetMapAt(_focus, out var currentMap)
             && Registry.Music.TryGetElement(currentMap.Data.BackgroundMusic, out var track)
         ) {
+            if (Music.IsFadingOut) return;
+
             int trackId = Music.GetTrackId();
-            if (trackId == -1 || trackId != track.Id) {
-                _ = Music.FadeInMusic(track);
+            if (trackId != track.Id) {
+                _ = Music.FadeOutMusic();
+            }
+            if (trackId == -1) {
+                Music.FadeIn(track);
             }
         }
     }
