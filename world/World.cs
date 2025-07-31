@@ -40,11 +40,11 @@ public class World {
     public void Update () {
         Player.Update();
 
-        if (TryGetMapAt(_focus, out var currentMap)
+        if (
+            Music.IsFadingOut == false
+            && TryGetMapAt(_focus, out var currentMap)
             && Registry.Music.TryGetElement(currentMap.Data.BackgroundMusic, out var track)
         ) {
-            if (Music.IsFadingOut) return;
-
             int trackId = Music.GetTrackId();
             if (trackId != track.Id) {
                 _ = Music.FadeOutMusic();
@@ -169,10 +169,8 @@ public class World {
          * A tile is interactable from a given z position if one of three
          * conditions apply:
          * - The tile is in the z position given.
-         * - The tile warps to the z position given.
-         * - The tile warps to the z position it is in. This one is important
-         *   because, even when you are not in the z position of the tile,
-         *   entering the tile will transfer you to that z position.
+         * - The tile warps to the z position it is in.
+         * - The tile warps to the z position directly above it.
          */
 
         if (TryGetMapAt(worldPos, out var map) == false) return [];
@@ -184,11 +182,15 @@ public class World {
 
         foreach (var l in map.Terrain) {
             // Check that any of the conditions apply, or else skip this tile.
-            if (l.ZIndex != zIndex && l.ZIndex != zWarp && zWarp != zIndex) continue;
-
-            var props = l[localPos];
-            if (props is not null) {
-                tiles.Add(props.Properties);
+            if (
+                l.ZIndex == zIndex
+                || (zWarp is not null && l.ZIndex == zWarp)
+                || (zWarp is not null && l.ZIndex == zWarp - 1)
+            ) {
+                var props = l[localPos];
+                if (props is not null) {
+                    tiles.Add(props.Properties);
+                }
             }
         }
 
