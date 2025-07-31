@@ -35,6 +35,9 @@ public static class Music {
     /// </summary>
     private static TaskCompletionSource<bool>? _fadeOutResolve = null;
 
+    private static bool _isTransitioning = false;
+    private static MusicFile? _transitionTarget = null;
+
     public static unsafe void Update () {
         lock (_musicLock) {
             // If no music is playing, do nothing.
@@ -60,12 +63,22 @@ public static class Music {
     /// </summary>
     /// <param name="file"></param>
     public static async Task FadeInMusic (MusicFile file, bool fadeOutCurrent) {
+        // TODO: This still may mix up tracks.
+        lock (_musicLock) {
+            // If the music currently playing is the one provided, do nothing.
+            if (_transitionTarget is not null && _currentFile?.Id == _transitionTarget?.Id) {
+                return;
+            }
+
+            _transitionTarget = file;
+
+            if (_isTransitioning) return;
+            _isTransitioning = true;
+        }
+
         Task? fadeOutTask = null;
 
         lock (_musicLock) {
-            // If the music currently playing is the one provided, do nothing.
-            if (_currentFile?.Id == file.Id) return;
-
             if (_currentFile is not null) {
                 // These methods clean up the music.
                 if (fadeOutCurrent) {
@@ -80,11 +93,16 @@ public static class Music {
         if (fadeOutTask is not null) await fadeOutTask;
 
         lock (_musicLock) {
+            var target = _transitionTarget;
+            _EndTransition();
+
+            if (target is null) return;
+
             unsafe {
-                var track = SDL3_mixer.Mix_LoadMUS(file.Path);
+                var track = SDL3_mixer.Mix_LoadMUS(target.Path);
                 if (track is null) {
                     _logger.Error(
-                        $"Failed to load music file '{file.Path}'. " +
+                        $"Failed to load music file '{target.Path}'. " +
                         $"Error: {SDL3.SDL_GetError()}"
                     );
                     return;
@@ -92,7 +110,7 @@ public static class Music {
 
                 if (SDL3_mixer.Mix_FadeInMusic(track, 1, FADE_IN_MS) == false) {
                     _logger.Error(
-                        $"Failed to play music '{file.Name}'. Error: {SDL3.SDL_GetError()}"
+                        $"Failed to play music '{target.Name}'. Error: {SDL3.SDL_GetError()}"
                     );
                     SDL3_mixer.Mix_FreeMusic(track);
                     return;
@@ -104,6 +122,12 @@ public static class Music {
                 _current = track;
                 _currentFile = file;
             }
+        }
+
+        // NOTE: Only call when music is locked.
+        void _EndTransition () {
+            _isTransitioning = false;
+            _transitionTarget = null;
         }
     }
 
