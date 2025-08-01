@@ -22,4 +22,12 @@ public static class Time {
 
         _lastCounter = now;
     }
+
+    /// <summary>
+    /// Returns the amount of minutes that have passed, since midnight, in the
+    /// computer's timezone.
+    /// </summary>
+    public static int RealMinutes () {
+        return (DateTime.Now.Hour * 60) + DateTime.Now.Minute;
+    }
 }

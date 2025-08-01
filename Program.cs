@@ -2,6 +2,7 @@
 global using static battlesdk.types.TypesUtils;
 
 using battlesdk;
+using battlesdk.graphics;
 using NLog;
 using SDL;
 
@@ -12,7 +13,8 @@ Logger _logger = LogManager.GetCurrentClassLogger();
 _logger.Info("Launching BattleSDK.");
 
 InitSdl();
-Registry.BuildRegistry();
+Data.Init();
+Registry.Init();
 G.LoadGame();
 Debug.Init();
 
@@ -83,6 +85,8 @@ unsafe void InitSdl () {
 
     SDL3_mixer.Mix_AllocateChannels(32);
     SDL3_mixer.Mix_VolumeMusic(32); // volume 0 to 128.
+
+    CustomBlendModes.Init();
 }
 
 unsafe void ProcessInput () {

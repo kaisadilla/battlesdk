@@ -61,4 +61,6 @@ public class Constants {
     /// loaded and included in the world.
     /// </summary>
     public const int LOAD_DISTANCE_Y = ((VIEWPORT_HEIGHT / TILE_SIZE) / 2) + 6;
+
+    public static uint _BLEND_FACTOR_SUBTRACT = 0;
 }

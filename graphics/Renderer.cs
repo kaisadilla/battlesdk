@@ -102,6 +102,8 @@ public unsafe class Renderer {
             }
         }
 
+        ApplyTimeTint();
+
         DisableScale();
         Debug.Draw(_renderer);
         EnableScale();
@@ -198,11 +200,6 @@ public unsafe class Renderer {
         }
     }
 
-    private void DrawPlayer () {
-        if (G.World is null) return;
-        DrawCharacter(G.World.Player);
-    }
-
     private void DrawCharacter (Character character) {
         int frame = 0;
         if (
@@ -210,7 +207,7 @@ public unsafe class Renderer {
             && character.MoveProgress >= 0.25f
             && character.MoveProgress < 0.75f
         ) {
-            frame = (character.Position.X + character.Position.Y) % 2 == 0 ? 1 : 2;
+            frame = 1 + (character.MoveCount % 2);
         }
 
         var subpos = character.Subposition;
@@ -240,5 +237,43 @@ public unsafe class Renderer {
                 frame
             );
         }
+    }
+
+    private void ApplyTimeTint () {
+        // If time tints are not defined, then they aren't applied.
+        if (Data.Misc.TimeTints is null) return;
+
+        int minutes = Time.RealMinutes();
+        int hour = minutes / 60;
+        float progress = (minutes % 60) / 60f;
+
+        var thisTint = Data.Misc.TimeTints[hour % 24];
+        var nextTint = Data.Misc.TimeTints[(hour + 1) % 24];
+
+        var tint = new ColorRGB() {
+            R = (int)thisTint.R.Lerp(nextTint.R, progress),
+            G = (int)thisTint.G.Lerp(nextTint.G, progress),
+            B = (int)thisTint.B.Lerp(nextTint.B, progress),
+        };
+
+        SDL3.SDL_SetRenderDrawBlendMode(_renderer, CustomBlendModes.Subtract);
+        SDL3.SDL_SetRenderDrawColor(
+            _renderer,
+            (byte)Math.Max(0, -tint.R),
+            (byte)Math.Max(0, -tint.G),
+            (byte)Math.Max(0, -tint.B),
+            255
+        );
+        SDL3.SDL_RenderFillRect(_renderer, null);
+
+        SDL3.SDL_SetRenderDrawBlendMode(_renderer, CustomBlendModes.Add);
+        SDL3.SDL_SetRenderDrawColor(
+            _renderer,
+            (byte)Math.Max(0, tint.R),
+            (byte)Math.Max(0, tint.G),
+            (byte)Math.Max(0, tint.B),
+            255
+        );
+        SDL3.SDL_RenderFillRect(_renderer, null);
     }
 }

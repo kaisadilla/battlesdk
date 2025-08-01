@@ -55,7 +55,11 @@ public static class Registry {
         );
     }
 
-    public static void BuildRegistry () {
+    /// <summary>
+    /// Registers all the resources in the resources folder. This method must
+    /// be called once before trying to read any data from the registry.
+    /// </summary>
+    public static void Init () {
         // NOTE: The order in which the resources are loaded is important, as
         // some resources depend on other resources.
 

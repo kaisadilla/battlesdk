@@ -38,22 +38,22 @@ public class Player : Character {
 
             if (Controls.GetKey(ActionKey.Left)) {
                 if (Time.TotalTime - _leftKeyStart > MOVE_INPUT_DELAY) {
-                    Move(Direction.Left);
+                    Move(Direction.Left, false);
                 }
             }
             else if (Controls.GetKey(ActionKey.Right)) {
                 if (Time.TotalTime - _rightKeyStart > MOVE_INPUT_DELAY) {
-                    Move(Direction.Right);
+                    Move(Direction.Right, false);
                 }
             }
             else if (Controls.GetKey(ActionKey.Up)) {
                 if (Time.TotalTime - _upKeyStart > MOVE_INPUT_DELAY) {
-                    Move(Direction.Up);
+                    Move(Direction.Up, false);
                 }
             }
             else if (Controls.GetKey(ActionKey.Down)) {
                 if (Time.TotalTime - _downKeyStart > MOVE_INPUT_DELAY) {
-                    Move(Direction.Down);
+                    Move(Direction.Down, false);
                 }
             }
 

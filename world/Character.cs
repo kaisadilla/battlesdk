@@ -6,6 +6,8 @@ public abstract class Character {
 
     public int Sprite { get; private set; }
 
+    public CharacterMovement? AutonomousMovement { get; private set; } = null;
+
     /// <summary>
     /// The z position of the character, which indicates the height at which it
     /// currently is. Note: use <see cref="VisualZ"/> to get the z position the
@@ -28,6 +30,10 @@ public abstract class Character {
     /// A value from 0 to 1 representing the progress of the movement being made.
     /// </summary>
     public float MoveProgress { get; private set; } = 0f;
+    /// <summary>
+    /// The amount of times this character has moved.
+    /// </summary>
+    public int MoveCount { get; protected set; } = 0;
 
     /// <summary>
     /// True if this character has tried to move against impassable terrain
@@ -41,21 +47,32 @@ public abstract class Character {
     /// </summary>
     public int VisualZ { get; private set; } = 0;
 
+    /// <summary>
+    /// A queue of moves this character will execute.
+    /// </summary>
+    private readonly Queue<CharacterMove> _pendingMoves = [];
+
+    /// <summary>
+    /// The position the character was in before its last movement.
+    /// </summary>
+    public IVec2 PreviousPosition { get; private set; } = IVec2.Zero;
+
+    /// <summary>
+    /// The position the character is, taking into consideration, when it's
+    /// moving, how much of its movement has completed so far.
+    /// </summary>
     public Vec2 Subposition {
         get {
             if (IsMoving == false) return Position;
 
-            int offset = IsJumping ? 2 : 1;
-
-            return (Vec2)Position + (Direction switch {
-                Direction.Down => new(0, -offset),
-                Direction.Right => new(-offset, 0),
-                Direction.Up => new(0, offset),
-                Direction.Left => new(offset, 0),
-                _ => Vec2.Zero,
-            } * (1f - MoveProgress));
+            return new Vec2(
+                PreviousPosition.X.Lerp(Position.X, MoveProgress),
+                PreviousPosition.Y.Lerp(Position.Y, MoveProgress)
+            );
         }
     }
+
+    public event EventHandler<EventArgs>? OnMoveSequenceCompleted;
 
     public Character (IVec2 position, string sprite) {
         Position = position;
@@ -89,6 +106,31 @@ public abstract class Character {
             IsMoving = false;
             IsJumping = false;
         }
+
+        if (IsMoving == false && _pendingMoves.TryDequeue(out var move)) {
+            switch (move.Move) {
+                case MoveKind.StepDown:
+                case MoveKind.StepRight:
+                case MoveKind.StepUp:
+                case MoveKind.StepLeft:
+                    Move((Direction)move.Move, move.IgnoreCharacters);
+                    break;
+                case MoveKind.LookDown:
+                case MoveKind.LookRight:
+                case MoveKind.LookUp:
+                case MoveKind.LookLeft:
+                    SetDirection((Direction)((int)move.Move - 4));
+                    break;
+                case MoveKind.Jump:
+                    break;
+            }
+
+            if (_pendingMoves.Count == 0) {
+                OnMoveSequenceCompleted?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
+        AutonomousMovement?.Update();
     }
 
     public virtual void SetPosition (IVec2 position) {
@@ -99,7 +141,22 @@ public abstract class Character {
         Direction = direction;
     }
 
-    public virtual void Move (Direction direction) {
+    /// <summary>
+    /// Sets this character's autonomous movement.
+    /// </summary>
+    /// <param name="movement">A movement provider, or null to have no movement.</param>
+    public virtual void SetAutonomousMovement (CharacterMovement? movement) {
+        AutonomousMovement = movement;
+    }
+
+    /// <summary>
+    /// The character executes the move described. If the character is already
+    /// moving, the call is ignored. To queue up moves, use
+    /// <see cref="QueueMove(CharacterMove)"/> instead.
+    /// </summary>
+    /// <param name="direction">The direction in which to move.</param>
+    /// <param name="ignoreCharacters">If true, the move will ignore characters.</param>
+    public virtual void Move (Direction direction, bool ignoreCharacters) {
         if (G.World is null) return;
         if (IsMoving) return;
 
@@ -141,29 +198,45 @@ public abstract class Character {
         }
 
         Direction = direction;
+        if (moveAllowed == false) {
+            destination = Position;
+        }
+
+        PreviousPosition = Position;
+        MoveCount++;
+        if (jumpDir == Direction.None) {
+            IsMoving = true;
+            MoveProgress = 0; //Constants.WALK_SPEED* Time.DeltaTime;
+            Position = destination;
+        }
+        else {
+            IsMoving = true;
+            IsJumping = true;
+            MoveProgress = 0;
+            Position = jumpDir switch {
+                Direction.Down => destination + new IVec2(0, 1),
+                Direction.Right => destination + new IVec2(1, 0),
+                Direction.Up => destination + new IVec2(0, -1),
+                Direction.Left => destination + new IVec2(-1, 0),
+                _ => destination,
+            };
+        }
+
         if (moveAllowed) {
-            if (jumpDir == Direction.None) {
-                IsMoving = true;
-                MoveProgress = 0; //Constants.WALK_SPEED* Time.DeltaTime;
-                Position = destination;
-            }
-            else {
-                IsMoving = true;
-                IsJumping = true;
-                MoveProgress = 0;
-                Position = jumpDir switch {
-                    Direction.Down => destination + new IVec2(0, 1),
-                    Direction.Right => destination + new IVec2(1, 0),
-                    Direction.Up => destination + new IVec2(0, -1),
-                    Direction.Left => destination + new IVec2(-1, 0),
-                    _ => destination,
-                };
-            }
             LandAtTile();
         }
         else {
             Collided = true;
         }
+    }
+
+    /// <summary>
+    /// Enqueues a new movement for this character, that will be executed as
+    /// soon as the character can move.
+    /// </summary>
+    /// <param name="move">The move to enqueue.</param>
+    public void QueueMove (CharacterMove move) {
+        _pendingMoves.Enqueue(move);
     }
 
     protected void LandAtTile () {

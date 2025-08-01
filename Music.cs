@@ -41,6 +41,9 @@ public static class Music {
 
     public static unsafe void Update () {
         lock (_musicLock) {
+            // Music does not loop during fade out.
+            if (IsFadingOut) return;
+
             // If no music is playing, do nothing.
             if (_currentObj is null || _currentTrack is null) return;
 
@@ -80,6 +83,8 @@ public static class Music {
                     SDL3_mixer.Mix_HaltMusic();
                     SDL3_mixer.Mix_HookMusicFinished(null);
                     SDL3_mixer.Mix_FreeMusic(_currentObj);
+                    _currentObj = null;
+                    _currentTrack = null;
                 }
 
                 var track = SDL3_mixer.Mix_LoadMUS(file.Path);
@@ -118,30 +123,33 @@ public static class Music {
             if (_currentTrack is null) return;
 
             IsFadingOut = true;
-        }
 
-        unsafe {
-            // This will resolve _fadeOutResolve when the fade out ends.
-            SDL3_mixer.Mix_HookMusicFinished(&_OnMusicFinished);
+            unsafe {
+                // This will resolve _fadeOutResolve when the fade out ends.
+                SDL3_mixer.Mix_HookMusicFinished(&_OnMusicFinished);
 
-            // Try to fade out the music. If the action fails, clean up
-            // immediately and return.
-            if (SDL3_mixer.Mix_FadeOutMusic(FADE_OUT_MS) == false) {
-                _logger.Warn("Failed to fade out music.");
-                SDL3_mixer.Mix_HaltMusic();
-                SDL3_mixer.Mix_HookMusicFinished(null);
-                SDL3_mixer.Mix_FreeMusic(_currentObj);
-                return;
+                // Try to fade out the music. If the action fails, clean up
+                // immediately and return.
+                if (SDL3_mixer.Mix_FadeOutMusic(FADE_OUT_MS) == false) {
+                    _logger.Warn("Failed to fade out music.");
+                    SDL3_mixer.Mix_HaltMusic();
+                    SDL3_mixer.Mix_HookMusicFinished(null);
+                    SDL3_mixer.Mix_FreeMusic(_currentObj);
+                    _currentObj = null;
+                    _currentTrack = null;
+                    return;
+                }
+
+                _fadeOutResolve = new();
             }
-
-            _fadeOutResolve = new();
         }
 
         await _fadeOutResolve.Task;
-        _fadeOutResolve = null;
 
         lock (_musicLock) {
+            _fadeOutResolve = null;
             unsafe {
+                SDL3_mixer.Mix_FreeMusic(_currentObj);
                 _currentTrack = null;
                 _currentObj = null;
             }

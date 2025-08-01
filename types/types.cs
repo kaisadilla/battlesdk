@@ -1,4 +1,7 @@
-﻿namespace battlesdk.types;
+﻿using battlesdk.json;
+using System.Text.Json.Serialization;
+
+namespace battlesdk.types;
 
 public readonly record struct IVec2 (int X, int Y) {
     public readonly static IVec2 Zero = new(0, 0);
@@ -86,6 +89,11 @@ public readonly record struct IRect (int Top, int Left, int Bottom, int Right) {
     }
 }
 
+[JsonConverter(typeof(ColorRGBConverter))]
+public readonly record struct ColorRGB (int R, int G, int B) {
+
+}
+
 public enum Direction {
     Down,
     Right,
@@ -142,5 +150,13 @@ public static class TypesUtils {
 
     public static IRect TileToPixelSpace (IRect rect) {
         return rect * Constants.TILE_SIZE;
+    }
+
+    public static float Lerp (this float a, float b, float t) {
+        return a + (b - a) * t;
+    }
+
+    public static float Lerp (this int a, float b, float t) {
+        return a + (b - a) * t;
     }
 }

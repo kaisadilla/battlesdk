@@ -30,7 +30,23 @@ public class World {
     public World () {
         Player = new(new(0, 0));
         Npcs.Add(new(new(8, 2), "winona"));
-        Npcs.Add(new(new(9, 6), "lorelei"));
+        Npcs.Add(new(new(9, 6), "piers"));
+
+        Npcs[0].SetAutonomousMovement(new RouteCharacterMovement(Npcs[0], [
+            MoveKind.StepDown,
+            MoveKind.StepRight,
+            MoveKind.StepRight,
+            MoveKind.StepDown,
+            MoveKind.StepLeft,
+            MoveKind.StepLeft,
+            MoveKind.StepUp,
+            MoveKind.StepUp,
+            MoveKind.StepUp,
+        ]));
+
+        Npcs[1].SetAutonomousMovement(new RandomCharacterMovement(Npcs[1]) {
+            IgnoreCharacters = false,
+        });
     }
 
     public void OnFrameStart () {
@@ -38,6 +54,10 @@ public class World {
     }
 
     public void Update () {
+        foreach (var npc in Npcs) {
+            npc.Update();
+        }
+
         Player.Update();
 
         if (
@@ -131,6 +151,11 @@ public class World {
         return tiles;
     }
 
+    /// <summary>
+    /// Returns the character that is at the given position, if any. If multiple
+    /// characters exist in the same position, only one of them will be returned.
+    /// </summary>
+    /// <param name="worldPos">A position in the world.</param>
     public Character? GetCharacterAt (IVec2 worldPos) {
         foreach (var ch in Npcs) {
             if (ch.Position == worldPos) return ch;
@@ -144,7 +169,6 @@ public class World {
     /// </summary>
     /// <param name="worldPos">The position in the world</param>
     /// <param name="map">The map at that position.</param>
-    /// <returns></returns>
     public bool TryGetMapAt (IVec2 worldPos, [NotNullWhen(true)] out GameMap? map) {
         foreach (var m in Maps) {
             if (m.IsInsideBounds(worldPos)) {
