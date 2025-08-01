@@ -66,6 +66,24 @@ public readonly record struct IRect (int Top, int Left, int Bottom, int Right) {
     public override string ToString () {
         return $"(top: {Top}, left: {Left}, bottom: {Bottom}, right: {Right})";
     }
+
+    public static IRect operator + (IRect rect, IVec2 pos) {
+        return new() {
+            Top = rect.Top + pos.Y,
+            Left = rect.Left + pos.X,
+            Bottom = rect.Bottom + pos.Y,
+            Right = rect.Right + pos.X
+        };
+    }
+
+    public static IRect operator * (IRect rect, float val) {
+        return new() {
+            Top = (int)(rect.Top * val),
+            Left = (int)(rect.Left * val),
+            Bottom = (int)(rect.Bottom * val),
+            Right = (int)(rect.Right * val),
+        };
+    }
 }
 
 public enum Direction {
@@ -113,5 +131,16 @@ public static class TypesUtils {
             DirectionMask.Left => Direction.Left,
             _ => (Direction)direction,
         };
+    }
+
+    public static IVec2 TileToPixelSpace (Vec2 tilePos) {
+        return new IVec2(
+            (int)(tilePos.X * Constants.TILE_SIZE),
+            (int)(tilePos.Y * Constants.TILE_SIZE)
+        );
+    }
+
+    public static IRect TileToPixelSpace (IRect rect) {
+        return rect * Constants.TILE_SIZE;
     }
 }

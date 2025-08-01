@@ -35,6 +35,8 @@ public static class Debug {
     public static bool PrintToScreen { get; set; } = false;
     public static FpsCounter? FpsCounter { get; private set; } = null;
 
+    public static int InfoRenderedMaps { get; set; } = 0;
+
     public static unsafe void Init () {
         _font = SDL3_ttf.TTF_OpenFont("res/fonts/CascadiaMono.ttf", FONT_SIZE);
         if (_font is null) {
@@ -88,6 +90,13 @@ public static class Debug {
             $"Z: {G.World.Player.Z}",
             leftMargin,
             topMargin + (GAP * 2)
+        );
+        DrawText(
+            renderer,
+            "rendered_maps",
+            $"Rendered maps: {InfoRenderedMaps}",
+            leftMargin,
+            topMargin + (GAP * 3)
         );
     }
 

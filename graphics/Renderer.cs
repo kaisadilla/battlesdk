@@ -59,14 +59,24 @@ public unsafe class Renderer {
         );
     }
 
+
+    private readonly List<GameMap> _visibleMaps = [];
     public unsafe void Render () {
         SDL3.SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
         SDL3.SDL_RenderClear(_renderer);
 
-        _camera.Center = G.World.Player.Subposition;
-        // TODO: Dynamically adapt to arbitrary amount of z indices.
+        _camera.SetPosition(TileToPixelSpace(G.World.Player.Subposition));
+
+        List<GameMap> visibleMaps = [];
+        foreach (var map in G.World.Maps) {
+            if (_camera.IsRectVisible(TileToPixelSpace(map.WorldPos))) {
+                visibleMaps.Add(map);
+            }
+        }
+        Debug.InfoRenderedMaps = visibleMaps.Count;
+
         for (int i = 0; i < 8; i++) {
-            foreach (var map in G.World.Maps) {
+            foreach (var map in visibleMaps) {
                 foreach (var l in map.Terrain) {
                     if (l.ZIndex == i) {
                         DrawLayer(l, map.WorldPos.Left, map.WorldPos.Top);
@@ -77,15 +87,15 @@ public unsafe class Renderer {
             List<Character> chars = [];
 
             foreach (var npc in G.World.Npcs) {
-                if (npc.Z == i) {
+                if (npc.VisualZ == i) {
                     chars.Add(npc);
                 }
             }
-            if (G.World.Player.Z == i) {
+            if (G.World.Player.VisualZ == i) {
                 chars.Add(G.World.Player);
             }
 
-            chars.Sort(((a, b) => a.Subposition.Y.CompareTo(b.Subposition.Y)));
+            chars.Sort((a, b) => a.Subposition.Y.CompareTo(b.Subposition.Y));
 
             foreach (var ch in chars) {
                 DrawCharacter(ch);
@@ -126,13 +136,13 @@ public unsafe class Renderer {
 
     private void DrawLayer (TileLayer layer, int xOffset, int yOffset) {
         for (int y = 0; y < layer.Height; y++) {
-            int yPos = _camera.GetScreenY(y + yOffset);
+            int yPos = _camera.GetScreenY((y + yOffset) * Constants.TILE_SIZE);
 
             if (yPos + Constants.TILE_SIZE < 0) continue;
             if (yPos >= _height) continue;
 
             for (int x = 0; x < layer.Width; x++) {
-                int xPos = _camera.GetScreenX(x + xOffset);
+                int xPos = _camera.GetScreenX((x + xOffset) * Constants.TILE_SIZE);
 
                 if (xPos + Constants.TILE_SIZE < 0) continue;
                 if (xPos >= _width) continue;
@@ -162,6 +172,29 @@ public unsafe class Renderer {
                     SDL3.SDL_RenderTexture(_renderer, tex.Texture, &src, &dst);
                 }
             }
+        }
+    }
+
+    private void DrawTile (MapTile tile, int screenX, int screenY) {
+        var ts = Registry.Tilesets[tile.TilesetId];
+        var tex = _tilesetTexes[tile.TilesetId];
+
+        SDL_FRect src = new() {
+            x = (tile.TileId % ts.Width) * Constants.TILE_SIZE,
+            y = (tile.TileId / ts.Width) * Constants.TILE_SIZE,
+            h = Constants.TILE_SIZE,
+            w = Constants.TILE_SIZE,
+        };
+
+        SDL_FRect dst = new() {
+            x = screenX,
+            y = screenY,
+            h = Constants.TILE_SIZE,
+            w = Constants.TILE_SIZE,
+        };
+
+        unsafe {
+            SDL3.SDL_RenderTexture(_renderer, tex.Texture, &src, &dst);
         }
     }
 
@@ -195,13 +228,13 @@ public unsafe class Renderer {
             if (Registry.CharSpriteShadow != -1) {
                 _miscTexes[Registry.CharSpriteShadow].Draw(
                     _renderer,
-                    _camera.GetScreenPos(character.Subposition) + new IVec2(0, 8)
+                    _camera.GetScreenPos(TileToPixelSpace(character.Subposition)) + new IVec2(0, 8)
                 );
             }
 
             _charTexes[character.Sprite].Draw(
                 _renderer,
-                _camera.GetScreenPos(subpos),
+                _camera.GetScreenPos(TileToPixelSpace(subpos)),
                 character.Direction,
                 (character.IsMoving && !character.IsJumping && character.IsRunning) ? 1 : 0,
                 frame

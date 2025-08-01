@@ -8,7 +8,8 @@ public abstract class Character {
 
     /// <summary>
     /// The z position of the character, which indicates the height at which it
-    /// currently is.
+    /// currently is. Note: use <see cref="VisualZ"/> to get the z position the
+    /// character visually is.
     /// </summary>
     public int Z { get; private set; } = 0;
     /// <summary>
@@ -33,6 +34,12 @@ public abstract class Character {
     /// this frame.
     /// </summary>
     public bool Collided { get; private set; } = false;
+    /// <summary>
+    /// The visual z-index of the chacter. This is usually the same as its
+    /// logical Z index, but can difer if the character has changed its Z
+    /// index in its last move.
+    /// </summary>
+    public int VisualZ { get; private set; } = 0;
 
     public Vec2 Subposition {
         get {
@@ -160,11 +167,13 @@ public abstract class Character {
     }
 
     protected void LandAtTile () {
-        if (G.World is null) return;
-
         var zWarp = G.World.GetZWarpAt(Position);
-        if (zWarp is null) return;
+        if (zWarp is null) {
+            VisualZ = Z;
+            return;
+        }
 
+        VisualZ = Math.Max(Z, zWarp.Value);
         Z = zWarp.Value;
     }
 }

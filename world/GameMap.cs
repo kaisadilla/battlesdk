@@ -39,6 +39,14 @@ public class GameMap {
         return worldPos - new IVec2(WorldPos.Left, WorldPos.Top);
     }
 
+    public int GetLocalX (int worldX) {
+        return worldX - WorldPos.Left;
+    }
+
+    public int GetLocalY (int worldY) {
+        return worldY - WorldPos.Top;
+    }
+
     /// <summary>
     /// Returns true if the world position given is inside this map.
     /// </summary>

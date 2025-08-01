@@ -5,7 +5,7 @@ public class Constants {
     /// The width of the viewport, in pixels. This is NOT the size of the window,
     /// do NOT apply the screen's scale here. 
     /// </summary>
-    public const int VIEWPORT_WIDTH = 340;
+    public const int VIEWPORT_WIDTH = 352;
     /// <summary>
     /// The height of the viewport, in pixels. This is NOT the size of the window,
     /// do NOT apply the screen's scale here. 
@@ -17,6 +17,14 @@ public class Constants {
     /// dimensions multiplied by this value.
     /// </summary>
     public const float DEFAULT_SCREEN_SCALE = 3f;
+    /// <summary>
+    /// The amount of visible tiles, from the center, to each horizontal side.
+    /// </summary>
+    public const float VISIBLE_TILES_X = (VIEWPORT_WIDTH / 2f) / TILE_SIZE;
+    /// <summary>
+    /// The amount of visible tiles, from the center, to each vertical side.
+    /// </summary>
+    public const float VISIBLE_TILES_Y = (VIEWPORT_HEIGHT / 2f) / TILE_SIZE;
 
     /// <summary>
     /// The default size of each sprite in a overworld character spritesheet.
