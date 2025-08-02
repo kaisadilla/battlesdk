@@ -110,6 +110,12 @@ public enum DirectionMask {
     Left = 0b1000,
 };
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum ResizeMode {
+    Stretch,
+    Repeat,
+}
+
 public static class TypesUtils {
     public static DirectionMask ToMask (this Direction direction) {
         return direction switch {

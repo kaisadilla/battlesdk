@@ -19,6 +19,8 @@ public unsafe class Renderer {
     private float _scale;
     private Camera _camera;
 
+    private TextBoxTexture __test_tbtex;
+
     public Renderer (SDL_Window* window, int width, int height, float scale) {
         _renderer = SDL3.SDL_CreateRenderer(window, (string?)null);
         _width = width;
@@ -39,6 +41,9 @@ public unsafe class Renderer {
         foreach (var ch in Registry.MiscSprites) {
             LoadMiscSprite(ch);
         }
+
+        Registry.TextboxSprites.TryGetElementByName("dp_1", out var texfile);
+        __test_tbtex = new(_renderer, texfile!);
     }
 
     public void EnableScale () {
@@ -103,6 +108,9 @@ public unsafe class Renderer {
         }
 
         ApplyTimeTint();
+
+        __test_tbtex.Draw(new(3, Constants.VIEWPORT_HEIGHT - 48), new(Constants.VIEWPORT_WIDTH - 6, 46));
+        Hud.Draw(_renderer);
 
         DisableScale();
         Debug.Draw(_renderer);
@@ -239,6 +247,10 @@ public unsafe class Renderer {
         }
     }
 
+    /// <summary>
+    /// Applies the day/night tint to everything that's drawn to the screen so
+    /// far, if day/night tint is enabled and properly configured.
+    /// </summary>
     private void ApplyTimeTint () {
         // If time tints are not defined, then they aren't applied.
         if (Data.Misc.TimeTints is null) return;

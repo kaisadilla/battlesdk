@@ -11,6 +11,7 @@ public static class Registry {
 
     public const string FOLDER_GRAPHICS_CHARACTERS = "graphics/characters";
     public const string FOLDER_GRAPHICS_MISC = "graphics/misc";
+    public const string FOLDER_GRAPHICS_TEXTBOXES = "graphics/textboxes";
     public const string FOLDER_GRAPHICS_TILESETS = "graphics/tilesets";
     public const string FOLDER_MAPS = "maps";
     public const string FOLDER_MUSIC = "music";
@@ -25,6 +26,7 @@ public static class Registry {
     public static Collection<WorldData> Worlds { get; } = new();
     public static Collection<AssetFile> CharSprites { get; } = new();
     public static Collection<AssetFile> MiscSprites { get; } = new();
+    public static Collection<TextBoxAssetFile> TextboxSprites { get; } = new();
     public static Collection<MusicFile> Music { get; } = new();
     public static Collection<AssetFile> Sounds { get; } = new();
 
@@ -65,6 +67,7 @@ public static class Registry {
 
         LoadCharSprites();
         LoadMiscSprites();
+        LoadTextboxSprites();
         LoadMusic();
         LoadSounds();
         LoadTilesets();
@@ -124,6 +127,16 @@ public static class Registry {
             [".png"],
             MiscSprites,
             (name, path) => new AssetFile(name, path)
+        );
+    }
+
+    private static void LoadTextboxSprites () {
+        LoadAssets(
+            AssetType.TextboxSprite,
+            FOLDER_GRAPHICS_TEXTBOXES,
+            [".png"],
+            TextboxSprites,
+            (name, path) => new TextBoxAssetFile(name, path)
         );
     }
 
@@ -220,7 +233,9 @@ public static class Registry {
 public enum AssetType {
     CharacterSprite,
     MiscSprite,
+    TextboxSprite,
     TilesetSprite,
+    Font,
     Map,
     Music,
     Sound,

@@ -15,12 +15,13 @@ _logger.Info("Launching BattleSDK.");
 InitSdl();
 Data.Init();
 Registry.Init();
+Hud._Init();
 G.LoadGame();
 Debug.Init();
 
 Audio.RegisterSounds();
 
-var win = new battlesdk.graphics.Window(
+var win = new Window(
     Constants.VIEWPORT_WIDTH,
     Constants.VIEWPORT_HEIGHT,
     Constants.DEFAULT_SCREEN_SCALE

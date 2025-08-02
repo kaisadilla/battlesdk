@@ -38,10 +38,10 @@ public static class Debug {
     public static int InfoRenderedMaps { get; set; } = 0;
 
     public static unsafe void Init () {
-        _font = SDL3_ttf.TTF_OpenFont("res/fonts/CascadiaMono.ttf", FONT_SIZE);
+        _font = SDL3_ttf.TTF_OpenFont("res/fonts/cascadia_mono.ttf", FONT_SIZE);
         if (_font is null) {
             _logger.Error(
-                $"Failed to open debug font 'CascadiaMono.ttf': {SDL3.SDL_GetError()}."
+                $"Failed to open debug font 'cascadia_mono.ttf': {SDL3.SDL_GetError()}."
             );
         }
         else {
