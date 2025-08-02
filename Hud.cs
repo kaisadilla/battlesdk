@@ -30,7 +30,9 @@ public static class Hud {
     public static unsafe void Draw (SDL_Renderer* renderer) {
         if (_txtFont is null || _shadowFont is null) return;
 
-        if (_stringTex is null || _shadowTex is null) _Test(renderer);
+        if (_stringTex is null || _shadowTex is null) {
+            _Test(renderer, "Hi! I've seen you have 6 Mewtwos! Would you trade all of them for my Rattata and $50?");
+        }
 
         SDL_FRect dst = new() { x = 17, y = Constants.VIEWPORT_HEIGHT - 38, w = _shadowTex->w, h = _shadowTex->h };
         SDL3.SDL_RenderTexture(renderer, _shadowTex, null, &dst);
@@ -39,11 +41,9 @@ public static class Hud {
         SDL3.SDL_RenderTexture(renderer, _stringTex, null, &dst);
     }
 
-    private static unsafe void _Test (SDL_Renderer* renderer) {
+    private static unsafe void _Test (SDL_Renderer* renderer, string str) {
         SDL_Color black = new() { r = 0, g = 0, b = 0, a = 255 };
         SDL_Color almostBlack = new() { r = 0, g = 0, b = 0, a = 64 };
-
-        var str = "This is a Pokémon and a very long sentence, yeah. When I was younger, I used to like communism.";
 
         var stringSurface = GenerateSurface(str, black);
         var shadowSurface = GenerateSurface(str, almostBlack);
@@ -64,7 +64,7 @@ public static class Hud {
         var surface = SDL3_ttf.TTF_RenderText_Solid_Wrapped(
             _txtFont,
             str,
-            (nuint)str.Length + 1,
+            (nuint)str.Length,
             color,
             Constants.VIEWPORT_WIDTH - 6 - 14 - 25
         );
