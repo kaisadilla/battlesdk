@@ -18,6 +18,7 @@ Registry.Init();
 Settings.Init();
 G.LoadGame();
 Debug.Init();
+Time.Init();
 
 Audio.RegisterSounds();
 
@@ -30,7 +31,9 @@ var win = new Window(
 Hud.ShowTextbox(
     "When I was a kid, all of this was black empty tiles. " +
     "Now there's trees and stuff. There's also textboxes, " +
-    "which we need to fill right now with as many words as we can."
+    "which we need to fill right now with as many words as we can. " +
+    "This text is even longer, as we now have to check transitions across " +
+    "several lines."
 );
 
 while (win.CloseRequested == false) {
@@ -44,6 +47,7 @@ while (win.CloseRequested == false) {
 
     Music.Update();
     G.World.Update();
+    Hud.Update();
 
     win.Render();
 

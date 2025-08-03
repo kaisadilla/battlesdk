@@ -15,6 +15,10 @@ public static class Hud {
         _renderer = renderer;
     }
 
+    public static void Update () {
+        _textbox?.Update();
+    }
+
     public static unsafe void Draw () {
         if (_renderer is null) return;
 
@@ -30,5 +34,7 @@ public static class Hud {
             new(Constants.VIEWPORT_WIDTH - 6, 46),
             text
         );
+
+        _textbox.OnComplete += (s, evt) => _textbox = null;
     }
 }

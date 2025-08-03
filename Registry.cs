@@ -39,6 +39,7 @@ public static class Registry {
     /// or -1 if no such asset exists.
     /// </summary>
     public static int CharSpriteShadow = -1;
+    public static int SfxTapShort = -1;
 
     /// <summary>
     /// Given an assets folder and a path to a specific asset, generates the
@@ -80,6 +81,9 @@ public static class Registry {
         int id = -1;
         if (MiscSprites.TryGetId("char_shadow", out id)) {
             CharSpriteShadow = id;
+        }
+        if (MiscSprites.TryGetId("tap_short", out id)) {
+            SfxTapShort = id;
         }
     }
 

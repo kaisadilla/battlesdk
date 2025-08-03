@@ -3,7 +3,7 @@
 namespace battlesdk;
 public static class Time {
     private readonly static float _freq = SDL3.SDL_GetPerformanceFrequency();
-    private static ulong _lastCounter = SDL3.SDL_GetPerformanceCounter();
+    private static ulong _lastCounter = 0ul;
 
     /// <summary>
     /// The amount of time, in seconds, since the last frame.
@@ -12,7 +12,13 @@ public static class Time {
     /// <summary>
     /// The amount of time, in seconds, since the application started.
     /// </summary>
-    public static float TotalTime { get; private set; } = SDL3.SDL_GetPerformanceCounter();
+    public static float TotalTime { get; private set; } = 0f;
+
+    public static void Init () {
+        _lastCounter = SDL3.SDL_GetPerformanceCounter();
+        DeltaTime = 0f;
+        TotalTime = SDL3.SDL_GetPerformanceCounter();
+    }
 
     public static void Update () {
         ulong now = SDL3.SDL_GetPerformanceCounter();
