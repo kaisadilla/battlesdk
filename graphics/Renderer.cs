@@ -22,7 +22,7 @@ public unsafe class Renderer {
     // elements from these dictionaries, automatically creating new elements
     // if they don't already exist.
     private readonly Dictionary<int, GraphicsFont> _fonts = [];
-    private readonly Dictionary<int, GraphicsTextbox> _textboxes = [];
+    private readonly Dictionary<int, GraphicsTextboxTexture> _textboxes = [];
 
     public unsafe SDL_Renderer* SdlRenderer { get; private set; }
 
@@ -316,7 +316,7 @@ public unsafe class Renderer {
         return GetFont(id) ?? GetFont(0) ?? throw new("No font available.");
     }
 
-    public GraphicsTextbox? GetTextbox (int id) {
+    public GraphicsTextboxTexture? GetTextbox (int id) {
         if (_textboxes.TryGetValue(id, out var textbox)) {
             return textbox;
         }
@@ -329,7 +329,7 @@ public unsafe class Renderer {
         return _textboxes[id];
     }
 
-    public GraphicsTextbox GetTextboxOrDefault (int id) {
+    public GraphicsTextboxTexture GetTextboxOrDefault (int id) {
         return GetTextbox(id) ?? GetTextbox(0) ?? throw new("No textbox available.");
     }
     #endregion

@@ -170,7 +170,7 @@ public class GraphicsFont {
     public unsafe void DrawChar (
         IVec2 pos, SDL_FRect ch, SDL_Color color, bool shadow
     ) {
-        SDL_FRect charDst = new() {
+        SDL_FRect dst = new() {
             x = pos.X,
             y = pos.Y,
             w = ch.w,
@@ -180,12 +180,57 @@ public class GraphicsFont {
         if (shadow) {
             SDL3.SDL_SetTextureColorMod(ShadowAtlas, 0, 0, 0);
             SDL3.SDL_SetTextureAlphaMod(ShadowAtlas, Constants.TEXT_SHADOW_ALPHA);
-            SDL3.SDL_RenderTexture(_renderer, ShadowAtlas, &ch, &charDst);
+            SDL3.SDL_RenderTexture(_renderer, ShadowAtlas, &ch, &dst);
         }
 
         SDL3.SDL_SetTextureColorMod(CharAtlas, color.r, color.g, color.b);
         SDL3.SDL_SetTextureAlphaMod(ShadowAtlas, color.a);
-        SDL3.SDL_RenderTexture(_renderer, CharAtlas, &ch, &charDst);
+        SDL3.SDL_RenderTexture(_renderer, CharAtlas, &ch, &dst);
+    }
+
+    public unsafe void DrawCharInViewport (
+        IVec2 pos, IRect viewport, SDL_FRect ch, SDL_Color color, bool shadow
+    ) {
+        float drawLeft = Math.Max(pos.X, viewport.Left);
+        float drawRight = Math.Min(pos.X + ch.w, viewport.Right);
+        float drawTop = Math.Max(pos.Y, viewport.Top);
+        float drawBottom = Math.Min(pos.Y + ch.h, viewport.Bottom);
+
+        // The width and height of the part of the texture that is visible.
+        float drawWidth = drawRight - drawLeft;
+        float drawHeight = drawBottom - drawTop;
+
+        // This character is not visible in the viewport given.
+        if (drawWidth <= 0 || drawHeight <= 0) return;
+
+        // How far the viewport is from the texture.
+        float srcOffsetX = drawLeft - pos.X;
+        float srcOffsetY = drawTop - pos.Y;
+
+        SDL_FRect src = new() {
+            x = ch.x + srcOffsetX,
+            y = ch.y + srcOffsetY,
+            w = drawWidth,
+            h = drawHeight,
+        };
+
+        SDL_FRect dst = new() {
+            x = drawLeft,
+            y = drawTop,
+            w = drawWidth,
+            h = drawHeight,
+        };
+
+        if (shadow) {
+            SDL3.SDL_SetTextureColorMod(ShadowAtlas, 0, 0, 0);
+            SDL3.SDL_SetTextureAlphaMod(ShadowAtlas, Constants.TEXT_SHADOW_ALPHA);
+            SDL3.SDL_RenderTexture(_renderer, ShadowAtlas, &src, &dst);
+        }
+
+        SDL3.SDL_SetTextureColorMod(CharAtlas, color.r, color.g, color.b);
+        SDL3.SDL_SetTextureAlphaMod(ShadowAtlas, color.a);
+        SDL3.SDL_RenderTexture(_renderer, CharAtlas, &src, &dst);
+
     }
 
     /// <summary>

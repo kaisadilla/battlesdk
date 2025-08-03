@@ -6,16 +6,25 @@ namespace battlesdk.graphics;
 public class GraphicsText {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    private unsafe SDL_Renderer* _renderer;
-    private GraphicsFont _font;
+    protected unsafe SDL_Renderer* _renderer;
+    protected GraphicsFont _font;
     /// <summary>
     /// The maximum width of one line of text.
     /// </summary>
-    private readonly int _width;
+    protected readonly int _width;
     /// <summary>
     /// Each glyph contained by this text.
     /// </summary>
-    private readonly List<Glyph> _glyphs = [];
+    protected readonly List<Glyph> _glyphs = [];
+
+    /// <summary>
+    /// <summary>
+    /// The amount of characters this text has.
+    /// </summary>
+    public int CharCount => _glyphs.Count;
+    /// The amount of lines this text has.
+    /// </summary>
+    public int LineCount { get; }
 
     public unsafe GraphicsText (
         Renderer renderer, int fontId, string text, int width
@@ -25,9 +34,16 @@ public class GraphicsText {
         _width = width;
 
         var glyphGen = new GlyphGenerator(_renderer, _font, text, width);
-        _glyphs = glyphGen.Generate();
+        glyphGen.Generate();
+
+        _glyphs = glyphGen.Glyphs;
+        LineCount = glyphGen.Lines;
     }
 
+    /// <summary>
+    /// Draws all the text to the screen.
+    /// </summary>
+    /// <param name="pos">The position in the screen to draw at.</param>
     public unsafe void Draw (IVec2 pos) {
         int y = pos.Y;
 
@@ -38,6 +54,44 @@ public class GraphicsText {
             );
             g.Font.DrawChar(glyphPos, g.CharRect, g.Color, true);
         }
+    }
+
+    /// <summary>
+    /// Draws a line of text to the screen.
+    /// </summary>
+    /// <param name="pos">The position in the screen to draw at.</param>
+    /// <param name="line">The line to draw.</param>
+    public unsafe void DrawLine (IVec2 pos, int line) {
+        foreach (var g in _glyphs) {
+            if (g.Line != line) continue;
+
+            IVec2 glyphPos = new(pos.X + g.Position, pos.Y);
+            g.Font.DrawChar(glyphPos, g.CharRect, g.Color, true);
+        }
+    }
+
+    public unsafe void DrawPartial (IVec2 pos, int amount) {
+        int y = pos.Y;
+
+        for (int i = 0; i < _glyphs.Count; i++) {
+            if (i == amount) break;
+            
+            var g = _glyphs[i];
+
+            IVec2 glyphPos = new(
+                pos.X + g.Position,
+                y + (g.Line * _font.Asset.LineHeight)
+            );
+            g.Font.DrawChar(glyphPos, g.CharRect, g.Color, true);
+        }
+    }
+
+    /// <summary>
+    /// Returns the line the character at the index given belongs to.
+    /// </summary>
+    /// <param name="charIndex">The index of the character to check.</param>
+    public int GetCharLine (int charIndex) {
+        return _glyphs[charIndex].Line;
     }
 }
 
@@ -111,7 +165,11 @@ file class GlyphGenerator { // TODO: Texture aliases for fonts, rather than indi
     /// <summary>
     /// Each glyph contained by this text.
     /// </summary>
-    private readonly List<Glyph> _glyphs = [];
+    public List<Glyph> Glyphs { get; } = [];
+    /// <summary>
+    /// The amount of lines generated.
+    /// </summary>
+    public int Lines { get; private set; } = -1;
 
     public unsafe GlyphGenerator (
         SDL_Renderer* renderer, GraphicsFont font, string text, int width
@@ -124,7 +182,7 @@ file class GlyphGenerator { // TODO: Texture aliases for fonts, rather than indi
         _colors.Push(SdlColor(48, 80, 200, 255));
     }
 
-    public List<Glyph> Generate () {
+    public void Generate () {
         for (int i = 0; i < _text.Length; i++) {
             char c = _text[i];
             ProcessChar(c);
@@ -134,7 +192,7 @@ file class GlyphGenerator { // TODO: Texture aliases for fonts, rather than indi
             CommitWord();
         }
 
-        return _glyphs;
+        Lines = _currentLine + 1;
     }
 
     private unsafe void ProcessChar (char c) {
@@ -177,7 +235,7 @@ file class GlyphGenerator { // TODO: Texture aliases for fonts, rather than indi
 
     private unsafe void CommitWord () {
         foreach (var gd in _wordBuffer) {
-            _glyphs.Add(new() {
+            Glyphs.Add(new() {
                 Font = gd.Font,
                 CharRect = gd.CharRect,
                 Color = gd.Color,
