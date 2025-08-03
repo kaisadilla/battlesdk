@@ -13,6 +13,7 @@ public static class Registry {
     public const string FOLDER_GRAPHICS_MISC = "graphics/misc";
     public const string FOLDER_GRAPHICS_TEXTBOXES = "graphics/textboxes";
     public const string FOLDER_GRAPHICS_TILESETS = "graphics/tilesets";
+    public const string FOLDER_FONTS = "fonts";
     public const string FOLDER_MAPS = "maps";
     public const string FOLDER_MUSIC = "music";
     public const string FOLDER_WORLDS = "worlds";
@@ -21,12 +22,13 @@ public static class Registry {
 
     public static string ResFolderPath { get; private set; } = "res";
 
+    public static Collection<FontAsset> Fonts { get; } = new();
     public static Collection<Tileset> Tilesets { get; } = new();
     public static Collection<MapData> Maps { get; } = new();
     public static Collection<WorldData> Worlds { get; } = new();
     public static Collection<AssetFile> CharSprites { get; } = new();
     public static Collection<AssetFile> MiscSprites { get; } = new();
-    public static Collection<TextBoxAssetFile> TextboxSprites { get; } = new();
+    public static Collection<TextBoxAsset> TextboxSprites { get; } = new();
     public static Collection<MusicFile> Music { get; } = new();
     public static Collection<AssetFile> Sounds { get; } = new();
 
@@ -68,16 +70,27 @@ public static class Registry {
         LoadCharSprites();
         LoadMiscSprites();
         LoadTextboxSprites();
+        LoadFonts();
         LoadMusic();
         LoadSounds();
         LoadTilesets();
-        LoadMaps();
-        LoadWorlds();
+        LoadMaps(); // Maps require the tilesets they use to be loaded.
+        LoadWorlds(); // Worlds require the maps they include to be loaded.
 
         int id = -1;
         if (MiscSprites.TryGetId("char_shadow", out id)) {
             CharSpriteShadow = id;
         }
+    }
+
+    private static void LoadFonts () {
+        LoadAssets(
+            AssetType.Font,
+            FOLDER_FONTS,
+            [".ttf", ".otf"],
+            Fonts,
+            (name, path) => new FontAsset(name, path)
+        );
     }
 
     private static void LoadTilesets () {
@@ -136,7 +149,7 @@ public static class Registry {
             FOLDER_GRAPHICS_TEXTBOXES,
             [".png"],
             TextboxSprites,
-            (name, path) => new TextBoxAssetFile(name, path)
+            (name, path) => new TextBoxAsset(name, path)
         );
     }
 

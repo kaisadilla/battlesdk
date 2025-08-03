@@ -8,8 +8,6 @@ namespace battlesdk.graphics;
 public unsafe class Renderer {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    private unsafe SDL_Renderer* _renderer;
-
     private Dictionary<int, TilesetTexture> _tilesetTexes = [];
     private Dictionary<int, CharacterTexture> _charTexes = [];
     private Dictionary<int, StdTexture> _miscTexes = [];
@@ -19,10 +17,19 @@ public unsafe class Renderer {
     private float _scale;
     private Camera _camera;
 
-    private TextBoxTexture __test_tbtex;
+    // These dictionaries map assets by their Registry id to Graphics elements
+    // that are loaded into the SDL renderer. This class has methods to obtain
+    // elements from these dictionaries, automatically creating new elements
+    // if they don't already exist.
+    private readonly Dictionary<int, GraphicsFont> _fonts = [];
+    private readonly Dictionary<int, GraphicsTextbox> _textboxes = [];
+
+    public unsafe SDL_Renderer* SdlRenderer { get; private set; }
 
     public Renderer (SDL_Window* window, int width, int height, float scale) {
-        _renderer = SDL3.SDL_CreateRenderer(window, (string?)null);
+        SdlRenderer = SDL3.SDL_CreateRenderer(window, (string?)null);
+        SDL3.SDL_SetDefaultTextureScaleMode(SdlRenderer, SDL_ScaleMode.SDL_SCALEMODE_NEAREST);
+
         _width = width;
         _height = height;
         _scale = scale;
@@ -42,13 +49,12 @@ public unsafe class Renderer {
             LoadMiscSprite(ch);
         }
 
-        Registry.TextboxSprites.TryGetElementByName("dp_1", out var texfile);
-        __test_tbtex = new(_renderer, texfile!);
+        Hud.Init(this);
     }
 
     public void EnableScale () {
         SDL3.SDL_SetRenderLogicalPresentation(
-            _renderer,
+            SdlRenderer,
             _width,
             _height,
             SDL_RendererLogicalPresentation.SDL_LOGICAL_PRESENTATION_INTEGER_SCALE
@@ -57,7 +63,7 @@ public unsafe class Renderer {
 
     public void DisableScale () {
         SDL3.SDL_SetRenderLogicalPresentation(
-            _renderer,
+            SdlRenderer,
             (int)(_width * _scale),
             (int)(_height * _scale),
             SDL_RendererLogicalPresentation.SDL_LOGICAL_PRESENTATION_INTEGER_SCALE
@@ -67,8 +73,8 @@ public unsafe class Renderer {
 
     private readonly List<GameMap> _visibleMaps = [];
     public unsafe void Render () {
-        SDL3.SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
-        SDL3.SDL_RenderClear(_renderer);
+        SDL3.SDL_SetRenderDrawColor(SdlRenderer, 0, 0, 0, 255);
+        SDL3.SDL_RenderClear(SdlRenderer);
 
         _camera.SetPosition(TileToPixelSpace(G.World.Player.Subposition));
 
@@ -108,38 +114,36 @@ public unsafe class Renderer {
         }
 
         ApplyTimeTint();
-
-        __test_tbtex.Draw(new(3, Constants.VIEWPORT_HEIGHT - 48), new(Constants.VIEWPORT_WIDTH - 6, 46));
-        Hud.Draw(_renderer);
+        Hud.Draw();
 
         DisableScale();
-        Debug.Draw(_renderer);
+        Debug.Draw(SdlRenderer);
         EnableScale();
 
-        SDL3.SDL_RenderPresent(_renderer);
+        SDL3.SDL_RenderPresent(SdlRenderer);
     }
 
     public unsafe void Destroy () {
-        SDL3.SDL_DestroyRenderer(_renderer);
+        SDL3.SDL_DestroyRenderer(SdlRenderer);
     }
 
     private unsafe void LoadTileset (Tileset tileset) {
         if (Registry.Tilesets.TryGetId(tileset.Name, out int id)) {
-            TilesetTexture tex = new(_renderer, tileset.TexturePath);
+            TilesetTexture tex = new(SdlRenderer, tileset.TexturePath);
             _tilesetTexes[id] = tex;
         }
     }
 
     private unsafe void LoadCharacterSprite (AssetFile sprite) {
         if (Registry.CharSprites.TryGetId(sprite.Name, out int id)) {
-            CharacterTexture tex = new(_renderer, sprite);
+            CharacterTexture tex = new(SdlRenderer, sprite);
             _charTexes[id] = tex;
         }
     }
 
     private unsafe void LoadMiscSprite (AssetFile sprite) {
         if (Registry.MiscSprites.TryGetId(sprite.Name, out int id)) {
-            StdTexture tex = new(_renderer, sprite);
+            StdTexture tex = new(SdlRenderer, sprite);
             _miscTexes[id] = tex;
         }
     }
@@ -179,7 +183,7 @@ public unsafe class Renderer {
                 };
 
                 unsafe {
-                    SDL3.SDL_RenderTexture(_renderer, tex.Texture, &src, &dst);
+                    SDL3.SDL_RenderTexture(SdlRenderer, tex.Texture, &src, &dst);
                 }
             }
         }
@@ -204,7 +208,7 @@ public unsafe class Renderer {
         };
 
         unsafe {
-            SDL3.SDL_RenderTexture(_renderer, tex.Texture, &src, &dst);
+            SDL3.SDL_RenderTexture(SdlRenderer, tex.Texture, &src, &dst);
         }
     }
 
@@ -232,13 +236,13 @@ public unsafe class Renderer {
         unsafe {
             if (Registry.CharSpriteShadow != -1) {
                 _miscTexes[Registry.CharSpriteShadow].Draw(
-                    _renderer,
+                    SdlRenderer,
                     _camera.GetScreenPos(TileToPixelSpace(character.Subposition)) + new IVec2(0, 8)
                 );
             }
 
             _charTexes[character.Sprite].Draw(
-                _renderer,
+                SdlRenderer,
                 _camera.GetScreenPos(TileToPixelSpace(subpos)),
                 character.Direction,
                 (character.IsMoving && !character.IsJumping && character.IsRunning) ? 1 : 0,
@@ -268,24 +272,65 @@ public unsafe class Renderer {
             B = (int)thisTint.B.Lerp(nextTint.B, progress),
         };
 
-        SDL3.SDL_SetRenderDrawBlendMode(_renderer, CustomBlendModes.Subtract);
+        SDL3.SDL_SetRenderDrawBlendMode(SdlRenderer, CustomBlendModes.Subtract);
         SDL3.SDL_SetRenderDrawColor(
-            _renderer,
+            SdlRenderer,
             (byte)Math.Max(0, -tint.R),
             (byte)Math.Max(0, -tint.G),
             (byte)Math.Max(0, -tint.B),
             255
         );
-        SDL3.SDL_RenderFillRect(_renderer, null);
+        SDL3.SDL_RenderFillRect(SdlRenderer, null);
 
-        SDL3.SDL_SetRenderDrawBlendMode(_renderer, CustomBlendModes.Add);
+        SDL3.SDL_SetRenderDrawBlendMode(SdlRenderer, CustomBlendModes.Add);
         SDL3.SDL_SetRenderDrawColor(
-            _renderer,
+            SdlRenderer,
             (byte)Math.Max(0, tint.R),
             (byte)Math.Max(0, tint.G),
             (byte)Math.Max(0, tint.B),
             255
         );
-        SDL3.SDL_RenderFillRect(_renderer, null);
+        SDL3.SDL_RenderFillRect(SdlRenderer, null);
     }
+
+    #region GPU asset getters
+    /// <summary>
+    /// Obtains the drawable font with the given id, loading it in the renderer
+    /// if it's not already loaded.
+    /// </summary>
+    /// <param name="id">The font's id.</param>
+    public GraphicsFont? GetFont (int id) {
+        if (_fonts.TryGetValue(id, out var font)) {
+            return font;
+        }
+
+        if (Registry.Fonts.TryGetElement(id, out var fontAsset) == false) {
+            return null;
+        }
+
+        _fonts[id] = new(SdlRenderer, fontAsset);
+        return _fonts[id];
+    }
+
+    public GraphicsFont GetFontOrDefault (int id) {
+        return GetFont(id) ?? GetFont(0) ?? throw new("No font available.");
+    }
+
+    public GraphicsTextbox? GetTextbox (int id) {
+        if (_textboxes.TryGetValue(id, out var textbox)) {
+            return textbox;
+        }
+
+        if (Registry.TextboxSprites.TryGetElement(id, out var tbAsset) == false) {
+            return null;
+        }
+
+        _textboxes[id] = new(SdlRenderer, tbAsset);
+        return _textboxes[id];
+    }
+
+    public GraphicsTextbox GetTextboxOrDefault (int id) {
+        return GetTextbox(id) ?? GetTextbox(0) ?? throw new("No textbox available.");
+    }
+    #endregion
 }

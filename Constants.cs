@@ -62,5 +62,8 @@ public class Constants {
     /// </summary>
     public const int LOAD_DISTANCE_Y = ((VIEWPORT_HEIGHT / TILE_SIZE) / 2) + 6;
 
-    public static uint _BLEND_FACTOR_SUBTRACT = 0;
+    /// <summary>
+    /// The value (from 0 to 255) of the alpha channel of a text shadow's color.
+    /// </summary>
+    public const int TEXT_SHADOW_ALPHA = 48;
 }

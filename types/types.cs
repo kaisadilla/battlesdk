@@ -1,4 +1,5 @@
 ﻿using battlesdk.json;
+using SDL;
 using System.Text.Json.Serialization;
 
 namespace battlesdk.types;
@@ -164,5 +165,14 @@ public static class TypesUtils {
 
     public static float Lerp (this int a, float b, float t) {
         return a + (b - a) * t;
+    }
+
+    public static SDL_Color SdlColor (byte r, byte g, byte b, byte a) {
+        return new() {
+            r = r,
+            g = g,
+            b = b,
+            a = a,
+        };
     }
 }

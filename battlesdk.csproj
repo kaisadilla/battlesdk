@@ -27,7 +27,6 @@
 </ItemGroup>
 
 <ItemGroup>
-  <Folder Include="hud\" />
   <Folder Include="map\" />
   <Folder Include="audio\" />
   <Folder Include="res\worlds\" />

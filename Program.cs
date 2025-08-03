@@ -15,7 +15,7 @@ _logger.Info("Launching BattleSDK.");
 InitSdl();
 Data.Init();
 Registry.Init();
-Hud._Init();
+Settings.Init();
 G.LoadGame();
 Debug.Init();
 
@@ -25,6 +25,12 @@ var win = new Window(
     Constants.VIEWPORT_WIDTH,
     Constants.VIEWPORT_HEIGHT,
     Constants.DEFAULT_SCREEN_SCALE
+);
+
+Hud.ShowTextbox(
+    "When I was a kid, all of this was black empty tiles. " +
+    "Now there's trees and stuff. There's also textboxes, " +
+    "which we need to fill right now with as many words as we can."
 );
 
 while (win.CloseRequested == false) {

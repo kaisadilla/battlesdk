@@ -192,7 +192,7 @@ public abstract class Character {
                 }
             }
         }
-        if (moveAllowed) {
+        if (moveAllowed && ignoreCharacters == false) {
             var ch = G.World.GetCharacterAt(destination);
             if (ch is not null) moveAllowed = false;
         }

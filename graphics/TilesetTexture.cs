@@ -18,7 +18,6 @@ public unsafe class TilesetTexture {
 
         SDL3.SDL_DestroySurface(surface);
         SDL3.SDL_SetTextureBlendMode(Texture, SDL_BlendMode.SDL_BLENDMODE_BLEND);
-        SDL3.SDL_SetTextureScaleMode(Texture, SDL_ScaleMode.SDL_SCALEMODE_NEAREST);
     }
 
     public void Destroy () {

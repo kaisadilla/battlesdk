@@ -3,7 +3,7 @@ using NLog;
 using SDL;
 
 namespace battlesdk.data;
-public class TextBoxAssetFile : AssetFile {
+public class TextBoxAsset : AssetFile {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     /// <summary>
@@ -45,7 +45,7 @@ public class TextBoxAssetFile : AssetFile {
     /// </summary>
     public IRect Padding { get; private set; }
 
-    public TextBoxAssetFile (string name, string path) : base(name, path) {
+    public TextBoxAsset (string name, string path) : base(name, path) {
         unsafe {
             var surface = SDL3_image.IMG_Load(path);
 

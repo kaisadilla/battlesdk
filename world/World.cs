@@ -154,9 +154,12 @@ public class World {
     /// <summary>
     /// Returns the character that is at the given position, if any. If multiple
     /// characters exist in the same position, only one of them will be returned.
+    /// This method will return the player if the player is at the given position.
     /// </summary>
     /// <param name="worldPos">A position in the world.</param>
     public Character? GetCharacterAt (IVec2 worldPos) {
+        if (Player.Position == worldPos) return Player;
+
         foreach (var ch in Npcs) {
             if (ch.Position == worldPos) return ch;
         }

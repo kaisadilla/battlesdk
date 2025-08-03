@@ -24,8 +24,6 @@ public unsafe class CharacterTexture {
         if (Texture == null) throw new Exception("No tex.");
 
         SDL3.SDL_DestroySurface(surface);
-        SDL3.SDL_SetTextureBlendMode(Texture, SDL_BlendMode.SDL_BLENDMODE_BLEND);
-        SDL3.SDL_SetTextureScaleMode(Texture, SDL_ScaleMode.SDL_SCALEMODE_NEAREST);
     }
 
     public SDL_FRect GetSprite (Direction dir, int set, int frame) {

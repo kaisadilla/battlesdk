@@ -2,9 +2,8 @@
 using SDL;
 
 namespace battlesdk.graphics;
-public class TextBoxTexture : Texture {
-    private TextBoxAssetFile _file;
-    private unsafe SDL_Texture* _texture;
+public class GraphicsTextbox : GraphicsTexture {
+    public TextBoxAsset File { get; private init; }
 
     // Each of the 9 parts of a textbox: 4 corners, 4 borders and 1 center.
     private SDL_FRect _topLeft;
@@ -17,10 +16,10 @@ public class TextBoxTexture : Texture {
     private SDL_FRect _bottom;
     private SDL_FRect _center;
 
-    public unsafe TextBoxTexture (SDL_Renderer* renderer, TextBoxAssetFile file)
+    public unsafe GraphicsTextbox (SDL_Renderer* renderer, TextBoxAsset file)
         : base(renderer, file.Path)
     {
-        _file = file;
+        File = file;
 
         _topLeft = new() {
             x = 0,
@@ -81,19 +80,19 @@ public class TextBoxTexture : Texture {
     }
 
     public unsafe void Draw (IVec2 pos, IVec2 size) {
-        int x1 = pos.X + _file.X[0];
-        int x2 = pos.X + size.X - (_file.Width - _file.X[1]);
-        int y1 = pos.Y + _file.Y[0];
-        int y2 = pos.Y + size.Y - (_file.Height - _file.Y[1]);
+        int x1 = pos.X + File.X[0];
+        int x2 = pos.X + size.X - (File.Width - File.X[1]);
+        int y1 = pos.Y + File.Y[0];
+        int y2 = pos.Y + size.Y - (File.Height - File.Y[1]);
 
         DrawSection(_topLeft, pos);
         DrawSection(_topRight, new(x2, pos.Y));
         DrawSection(_bottomLeft, new(pos.X, y2));
         DrawSection(_bottomRight, new(x2, y2));
-        DrawSectionResize(_left, new(pos.X, y1), new((int)_left.w, y2 - y1), _file.YMode);
-        DrawSectionResize(_right, new(x2, y1), new((int)_right.w, y2 - y1), _file.YMode);
-        DrawSectionResize(_top, new(x1, pos.Y), new(x2 - x1, (int)_top.h), _file.XMode);
-        DrawSectionResize(_bottom, new(x1, y2), new(x2 - x1, (int)_bottom.h), _file.XMode);
-        DrawSectionResize(_center, new(x1, y1), new(x2 - x1, y2 - y1), _file.CenterMode);
+        DrawSectionResize(_left, new(pos.X, y1), new((int)_left.w, y2 - y1), File.YMode);
+        DrawSectionResize(_right, new(x2, y1), new((int)_right.w, y2 - y1), File.YMode);
+        DrawSectionResize(_top, new(x1, pos.Y), new(x2 - x1, (int)_top.h), File.XMode);
+        DrawSectionResize(_bottom, new(x1, y2), new(x2 - x1, (int)_bottom.h), File.XMode);
+        DrawSectionResize(_center, new(x1, y1), new(x2 - x1, y2 - y1), File.CenterMode);
     }
 }

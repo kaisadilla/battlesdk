@@ -3,7 +3,7 @@ using SDL;
 using System.Runtime.CompilerServices;
 
 namespace battlesdk.graphics;
-public abstract class Texture {
+public abstract class GraphicsTexture {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     /// <summary>
@@ -24,7 +24,7 @@ public abstract class Texture {
     /// </summary>
     protected int _height;
 
-    protected unsafe Texture (SDL_Renderer* renderer, string path) {
+    protected unsafe GraphicsTexture (SDL_Renderer* renderer, string path) {
         _renderer = renderer;
 
         var surface = SDL3_image.IMG_Load(path);
@@ -39,7 +39,6 @@ public abstract class Texture {
 
         SDL3.SDL_DestroySurface(surface);
         SDL3.SDL_SetTextureBlendMode(_texture, SDL_BlendMode.SDL_BLENDMODE_BLEND);
-        SDL3.SDL_SetTextureScaleMode(_texture, SDL_ScaleMode.SDL_SCALEMODE_NEAREST);
     }
 
     /// <summary>
