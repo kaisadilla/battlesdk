@@ -190,8 +190,6 @@ file class GlyphGenerator { // TODO: Texture aliases for fonts, rather than indi
 
         _wordBuffer.Clear();
         _wordWidth = 0;
-
-        _colors.Push(new() { r = (byte)Random.Shared.Next(255), g = (byte)Random.Shared.Next(255), b = (byte)Random.Shared.Next(255), a = 255 });
     }
 }
 

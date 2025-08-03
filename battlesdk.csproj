@@ -36,6 +36,9 @@
   <None Update="nlog.config">
     <CopyToOutputDirectory>Always</CopyToOutputDirectory>
   </None>
+  <None Update="SDL3.dll">
+    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+  </None>
 </ItemGroup>
 
 </Project>
