@@ -1,4 +1,6 @@
-﻿namespace battlesdk.world;
+﻿using battlesdk.world.entities;
+
+namespace battlesdk.world;
 public abstract class CharacterMovement {
     /// <summary>
     /// The character this autonomous movement controls.
@@ -34,18 +36,18 @@ public class RouteCharacterMovement : CharacterMovement {
     /// </summary>
     public List<MoveKind> Route { get; private init; }
 
+    private int _cursor = 0;
+
     public RouteCharacterMovement (Character character, List<MoveKind> route) : base(character) {
         Route = route;
+    }
 
-        foreach (var move in Route) {
-            character.QueueMove(new(move, IgnoreCharacters));
-        }
+    public override void Update () {
+        if (_character.IsMoving) return;
 
-        character.OnMoveSequenceCompleted += (s, evt) => {
-            foreach (var step in Route) {
-                character.QueueMove(new(step, IgnoreCharacters));
-            }
-        };
+        _character.Move((Direction)Route[_cursor], IgnoreCharacters);
+        _cursor++;
+        _cursor %= Route.Count;
     }
 }
 
@@ -99,7 +101,7 @@ public class RandomCharacterMovement : CharacterMovement {
                 _character.SetDirection(dir);
             }
             else {
-                _character.QueueMove(new((MoveKind)dir, IgnoreCharacters));
+                _character.Move(dir, IgnoreCharacters);
             }
 
         }

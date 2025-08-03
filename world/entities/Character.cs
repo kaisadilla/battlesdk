@@ -1,19 +1,10 @@
-﻿namespace battlesdk.world;
+﻿namespace battlesdk.world.entities;
 
-public abstract class Character {
-    public IVec2 Position { get; private set; }
-    public Direction Direction { get; private set; } = Direction.Down;
-
-    public int Sprite { get; private set; }
+public abstract class Character : Entity {
+    private CharacterInteraction _interaction;
 
     public CharacterMovement? AutonomousMovement { get; private set; } = null;
 
-    /// <summary>
-    /// The z position of the character, which indicates the height at which it
-    /// currently is. Note: use <see cref="VisualZ"/> to get the z position the
-    /// character visually is.
-    /// </summary>
-    public int Z { get; private set; } = 0;
     /// <summary>
     /// True while the character is moving from one tile into another.
     /// </summary>
@@ -26,6 +17,10 @@ public abstract class Character {
     /// True if the character is moving by jumping.
     /// </summary>
     public bool IsJumping { get; protected set; } = false;
+    /// <summary>
+    /// True if the player is jumping in place.
+    /// </summary>
+    public bool IsJumpingInPlace { get; protected set; } = false;
     /// <summary>
     /// A value from 0 to 1 representing the progress of the movement being made.
     /// </summary>
@@ -40,28 +35,13 @@ public abstract class Character {
     /// this frame.
     /// </summary>
     public bool Collided { get; private set; } = false;
-    /// <summary>
-    /// The visual z-index of the chacter. This is usually the same as its
-    /// logical Z index, but can difer if the character has changed its Z
-    /// index in its last move.
-    /// </summary>
-    public int VisualZ { get; private set; } = 0;
-
-    /// <summary>
-    /// A queue of moves this character will execute.
-    /// </summary>
-    private readonly Queue<CharacterMove> _pendingMoves = [];
 
     /// <summary>
     /// The position the character was in before its last movement.
     /// </summary>
     public IVec2 PreviousPosition { get; private set; } = IVec2.Zero;
 
-    /// <summary>
-    /// The position the character is, taking into consideration, when it's
-    /// moving, how much of its movement has completed so far.
-    /// </summary>
-    public Vec2 Subposition {
+    public override Vec2 Subposition {
         get {
             if (IsMoving == false) return Position;
 
@@ -72,26 +52,25 @@ public abstract class Character {
         }
     }
 
-    public event EventHandler<EventArgs>? OnMoveSequenceCompleted;
-
-    public Character (IVec2 position, string sprite) {
-        Position = position;
-        if (Registry.CharSprites.TryGetId(sprite, out var spriteId)) {
-            Sprite = spriteId;
-        }
-        else {
-            throw new Exception($"Sprite '{sprite}' doesn't exist.");
-        }
+    public Character (IVec2 worldPos, string sprite) : base(worldPos, sprite) {
+        Registry.Scripts.TryGetElementByName("characters/test-map-1/winona", out var scr);
+        _interaction = new(this, scr!);
     }
 
-    public virtual void OnFrameStart () {
+    public override void FrameStart () {
+        base.FrameStart();
         Collided = false;
     }
 
-    public virtual void Update () {
+    public override void Update () {
+        base.Update();
+
         if (IsMoving) {
             if (IsJumping) {
                 MoveProgress += Time.DeltaTime / Constants.LEDGE_JUMP_SPEED;
+            }
+            else if (IsJumpingInPlace) {
+                MoveProgress += Time.DeltaTime / (13f / 60f);
             }
             else if (IsRunning) {
                 MoveProgress += Time.DeltaTime / Constants.RUN_SPEED;
@@ -105,40 +84,31 @@ public abstract class Character {
             MoveProgress = 0;
             IsMoving = false;
             IsJumping = false;
+            IsJumpingInPlace = false;
         }
 
-        if (IsMoving == false && _pendingMoves.TryDequeue(out var move)) {
-            switch (move.Move) {
-                case MoveKind.StepDown:
-                case MoveKind.StepRight:
-                case MoveKind.StepUp:
-                case MoveKind.StepLeft:
-                    Move((Direction)move.Move, move.IgnoreCharacters);
-                    break;
-                case MoveKind.LookDown:
-                case MoveKind.LookRight:
-                case MoveKind.LookUp:
-                case MoveKind.LookLeft:
-                    SetDirection((Direction)((int)move.Move - 4));
-                    break;
-                case MoveKind.Jump:
-                    break;
-            }
-
-            if (_pendingMoves.Count == 0) {
-                OnMoveSequenceCompleted?.Invoke(this, EventArgs.Empty);
-            }
+        if (_interaction.IsInteracting == false) {
+            AutonomousMovement?.Update();
         }
-
-        AutonomousMovement?.Update();
     }
 
-    public virtual void SetPosition (IVec2 position) {
-        Position = position;
-    }
+    public override void Interact (Direction from) {
+        if (IsMoving && MoveProgress < 0.8f) return;
 
-    public virtual void SetDirection (Direction direction) {
-        Direction = direction;
+        //_isInteracting = true;
+
+        SetDirection(from);
+
+        Audio.PlaySound("beep_short");
+        _interaction.Interact();
+        //var tb = Hud.ShowTextbox(
+        //    "When I was a kid, all of this was black empty tiles. " +
+        //    "Now there's trees and stuff. There's also textboxes, " +
+        //    "which we need to fill right now with as many words as we can. " +
+        //    "This text is even longer, as we now have to check transitions across " +
+        //    "several lines."
+        //);
+        //tb.OnComplete += (s, evt) => _isInteracting = false;
     }
 
     /// <summary>
@@ -197,7 +167,7 @@ public abstract class Character {
             if (ch is not null) moveAllowed = false;
         }
 
-        Direction = direction;
+        SetDirection(direction);
         if (moveAllowed == false) {
             destination = Position;
         }
@@ -207,46 +177,33 @@ public abstract class Character {
         if (jumpDir == Direction.None) {
             IsMoving = true;
             MoveProgress = 0; //Constants.WALK_SPEED* Time.DeltaTime;
-            Position = destination;
+            SetPosition(destination);
         }
         else {
             IsMoving = true;
             IsJumping = true;
             MoveProgress = 0;
-            Position = jumpDir switch {
+            SetPosition(jumpDir switch {
                 Direction.Down => destination + new IVec2(0, 1),
                 Direction.Right => destination + new IVec2(1, 0),
                 Direction.Up => destination + new IVec2(0, -1),
                 Direction.Left => destination + new IVec2(-1, 0),
                 _ => destination,
-            };
+            });
         }
 
-        if (moveAllowed) {
-            LandAtTile();
-        }
-        else {
+        if (moveAllowed == false) {
             Collided = true;
         }
     }
 
     /// <summary>
-    /// Enqueues a new movement for this character, that will be executed as
-    /// soon as the character can move.
+    /// Makes the character jump without moving to any tile.
     /// </summary>
-    /// <param name="move">The move to enqueue.</param>
-    public void QueueMove (CharacterMove move) {
-        _pendingMoves.Enqueue(move);
-    }
-
-    protected void LandAtTile () {
-        var zWarp = G.World.GetZWarpAt(Position);
-        if (zWarp is null) {
-            VisualZ = Z;
-            return;
-        }
-
-        VisualZ = Math.Max(Z, zWarp.Value);
-        Z = zWarp.Value;
+    public virtual void JumpInPlace () {
+        IsMoving = true;
+        IsJumpingInPlace = true;
+        MoveProgress = 0;
+        PreviousPosition = Position;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using battlesdk.data;
+using battlesdk.world.entities;
 using NLog;
 using System.Diagnostics.CodeAnalysis;
 
@@ -49,8 +50,12 @@ public class World {
         });
     }
 
-    public void OnFrameStart () {
-        Player.OnFrameStart();
+    public void FrameStart () {
+        foreach (var npc in Npcs) {
+            npc.FrameStart();
+        }
+
+        Player.FrameStart();
     }
 
     public void Update () {

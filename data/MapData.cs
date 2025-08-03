@@ -67,7 +67,10 @@ public class MapData : INameable {
         List<int> firstGids = [];
 
         foreach (var ts in map.Tilesets) {
-            var name = Registry.GetAssetName(Registry.FOLDER_TILESETS, ts.source);
+            var name = Registry.GetAssetName(
+                Registry.FOLDER_TILESETS,
+                System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Path) ?? "", ts.source)
+            );
 
             // We should be able to locate a tileset with the name given in
             // the registry. Otherwise, this map cannot be used by BattleSDK.

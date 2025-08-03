@@ -1,4 +1,4 @@
-﻿using battlesdk.world;
+﻿using battlesdk.world.entities;
 using MoonSharp.Interpreter;
 
 namespace battlesdk.scripts;

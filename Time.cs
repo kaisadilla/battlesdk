@@ -23,7 +23,7 @@ public static class Time {
     public static void Update () {
         ulong now = SDL3.SDL_GetPerformanceCounter();
 
-        DeltaTime = (now - _lastCounter) / _freq;
+        DeltaTime = ((now - _lastCounter) / _freq) * 1f;
         TotalTime = now / _freq;
 
         _lastCounter = now;

@@ -52,7 +52,10 @@ public class WorldData : INameable {
             }
 
             var fileName = fnJson.GetString()!;
-            var mapName = Registry.GetAssetName(Registry.FOLDER_MAPS, fileName);
+            var mapName = Registry.GetAssetName(
+                Registry.FOLDER_MAPS,
+                System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Path) ?? "", fileName)
+            );
 
             if (Registry.Maps.TryGetId(mapName, out int mapId) == false) {
                 _logger.Error(

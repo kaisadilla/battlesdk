@@ -13,10 +13,12 @@ public static class Registry {
     public const string FOLDER_GRAPHICS_MISC = "graphics/misc";
     public const string FOLDER_GRAPHICS_TEXTBOXES = "graphics/textboxes";
     public const string FOLDER_GRAPHICS_TILESETS = "graphics/tilesets";
+    public const string FOLDER_GRAPHICS_UI = "graphics/ui";
     public const string FOLDER_FONTS = "fonts";
     public const string FOLDER_MAPS = "maps";
     public const string FOLDER_MUSIC = "music";
     public const string FOLDER_WORLDS = "worlds";
+    public const string FOLDER_SCRIPTS = "scripts";
     public const string FOLDER_SOUNDS = "sounds";
     public const string FOLDER_TILESETS = "tilesets";
 
@@ -29,7 +31,9 @@ public static class Registry {
     public static Collection<AssetFile> CharSprites { get; } = new();
     public static Collection<AssetFile> MiscSprites { get; } = new();
     public static Collection<TextBoxAsset> TextboxSprites { get; } = new();
+    public static Collection<AssetFile> UiSprites { get; } = new();
     public static Collection<MusicFile> Music { get; } = new();
+    public static Collection<ScriptAsset> Scripts { get; } = new();
     public static Collection<AssetFile> Sounds { get; } = new();
 
     public static int FlagsTilesetIndex { get; private set; } = -1;
@@ -52,12 +56,17 @@ public static class Registry {
     /// asset's type.</param>
     /// <param name="assetPath">The path to the asset.</param>
     public static string GetAssetName (string rootFolder, string assetPath) {
-        string rootPath = Path.GetFullPath(rootFolder);
+        string rootPath = Path.GetFullPath(Path.Combine(ResFolderPath, rootFolder));
         string targetPath = Path.GetFullPath(assetPath);
 
-        return Path.GetFileNameWithoutExtension(
-            Path.GetRelativePath(rootPath, targetPath)
-        );
+        string relativePath = Path.GetRelativePath(rootPath, targetPath);
+
+        string dir = Path.GetDirectoryName(relativePath)?.Replace("\\", "/") ?? "";
+        string fileName = Path.GetFileNameWithoutExtension(relativePath);
+
+        return string.IsNullOrEmpty(dir)
+            ? fileName
+            : $"{dir}/{fileName}";
     }
 
     /// <summary>
@@ -71,8 +80,10 @@ public static class Registry {
         LoadCharSprites();
         LoadMiscSprites();
         LoadTextboxSprites();
+        LoadUiSprites();
         LoadFonts();
         LoadMusic();
+        LoadScripts();
         LoadSounds();
         LoadTilesets();
         LoadMaps(); // Maps require the tilesets they use to be loaded.
@@ -82,7 +93,7 @@ public static class Registry {
         if (MiscSprites.TryGetId("char_shadow", out id)) {
             CharSpriteShadow = id;
         }
-        if (MiscSprites.TryGetId("tap_short", out id)) {
+        if (MiscSprites.TryGetId("beep_short", out id)) {
             SfxTapShort = id;
         }
     }
@@ -154,6 +165,26 @@ public static class Registry {
             [".png"],
             TextboxSprites,
             (name, path) => new TextBoxAsset(name, path)
+        );
+    }
+
+    private static void LoadUiSprites () {
+        LoadAssets(
+            AssetType.UiSprite,
+            FOLDER_GRAPHICS_UI,
+            [".png"],
+            UiSprites,
+            (name, path) => new AssetFile(name, path)
+        );
+    }
+
+    private static void LoadScripts () {
+        LoadAssets(
+            AssetType.Script,
+            FOLDER_SCRIPTS,
+            [".lua"],
+            Scripts,
+            (name, path) => new ScriptAsset(name, path)
         );
     }
 
@@ -252,9 +283,11 @@ public enum AssetType {
     MiscSprite,
     TextboxSprite,
     TilesetSprite,
+    UiSprite,
     Font,
     Map,
     Music,
+    Script,
     Sound,
     Tileset,
     World,

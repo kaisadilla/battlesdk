@@ -3,6 +3,7 @@ global using static battlesdk.types.TypesUtils;
 
 using battlesdk;
 using battlesdk.graphics;
+using battlesdk.scripts;
 using NLog;
 using SDL;
 
@@ -16,6 +17,7 @@ InitSdl();
 Data.Init();
 Registry.Init();
 Settings.Init();
+
 G.LoadGame();
 Debug.Init();
 Time.Init();
@@ -28,25 +30,19 @@ var win = new Window(
     Constants.DEFAULT_SCREEN_SCALE
 );
 
-Hud.ShowTextbox(
-    "When I was a kid, all of this was black empty tiles. " +
-    "Now there's trees and stuff. There's also textboxes, " +
-    "which we need to fill right now with as many words as we can. " +
-    "This text is even longer, as we now have to check transitions across " +
-    "several lines."
-);
-
 while (win.CloseRequested == false) {
     var frameStart = SDL3.SDL_GetTicks();
 
     win.ProcessEvents();
     Debug.OnFrameStart();
-    G.World.OnFrameStart();
+    G.World.FrameStart();
 
     ProcessInput();
 
     Music.Update();
     G.World.Update();
+    InputManager.Update();
+    ScriptLoop.Update();
     Hud.Update();
 
     win.Render();

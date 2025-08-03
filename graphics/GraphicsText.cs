@@ -7,6 +7,11 @@ public class GraphicsText {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     protected unsafe SDL_Renderer* _renderer;
+    /// <summary>
+    /// The primary font of the text. Keep in mind that text may use multiple
+    /// fonts - however, certain metrics, such as line height, are always based
+    /// on the primary font.
+    /// </summary>
     protected GraphicsFont _font;
     /// <summary>
     /// The maximum width of one line of text.
@@ -196,20 +201,20 @@ file class GlyphGenerator { // TODO: Texture aliases for fonts, rather than indi
     }
 
     private unsafe void ProcessChar (char c) {
+        // Character is newline, so it starts a new line, ending the word.
+        // The newline character is not rendered.
+        if (c == '\n') {
+            CommitWord();
+            StartNewLine();
+        }
         // Character is a white space, so it ends the word.
-        if (char.IsWhiteSpace(c)) {
+        else if (char.IsWhiteSpace(c)) {
             // Word doesn't fit in this line, so we start a new one.
             if (_lineWidth + _wordWidth > _width) {
                 StartNewLine();
             }
             // Word fits in this line, so we append the space to the word.
             CommitCharToWord(c);
-            CommitWord();
-        }
-        // Character is newline, so it starts a new line, ending the word.
-        // The newline character is not rendered.
-        else if (c == '\n') {
-            StartNewLine();
             CommitWord();
         }
         else {

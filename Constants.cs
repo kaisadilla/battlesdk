@@ -39,7 +39,7 @@ public class Constants {
     /// The amount of time, in seconds, that it takes for a normal character
     /// (including the player) to move one tile when walking.
     /// </summary>
-    public const float WALK_SPEED = 18f / 60f;
+    public const float WALK_SPEED = 18f / 60f; // TODO: Rename these as "speed" is not what this is.
     /// <summary>
     /// The amount of time, in seconds, that it takes for a normal character
     /// (including the player) to move one tile when running.

@@ -1,5 +1,7 @@
-﻿namespace battlesdk.world;
-public class Player : Character {
+﻿using battlesdk.input;
+
+namespace battlesdk.world.entities;
+public class Player : Character, IInputListener {
     private const float MOVE_INPUT_DELAY = 0.1f;
 
     private PlayerSoundManager _sounds = new();
@@ -9,15 +11,17 @@ public class Player : Character {
     private float _upKeyStart = float.MinValue;
     private float _downKeyStart = float.MinValue;
 
-    public Player (IVec2 position) : base(position, "dawn") { }
+    public bool BlockOtherInput => true;
+
+    public Player (IVec2 position) : base(position, "dawn") {
+        InputManager.Subscribe(this);
+    }
 
     public override void Update () {
         base.Update();
-
-        ProcessInput();
     }
 
-    private void ProcessInput () {
+    public void HandleInput () {
         if (IsMoving == false) {
             if (Controls.GetKeyDown(ActionKey.Left)) {
                 SetDirection(Direction.Left);
@@ -78,6 +82,9 @@ public class Player : Character {
             _downKeyStart = float.MinValue;
         }
 
+        if (Controls.GetKeyDown(ActionKey.Primary)) {
+            HandlePrimaryInput();
+        }
         if (Controls.GetKeyDown(ActionKey.Secondary)) {
             IsRunning = true;
         }
@@ -88,6 +95,14 @@ public class Player : Character {
 
         if (IsMoving) {
             G.World.SetFocus(Position);
+        }
+    }
+
+    private void HandlePrimaryInput () {
+        var ch = G.World.GetCharacterAt(GetPositionInFront());
+        if (ch is not null) {
+            ch.Interact(Direction.Opposite());
+            return;
         }
     }
 }

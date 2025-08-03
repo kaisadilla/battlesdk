@@ -1,5 +1,6 @@
 ﻿using battlesdk.data;
 using battlesdk.world;
+using battlesdk.world.entities;
 using NLog;
 using SDL;
 
@@ -10,7 +11,7 @@ public unsafe class Renderer {
 
     private Dictionary<int, TilesetTexture> _tilesetTexes = [];
     private Dictionary<int, CharacterTexture> _charTexes = [];
-    private Dictionary<int, StdTexture> _miscTexes = [];
+    private Dictionary<int, GraphicsTexture> _miscTexes = [];
 
     private int _width;
     private int _height;
@@ -22,7 +23,8 @@ public unsafe class Renderer {
     // elements from these dictionaries, automatically creating new elements
     // if they don't already exist.
     private readonly Dictionary<int, GraphicsFont> _fonts = [];
-    private readonly Dictionary<int, GraphicsTextboxTexture> _textboxes = [];
+    private readonly Dictionary<int, GraphicsTextboxFrame> _textboxes = [];
+    private readonly Dictionary<int, GraphicsTexture> _uiTexes = [];
 
     public unsafe SDL_Renderer* SdlRenderer { get; private set; }
 
@@ -143,7 +145,7 @@ public unsafe class Renderer {
 
     private unsafe void LoadMiscSprite (AssetFile sprite) {
         if (Registry.MiscSprites.TryGetId(sprite.Name, out int id)) {
-            StdTexture tex = new(SdlRenderer, sprite);
+            GraphicsTexture tex = new(SdlRenderer, sprite.Path);
             _miscTexes[id] = tex;
         }
     }
@@ -232,11 +234,18 @@ public unsafe class Renderer {
                 subpos += new Vec2(0, -2 * (1 - character.MoveProgress));
             }
         }
+        else if (character.IsJumpingInPlace) {
+            if (character.MoveProgress < 0.5) {
+                subpos = (Vec2)character.Position + new Vec2(0, -1 * character.MoveProgress);
+            }
+            else {
+                subpos = (Vec2)character.Position + new Vec2(0, -1 * (1 - character.MoveProgress));
+            }
+        }
 
         unsafe {
             if (Registry.CharSpriteShadow != -1) {
                 _miscTexes[Registry.CharSpriteShadow].Draw(
-                    SdlRenderer,
                     _camera.GetScreenPos(TileToPixelSpace(character.Subposition)) + new IVec2(0, 8)
                 );
             }
@@ -300,37 +309,56 @@ public unsafe class Renderer {
     /// </summary>
     /// <param name="id">The font's id.</param>
     public GraphicsFont? GetFont (int id) {
-        if (_fonts.TryGetValue(id, out var font)) {
-            return font;
-        }
-
-        if (Registry.Fonts.TryGetElement(id, out var fontAsset) == false) {
-            return null;
-        }
-
-        _fonts[id] = new(SdlRenderer, fontAsset);
-        return _fonts[id];
+        return GetGraphicResource(
+            Registry.Fonts,
+            _fonts,
+            id,
+            asset => new(SdlRenderer, asset)
+        );
     }
 
     public GraphicsFont GetFontOrDefault (int id) {
         return GetFont(id) ?? GetFont(0) ?? throw new("No font available.");
     }
 
-    public GraphicsTextboxTexture? GetTextbox (int id) {
-        if (_textboxes.TryGetValue(id, out var textbox)) {
-            return textbox;
-        }
-
-        if (Registry.TextboxSprites.TryGetElement(id, out var tbAsset) == false) {
-            return null;
-        }
-
-        _textboxes[id] = new(SdlRenderer, tbAsset);
-        return _textboxes[id];
+    public GraphicsTextboxFrame? GetTextbox (int id) {
+        return GetGraphicResource(
+            Registry.TextboxSprites,
+            _textboxes,
+            id,
+            asset => new(SdlRenderer, asset)
+        );
     }
 
-    public GraphicsTextboxTexture GetTextboxOrDefault (int id) {
+    public GraphicsTextboxFrame GetTextboxOrDefault (int id) {
         return GetTextbox(id) ?? GetTextbox(0) ?? throw new("No textbox available.");
+    }
+
+    public GraphicsTexture? GetUiTex (int id) {
+        return GetGraphicResource(
+            Registry.UiSprites,
+            _uiTexes,
+            id,
+            asset => new(SdlRenderer, asset.Path)
+        );
+    }
+
+    private static TGraphics? GetGraphicResource<TGraphics, TAsset> (
+        Collection<TAsset> assetCol,
+        Dictionary<int, TGraphics> dictionary,
+        int id,
+        Func<TAsset, TGraphics> buildRes
+    ) where TAsset : INameable {
+        if (dictionary.TryGetValue(id, out var el)) {
+            return el;
+        }
+
+        if (assetCol.TryGetElement(id, out var asset) == false) {
+            return default;
+        }
+
+        dictionary[id] = buildRes(asset);
+        return dictionary[id];
     }
     #endregion
 }

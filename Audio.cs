@@ -11,7 +11,7 @@ public static class Audio {
         if (_sounds.TryGetValue(name, out var chunk) == false) return;
 
         unsafe {
-            SDL3_mixer.Mix_PlayChannel(-1, (Mix_Chunk*)chunk, 0);
+            SDL3_mixer.Mix_PlayChannel(0, (Mix_Chunk*)chunk, 0);
         }
     }
 

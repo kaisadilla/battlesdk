@@ -3,7 +3,7 @@ using SDL;
 using System.Runtime.CompilerServices;
 
 namespace battlesdk.graphics;
-public abstract class GraphicsTexture {
+public class GraphicsTexture {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     /// <summary>
@@ -24,7 +24,7 @@ public abstract class GraphicsTexture {
     /// </summary>
     protected int _height;
 
-    protected unsafe GraphicsTexture (SDL_Renderer* renderer, string path) {
+    public unsafe GraphicsTexture (SDL_Renderer* renderer, string path) {
         _renderer = renderer;
 
         var surface = SDL3_image.IMG_Load(path);
@@ -46,6 +46,17 @@ public abstract class GraphicsTexture {
     /// </summary>
     public virtual unsafe void Destroy () {
         SDL3.SDL_DestroyTexture(_texture);
+    }
+
+    public unsafe void Draw (Vec2 position) {
+        SDL_FRect dst = new() {
+            x = (int)position.X,
+            y = (int)position.Y,
+            w = _width,
+            h = _height,
+        };
+
+        SDL3.SDL_RenderTexture(_renderer, _texture, null, &dst);
     }
 
     /// <summary>
