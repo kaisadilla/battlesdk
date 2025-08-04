@@ -14,7 +14,7 @@ public class Player : Character, IInputListener {
     public bool BlockOtherInput => true;
 
     public Player (IVec2 position) : base(position, "dawn") {
-        InputManager.Subscribe(this);
+        InputManager.Push(this);
     }
 
     public override void Update () {

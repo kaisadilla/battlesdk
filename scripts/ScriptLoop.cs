@@ -56,6 +56,23 @@ public class ScriptEndScriptEvent : ScriptEvent {
     }
 }
 
+public class WaitScriptEvent : ScriptEvent {
+    private float _seconds;
+    private float _elapsed = 0;
+
+    public WaitScriptEvent (int ms) {
+        _seconds = ms / 1000f;
+    }
+
+    public override void Update () {
+        _elapsed += Time.DeltaTime;
+
+        if (_elapsed >= _seconds) {
+            Complete = true;
+        }
+    }
+}
+
 public class MoveScriptEvent : ScriptEvent {
     private Character _character;
     private CharacterMove _move;

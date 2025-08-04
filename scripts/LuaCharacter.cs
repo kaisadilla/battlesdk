@@ -21,6 +21,11 @@ public class LuaCharacter {
         tbl["move_down"] = (Action<DynValue>)MoveDown;
         tbl["move_left"] = (Action<DynValue>)MoveLeft;
         tbl["move_right"] = (Action<DynValue>)MoveRight;
+        tbl["look_up"] = (Action)LookUp;
+        tbl["look_down"] = (Action)LookDown;
+        tbl["look_left"] = (Action)LookLeft;
+        tbl["look_right"] = (Action)LookRight;
+        tbl["look_towards_player"] = (Action)LookTowardsPlayer;
         tbl["jump"] = (Action<DynValue>)Jump;
         tbl["ignore_characters"] = (Action<DynValue>)IgnoreCharacters;
 
@@ -56,6 +61,46 @@ public class LuaCharacter {
 
         ScriptLoop.Enqueue(new MoveScriptEvent(
             _character, new(MoveKind.StepRight, _ignoreCharacters), steps
+        ));
+    }
+
+    private void LookUp () {
+        ScriptLoop.Enqueue(new MoveScriptEvent(
+            _character, new(MoveKind.LookUp, _ignoreCharacters), 1
+        ));
+    }
+
+    private void LookDown () {
+        ScriptLoop.Enqueue(new MoveScriptEvent(
+            _character, new(MoveKind.LookDown, _ignoreCharacters), 1
+        ));
+    }
+
+    private void LookLeft () {
+        ScriptLoop.Enqueue(new MoveScriptEvent(
+            _character, new(MoveKind.LookLeft, _ignoreCharacters), 1
+        ));
+    }
+
+    private void LookRight () {
+        ScriptLoop.Enqueue(new MoveScriptEvent(
+            _character, new(MoveKind.LookRight, _ignoreCharacters), 1
+        ));
+    }
+
+    private void LookTowardsPlayer () {
+        var delta = G.World.Player.Position - _character.Position;
+
+        Direction dir;
+        if (Math.Abs(delta.X) > Math.Abs(delta.Y)) {
+            dir = delta.X > 0 ? Direction.Right : Direction.Left;
+        }
+        else {
+            dir = delta.Y > 0 ? Direction.Down : Direction.Up;
+        }
+
+        ScriptLoop.Enqueue(new MoveScriptEvent(
+            _character, new((MoveKind)(dir + 4), _ignoreCharacters), 1
         ));
     }
 

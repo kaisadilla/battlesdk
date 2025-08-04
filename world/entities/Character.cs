@@ -99,7 +99,6 @@ public abstract class Character : Entity {
 
         SetDirection(from);
 
-        Audio.PlaySound("beep_short");
         _interaction.Interact();
         //var tb = Hud.ShowTextbox(
         //    "When I was a kid, all of this was black empty tiles. " +

@@ -37,12 +37,18 @@ public class CharacterInteraction {
 
     public void Interact () {
         if (_scriptFunc is null) return;
+        if (IsInteracting == true) return;
+
+        Audio.PlaySound("beep_short");
+        InputManager.PushBlock();
+
         IsInteracting = true;
 
         _lua.Call(_scriptFunc);
 
         ScriptLoop.EnqueueScriptEnd(() => {
             IsInteracting = false;
+            InputManager.Pop();
         });
     }
 }

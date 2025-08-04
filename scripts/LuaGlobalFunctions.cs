@@ -13,6 +13,16 @@ public static class LuaGlobalFunctions {
             }
             Message(arg.String);
         });
+        script.Globals["wait"] = (Action<DynValue>)(arg => {
+            if (arg.Type != DataType.Number) {
+                throw new ScriptRuntimeException($"[{asset.Name}] Invalid type.");
+            }
+            Wait((int)arg.Number);
+        });
+    }
+
+    public static void Wait (int ms) {
+        ScriptLoop.Enqueue(new WaitScriptEvent(ms));
     }
 
     public static void Message (string text) {

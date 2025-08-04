@@ -102,7 +102,7 @@ public class Textbox : IInputListener {
 
         _animState = AnimationState.TypingCharacters;
 
-        InputManager.Subscribe(this);
+        InputManager.Push(this);
     }
 
     public void Update () {
@@ -125,7 +125,7 @@ public class Textbox : IInputListener {
             Audio.PlaySound("beep_short");
 
             if ((int)_currentFirstLine >= (_txtRenderer.LineCount - _visibleLines)) {
-                InputManager.Unsubscribe();
+                InputManager.Pop();
                 OnComplete?.Invoke(this, EventArgs.Empty);
             }
             else {
