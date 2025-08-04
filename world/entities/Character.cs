@@ -52,11 +52,15 @@ public abstract class Character : Entity {
         }
     }
 
-    public Character (IVec2 worldPos, string sprite) : base(worldPos, sprite) {
+    public Character (int mapId, int entityId, IVec2 worldPos, string sprite)
+        : base(mapId, entityId, worldPos, sprite)
+    {
 
     }
 
-    public Character (GameMap map, CharacterData data) : base(map, data) {
+    public Character (int mapId, int entityId, GameMap map, CharacterData data)
+        : base(mapId, entityId, map, data)
+    {
         if (data.Movement is not null) {
             AutonomousMovement = CharacterMovement.New(this, data.Movement);
         }

@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿using battlesdk.graphics;
+using NLog;
 using SDL;
 
 namespace battlesdk;
@@ -32,10 +33,13 @@ public static class Debug {
     /// </summary>
     private static readonly Dictionary<string, nint> _texes = [];
 
+    /// <summary>
+    /// The game's renderer.
+    /// </summary>
+    private static Renderer? _renderer = null;
+
     public static bool PrintToScreen { get; set; } = false;
     public static FpsCounter? FpsCounter { get; private set; } = null;
-
-    public static int InfoRenderedMaps { get; set; } = 0;
 
     public static unsafe void Init () {
         _font = SDL3_ttf.TTF_OpenFont("res/fonts/cascadia_mono.ttf", FONT_SIZE);
@@ -50,6 +54,10 @@ public static class Debug {
 
         FpsCounter = new();
         FpsCounter.SetUpdateTime(0.1f);
+    }
+
+    public static void Subscribe (Renderer renderer) {
+        _renderer = renderer;
     }
 
     public static void OnFrameStart () {
@@ -91,12 +99,33 @@ public static class Debug {
             leftMargin,
             topMargin + (GAP * 2)
         );
+        if (G.World.TryGetMapAt(G.World.Player.Position, out var map)) {
+                DrawText(
+                renderer,
+                "map",
+                $"Map: {map.Data.Name}",
+                leftMargin,
+                topMargin + (GAP * 3)
+            );
+        }
+        string loadedMapsStr = $"Loaded maps: {G.World.Maps.Count}";
+        if (_renderer is not null) {
+            loadedMapsStr += $" (rendered: {_renderer.RenderedMapCount})";
+        }
         DrawText(
             renderer,
-            "rendered_maps",
-            $"Rendered maps: {InfoRenderedMaps}",
+            "loaded_maps",
+            $"Loaded maps: {G.World.Maps.Count}",
             leftMargin,
-            topMargin + (GAP * 3)
+            topMargin + (GAP * 4)
+        );
+        string loadedNpcsStr = $"Loaded NPCs: {G.World.Npcs.Count()}";
+        DrawText(
+            renderer,
+            "loaded_npcs",
+            loadedNpcsStr,
+            leftMargin,
+            topMargin + (GAP * 5)
         );
     }
 

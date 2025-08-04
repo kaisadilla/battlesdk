@@ -54,7 +54,30 @@ public class World {
 
             if (_npcs.ContainsKey(id)) continue;
 
-            _npcs[id] = new(map, npcData);
+            _npcs[id] = new(map.Data.Id, i, map, npcData);
+        }
+    }
+
+    public void CullEntities () {
+        foreach (var kv in _npcs) {
+            bool remove = true;
+            foreach (var map in Maps) {
+                // If the map this npc belongs to is loaded, this npc stays loaded.
+                if (kv.Value.MapId == map.Data.Id) {
+                    remove = false;
+                    break;
+                }
+            }
+            if (remove == false) continue;
+
+            var distX = Math.Abs(kv.Value.Position.X - Player.Position.X);
+            var distY = Math.Abs(kv.Value.Position.Y - Player.Position.Y);
+            if (distX < Constants.LOAD_DISTANCE_X && distY < Constants.LOAD_DISTANCE_Y) {
+                continue;
+            }
+
+            // TODO: Clean up method for the npc.
+            _npcs.Remove(kv.Key);
         }
     }
 
@@ -128,6 +151,9 @@ public class World {
                 AddMap(mapData, worldMap.Position.X, worldMap.Position.Y);
             }
         }
+
+        CullEntities();
+        LoadNearbyEntities();
     }
 
     private void AddMap (MapAsset mapData, int x, int y) {

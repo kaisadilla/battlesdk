@@ -10,6 +10,15 @@ public abstract class Entity {
     protected EntityInteraction? _interaction = null;
 
     /// <summary>
+    /// The id of the map asset that provided this entity.
+    /// </summary>
+    public int MapId { get; protected set; }
+    /// <summary>
+    /// The id of the entity data that provided this entity.
+    /// </summary>
+    public int EntityId { get; protected set; }
+
+    /// <summary>
     /// This entity's position in the world.
     /// </summary>
     public IVec2 Position { get; private set; }
@@ -42,7 +51,9 @@ public abstract class Entity {
     /// </summary>
     public virtual Vec2 Subposition => Position;
 
-    public Entity (IVec2 worldPos, string sprite) {
+    public Entity (int mapId, int entityId, IVec2 worldPos, string sprite) {
+        MapId = mapId;
+        EntityId = entityId;
         Position = worldPos;
         if (Registry.CharSprites.TryGetId(sprite, out var spriteId)) {
             Sprite = spriteId;
@@ -52,7 +63,9 @@ public abstract class Entity {
         }
     }
 
-    public Entity (GameMap map, EntityData data) {
+    public Entity (int mapId, int entityId, GameMap map, EntityData data) {
+        MapId = mapId;
+        EntityId = entityId;
         Position = map.GetWorldPos(data.Position);
         Sprite = data.Sprite;
 

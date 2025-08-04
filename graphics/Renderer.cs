@@ -28,6 +28,11 @@ public unsafe class Renderer {
 
     public unsafe SDL_Renderer* SdlRenderer { get; private set; }
 
+    /// <summary>
+    /// The amount of maps that were rendered in the last frame.
+    /// </summary>
+    public int RenderedMapCount { get; private set; } = 0;
+
     public Renderer (SDL_Window* window, int width, int height, float scale) {
         SdlRenderer = SDL3.SDL_CreateRenderer(window, (string?)null);
         SDL3.SDL_SetDefaultTextureScaleMode(SdlRenderer, SDL_ScaleMode.SDL_SCALEMODE_NEAREST);
@@ -52,6 +57,7 @@ public unsafe class Renderer {
         }
 
         Hud.Init(this);
+        Debug.Subscribe(this);
     }
 
     public void EnableScale () {
@@ -86,7 +92,7 @@ public unsafe class Renderer {
                 visibleMaps.Add(map);
             }
         }
-        Debug.InfoRenderedMaps = visibleMaps.Count;
+        RenderedMapCount = visibleMaps.Count;
 
         for (int i = 0; i < 8; i++) {
             foreach (var map in visibleMaps) {
