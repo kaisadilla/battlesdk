@@ -1,4 +1,5 @@
-﻿using battlesdk.world.entities;
+﻿using battlesdk.data;
+using battlesdk.world.entities;
 
 namespace battlesdk.world;
 public abstract class CharacterMovement {
@@ -26,6 +27,20 @@ public abstract class CharacterMovement {
         _character = character;
     }
 
+    public static CharacterMovement New (
+        Character character, CharacterMovementData data
+    ) {
+        return data switch {
+            RouteCharacterMovementData r
+                => new RouteCharacterMovement(character, r),
+            RandomCharacterMovementData r
+                => new RandomCharacterMovement(character, r),
+            LookAroundCharacterMovementData r
+                => new LookAroundCharacterMovement(character, r),
+            _ => throw new NotImplementedException()
+        };
+    }
+
     public virtual void Update () { }
 }
 
@@ -40,6 +55,13 @@ public class RouteCharacterMovement : CharacterMovement {
 
     public RouteCharacterMovement (Character character, List<MoveKind> route) : base(character) {
         Route = route;
+    }
+
+    public RouteCharacterMovement (
+        Character character, RouteCharacterMovementData data
+    ) : base(character)
+    {
+        Route = [.. data.Route];
     }
 
     public override void Update () {
@@ -74,6 +96,13 @@ public class RandomCharacterMovement : CharacterMovement {
         _origin = character.Position;
     }
 
+    public RandomCharacterMovement (
+        Character character, RandomCharacterMovementData data
+    ) : base(character)
+    {
+        _origin = character.Position;
+    }
+
     public override void Update () {
         if (_moveCd == float.MinValue) {
             _moveCd = GetCd();
@@ -104,6 +133,47 @@ public class RandomCharacterMovement : CharacterMovement {
                 _character.Move(dir, IgnoreCharacters);
             }
 
+        }
+    }
+
+    private float GetCd () {
+        return Gap + (float)((Random.Shared.NextDouble() - 0.5) * 2 * Variation);
+    }
+}
+
+public class LookAroundCharacterMovement : CharacterMovement {
+    /// <summary>
+    /// The gap, in seconds, between each time the character moves.
+    /// </summary>
+    public float Gap { get; init; } = 3f;
+    /// <summary>
+    /// The variation, in seconds, of the gap between moves.
+    /// </summary>
+    public float Variation { get; init; } = 2f;
+
+    private float _moveCd = float.MinValue;
+
+    public LookAroundCharacterMovement (Character character) : base(character) {}
+
+    public LookAroundCharacterMovement (
+        Character character, LookAroundCharacterMovementData data
+    ) : base(character)
+    {}
+
+    public override void Update () {
+        if (_moveCd == float.MinValue) {
+            _moveCd = GetCd();
+        }
+
+        if (_moveCd > 0f) {
+            _moveCd -= Time.DeltaTime;
+        }
+
+        if (_moveCd <= 0f) {
+            _moveCd = GetCd();
+
+            var dir = (Direction)(Random.Shared.Next((int)Direction.None));
+            _character.SetDirection(dir);
         }
     }
 

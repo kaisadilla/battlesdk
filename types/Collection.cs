@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 
 namespace battlesdk.types;
-public class Collection<T> : IEnumerable<T> where T : INameable {
+public class Collection<T> : IEnumerable<T> where T : IIdentifiable {
     private List<T> _elements = [];
     private Dictionary<string, int> _ids = [];
 
@@ -79,7 +79,11 @@ public class Collection<T> : IEnumerable<T> where T : INameable {
     }
 }
 
-public interface INameable {
+/// <summary>
+/// Represents an object that can be identified either by its name, or by its
+/// id inside a collection.
+/// </summary>
+public interface IIdentifiable {
     /// <summary>
     /// The name of this resource.
     /// </summary>

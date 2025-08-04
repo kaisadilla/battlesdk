@@ -1,6 +1,14 @@
-﻿namespace battlesdk.world.entities;
+﻿using battlesdk.data;
+
+namespace battlesdk.world.entities;
 
 public abstract class Entity {
+    /// <summary>
+    /// The behavior called when interacting with this entity via the primary
+    /// action. If this entity has no interaction, this value is null.
+    /// </summary>
+    protected EntityInteraction? _interaction = null;
+
     /// <summary>
     /// This entity's position in the world.
     /// </summary>
@@ -44,6 +52,15 @@ public abstract class Entity {
         }
     }
 
+    public Entity (GameMap map, EntityData data) {
+        Position = map.GetWorldPos(data.Position);
+        Sprite = data.Sprite;
+
+        if (data.Interaction is not null) {
+            _interaction = EntityInteraction.New(this, data.Interaction);
+        }
+    }
+
     public virtual void FrameStart () {
 
     }
@@ -58,7 +75,9 @@ public abstract class Entity {
     /// line of text if configured like so.
     /// </summary>
     public virtual void Interact (Direction from) {
+        if (_interaction is null) return;
 
+        _interaction?.Interact(from);
     }
 
     /// <summary>

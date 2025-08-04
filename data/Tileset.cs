@@ -1,7 +1,7 @@
 ﻿using TiledCS;
 
 namespace battlesdk.data;
-public class Tileset : INameable {
+public class Tileset : IIdentifiable {
     private const string CLASS_FLAGS = "TileFlags";
     private const string CLASS_Z_WARPS = "TileZWarps";
 

@@ -4,8 +4,6 @@ namespace battlesdk.world.entities;
 public class Player : Character, IInputListener {
     private const float MOVE_INPUT_DELAY = 0.1f;
 
-    private PlayerSoundManager _sounds = new();
-
     private float _leftKeyStart = float.MinValue;
     private float _rightKeyStart = float.MinValue;
     private float _upKeyStart = float.MinValue;
@@ -62,10 +60,10 @@ public class Player : Character, IInputListener {
             }
 
             if (Collided) {
-                _sounds.PlayCollision();
+                Audio.PlayCollision();
             }
             if (IsJumping) {
-                _sounds.PlayJump();
+                Audio.PlayJump();
             }
         }
 

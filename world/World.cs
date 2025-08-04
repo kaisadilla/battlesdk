@@ -11,10 +11,16 @@ public class World {
     private IVec2 _focus = IVec2.Zero;
 
     /// <summary>
+    /// The NPCs in the world, indexed by a unique id that encodes the map
+    /// they belong to as well as their individual id.
+    /// </summary>
+    private Dictionary<string, Npc> _npcs { get; } = [];
+
+    /// <summary>
     /// The world the player is currently in, if any. This value will be null
     /// when the player is in a map that doesn't belong to any world.
     /// </summary>
-    public WorldData? CurrentWorld { get; private set; } = null;
+    public WorldAsset? CurrentWorld { get; private set; } = null;
     /// <summary>
     /// A list that contains all the maps that are currently loaded in the world.
     /// This includes the map the player is currently in, as well as any map
@@ -26,28 +32,30 @@ public class World {
     /// </summary>
     public Player Player { get; }
 
-    public List<Npc> Npcs { get; } = [];
+    /// <summary>
+    /// Contains all the NPCs that are currently loaded in the world.
+    /// </summary>
+    public IEnumerable<Npc> Npcs => _npcs.Values;
 
     public World () {
         Player = new(new(0, 0));
-        Npcs.Add(new(new(8, 2), "winona"));
-        Npcs.Add(new(new(9, 6), "piers"));
+    }
 
-        Npcs[0].SetAutonomousMovement(new RouteCharacterMovement(Npcs[0], [
-            MoveKind.StepDown,
-            MoveKind.StepRight,
-            MoveKind.StepRight,
-            MoveKind.StepDown,
-            MoveKind.StepLeft,
-            MoveKind.StepLeft,
-            MoveKind.StepUp,
-            MoveKind.StepUp,
-            MoveKind.StepUp,
-        ]));
+    public void LoadNearbyEntities () {
+        foreach (var gm in Maps) {
+            LoadMapEntities(gm);
+        }
+    }
 
-        Npcs[1].SetAutonomousMovement(new RandomCharacterMovement(Npcs[1]) {
-            IgnoreCharacters = false,
-        });
+    private void LoadMapEntities (GameMap map) {
+        for (int i = 0; i < map.Data.Npcs.Count; i++) {
+            var npcData = map.Data.Npcs[i];
+            string id = $"{map.Data.Id}_{i}";
+
+            if (_npcs.ContainsKey(id)) continue;
+
+            _npcs[id] = new(map, npcData);
+        }
     }
 
     public void FrameStart () {
@@ -84,7 +92,7 @@ public class World {
     /// Loads the world given, placing the player at the position given.
     /// </summary>
     /// <param name="world"></param>
-    public void TransferTo (WorldData world, IVec2 position) {
+    public void TransferTo (WorldAsset world, IVec2 position) {
         _logger.Info($"Player transferred to world '{world.Name}' at pos {position}.");
 
         CurrentWorld = world;
@@ -92,7 +100,7 @@ public class World {
         SetFocus(Player.Position);
     }
 
-    public void TransferTo (MapData map, IVec2 position) {
+    public void TransferTo (MapAsset map, IVec2 position) {
         throw new NotImplementedException();
     }
 
@@ -122,7 +130,7 @@ public class World {
         }
     }
 
-    private void AddMap (MapData mapData, int x, int y) {
+    private void AddMap (MapAsset mapData, int x, int y) {
         foreach (var m in Maps) {
             if (m.Data.Id == mapData.Id) return;
         }

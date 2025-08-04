@@ -9,9 +9,9 @@ namespace battlesdk.graphics;
 public unsafe class Renderer {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    private Dictionary<int, TilesetTexture> _tilesetTexes = [];
-    private Dictionary<int, CharacterTexture> _charTexes = [];
-    private Dictionary<int, GraphicsTexture> _miscTexes = [];
+    private readonly Dictionary<int, TilesetTexture> _tilesetTexes = [];
+    private readonly Dictionary<int, CharacterTexture> _charTexes = [];
+    private readonly Dictionary<int, GraphicsTexture> _miscTexes = [];
 
     private int _width;
     private int _height;
@@ -348,7 +348,7 @@ public unsafe class Renderer {
         Dictionary<int, TGraphics> dictionary,
         int id,
         Func<TAsset, TGraphics> buildRes
-    ) where TAsset : INameable {
+    ) where TAsset : IIdentifiable {
         if (dictionary.TryGetValue(id, out var el)) {
             return el;
         }

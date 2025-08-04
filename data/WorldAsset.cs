@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace battlesdk.data;
 
-public class WorldData : INameable {
+public class WorldAsset : IIdentifiable {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public string Name { get; private init; }
@@ -15,7 +15,7 @@ public class WorldData : INameable {
     /// </summary>
     public List<WorldMapData> Maps { get; } = [];
 
-    public WorldData (string name, string path) {
+    public WorldAsset (string name, string path) {
         Name = name;
         Path = path;
 

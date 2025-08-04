@@ -3,7 +3,7 @@
 namespace battlesdk.world;
 
 public class GameMap {
-    public MapData Data { get; }
+    public MapAsset Data { get; }
 
     public int Width { get; }
     public int Height { get; }
@@ -16,7 +16,7 @@ public class GameMap {
     public List<TileLayer> Terrain { get; } = [];
     public ZWarpMap ZWarps { get; }
 
-    public GameMap (MapData map, int x, int y) {
+    public GameMap (MapAsset map, int x, int y) {
         Data = map;
 
         Width = map.Width;
@@ -45,6 +45,14 @@ public class GameMap {
 
     public int GetLocalY (int worldY) {
         return worldY - WorldPos.Top;
+    }
+
+    /// <summary>
+    /// Given a local position, returns its position in the world.
+    /// </summary>
+    /// <param name="localPos">A position relative to this map.</param>
+    public IVec2 GetWorldPos (IVec2 localPos) {
+        return localPos + new IVec2(WorldPos.Left, WorldPos.Top);
     }
 
     /// <summary>

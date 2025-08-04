@@ -22,7 +22,7 @@ G.LoadGame();
 Debug.Init();
 Time.Init();
 
-Audio.RegisterSounds();
+Audio.Init();
 
 var win = new Window(
     Constants.VIEWPORT_WIDTH,

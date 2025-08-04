@@ -9,6 +9,7 @@ public static class G {
 
     public static void LoadGame () {
         World.TransferTo(Registry.Worlds[0], new(6, -3));
+        World.LoadNearbyEntities();
         _logger.Info("Loaded game.");
     }
 }

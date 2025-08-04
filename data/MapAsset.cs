@@ -1,4 +1,6 @@
-﻿using NLog;
+﻿using battlesdk.data.definitions;
+using battlesdk.json;
+using NLog;
 using TiledCS;
 
 namespace battlesdk.data;
@@ -6,7 +8,7 @@ namespace battlesdk.data;
 /// <summary>
 /// Contains the data used to build a given map.
 /// </summary>
-public class MapData : INameable {
+public class MapAsset : IIdentifiable {
     private const string GROUP_NAME_METADATA = "Metadata";
     private const string LAYER_NAME_Z_WARPS = "ZWarps";
     private const string PROP_NAME_BACKGROUND_MUSIC = "BackgroundMusic";
@@ -34,20 +36,26 @@ public class MapData : INameable {
     /// </summary>
     public ZWarpMap ZWarps { get; private set; } = new(0, 0);
 
+    /// <summary>
+    /// The id of this map's background music.
+    /// </summary>
     public int BackgroundMusic { get; private set; } = -1;
 
-    public MapData (string name, string path) {
+    public List<NpcData> Npcs { get; } = [];
+
+    public MapAsset (string name, string path) {
         Name = name;
         Path = path;
 
-        Init();
+        ReadMapData();
+        ReadEntityData();
     }
 
     public void SetId (int id) {
         Id = id;
     }
 
-    protected void Init () {
+    protected void ReadMapData () {
         var map = new TiledMap(Path);
 
         Width = map.Width;
@@ -214,6 +222,34 @@ public class MapData : INameable {
 
             throw new Exception(
                 $"Invalid tile at layer '{layerName}'[{x}, {y}]."
+            );
+        }
+    }
+
+    /// <summary>
+    /// Reads the entities file associated with this map, if it exists, and
+    /// populates the entity lists.
+    /// </summary>
+    protected void ReadEntityData () {
+        string path = System.IO.Path.ChangeExtension(Path, ".entities.json");
+        if (File.Exists(path) == false) return;
+
+        try {
+            var json = File.ReadAllText(path);
+            var defs = Json.Parse<List<EntityDefinition>>(json);
+            if (defs is null) return;
+
+            foreach (var def in defs) {
+                if (def.Type == EntityType.Npc) {
+                    Npcs.Add(new NpcData(def));
+                }
+            }
+        }
+        catch (Exception ex) {
+            _logger.Error(
+                ex,
+                $"Failed to read entities file for {Path}. The map will work, " +
+                "but it won't have any entities."
             );
         }
     }

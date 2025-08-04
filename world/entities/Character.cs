@@ -1,8 +1,8 @@
-﻿namespace battlesdk.world.entities;
+﻿using battlesdk.data;
+
+namespace battlesdk.world.entities;
 
 public abstract class Character : Entity {
-    private CharacterInteraction _interaction;
-
     public CharacterMovement? AutonomousMovement { get; private set; } = null;
 
     /// <summary>
@@ -53,8 +53,13 @@ public abstract class Character : Entity {
     }
 
     public Character (IVec2 worldPos, string sprite) : base(worldPos, sprite) {
-        Registry.Scripts.TryGetElementByName("characters/test-map-1/winona", out var scr);
-        _interaction = new(this, scr!);
+
+    }
+
+    public Character (GameMap map, CharacterData data) : base(map, data) {
+        if (data.Movement is not null) {
+            AutonomousMovement = CharacterMovement.New(this, data.Movement);
+        }
     }
 
     public override void FrameStart () {
@@ -87,7 +92,7 @@ public abstract class Character : Entity {
             IsJumpingInPlace = false;
         }
 
-        if (_interaction.IsInteracting == false) {
+        if (_interaction?.IsInteracting != true) {
             AutonomousMovement?.Update();
         }
     }
@@ -95,19 +100,7 @@ public abstract class Character : Entity {
     public override void Interact (Direction from) {
         if (IsMoving && MoveProgress < 0.8f) return;
 
-        //_isInteracting = true;
-
-        SetDirection(from);
-
-        _interaction.Interact();
-        //var tb = Hud.ShowTextbox(
-        //    "When I was a kid, all of this was black empty tiles. " +
-        //    "Now there's trees and stuff. There's also textboxes, " +
-        //    "which we need to fill right now with as many words as we can. " +
-        //    "This text is even longer, as we now have to check transitions across " +
-        //    "several lines."
-        //);
-        //tb.OnComplete += (s, evt) => _isInteracting = false;
+        base.Interact(from);
     }
 
     /// <summary>
@@ -204,5 +197,6 @@ public abstract class Character : Entity {
         IsJumpingInPlace = true;
         MoveProgress = 0;
         PreviousPosition = Position;
+        Audio.PlayJump();
     }
 }

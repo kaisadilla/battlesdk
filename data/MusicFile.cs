@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace battlesdk.data;
 
-public class MusicFile : INameable {
+public class MusicFile : IIdentifiable {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public string Name { get; private init; }

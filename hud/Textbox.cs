@@ -122,7 +122,7 @@ public class Textbox : IInputListener {
         if (_animState != AnimationState.None) return;
 
         if (Controls.GetKeyDown(ActionKey.Primary)) {
-            Audio.PlaySound("beep_short");
+            Audio.PlayBeepShort();
 
             if ((int)_currentFirstLine >= (_txtRenderer.LineCount - _visibleLines)) {
                 InputManager.Pop();

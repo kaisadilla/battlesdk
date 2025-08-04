@@ -26,8 +26,8 @@ public static class Registry {
 
     public static Collection<FontAsset> Fonts { get; } = new();
     public static Collection<Tileset> Tilesets { get; } = new();
-    public static Collection<MapData> Maps { get; } = new();
-    public static Collection<WorldData> Worlds { get; } = new();
+    public static Collection<MapAsset> Maps { get; } = new();
+    public static Collection<WorldAsset> Worlds { get; } = new();
     public static Collection<AssetFile> CharSprites { get; } = new();
     public static Collection<AssetFile> MiscSprites { get; } = new();
     public static Collection<TextBoxAsset> TextboxSprites { get; } = new();
@@ -124,7 +124,7 @@ public static class Registry {
             FOLDER_MAPS,
             [".tmx"],
             Maps,
-            (name, path) => new MapData(name, path)
+            (name, path) => new MapAsset(name, path)
         );
     }
 
@@ -134,7 +134,7 @@ public static class Registry {
             FOLDER_WORLDS,
             [".world"],
             Worlds,
-            (name, path) => new WorldData(name, path)
+            (name, path) => new WorldAsset(name, path)
         );
     }
 
@@ -228,7 +228,7 @@ public static class Registry {
         IEnumerable<string>? extensions,
         Collection<T> collection,
         BuildAsset<T> getter
-    ) where T : INameable {
+    ) where T : IIdentifiable {
         foreach (string f in ScanDir(folder, extensions)) {
             try {
                 var name = GetAssetName(folder, f);
