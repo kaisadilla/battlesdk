@@ -8,5 +8,6 @@ public enum EntityInteractionType {
 public class EntityInteractionDefinition {
     public required EntityInteractionType Type { get; init; }
     public string? Script { get; init; } = null;
-    public string? Text { get; init; } = null;
+    public string? TextKey { get; init; } = null;
+    public List<string>? TextKeys { get; init; } = null;
 }

@@ -26,16 +26,32 @@ public abstract class EntityInteraction {
     public static EntityInteraction New (Entity entity, EntityInteractionData data) {
         return data switch {
             ScriptEntityInteractionData d => new ScriptEntityInteraction(entity, d),
+            MessageEntityInteractionData d => new MessageEntityInteraction(entity, d),
             _ => throw new NotImplementedException(),
         };
     }
 
     public virtual void Interact (Direction from) {
+        InputManager.PushBlock();
         Audio.PlayBeepShort();
 
         if (LookToSource) {
             _target.SetDirection(from);
         }
+    }
+
+    /// <summary>
+    /// Enqueues the end of this interaction in the script loop. This callback
+    /// will set the <see cref="IsInteracting"/> flag to false and pop an
+    /// input listener, which means it should only be used if the base
+    /// <see cref="Interact(Direction)"/> method has been called, or an input
+    /// listener has been pushed manually.
+    /// </summary>
+    protected void EnqueueEnd () {
+        ScriptLoop.EnqueueScriptEnd(() => {
+            IsInteracting = false;
+            InputManager.Pop();
+        });
     }
 }
 
@@ -96,13 +112,30 @@ public class ScriptEntityInteraction : EntityInteraction {
 
         IsInteracting = true;
 
-        InputManager.PushBlock();
-
         _lua.Call(_scriptFunc);
+        EnqueueEnd();
+    }
+}
 
-        ScriptLoop.EnqueueScriptEnd(() => {
-            IsInteracting = false;
-            InputManager.Pop();
-        });
+public class MessageEntityInteraction : EntityInteraction {
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
+    private List<string> _textKeys;
+
+    public MessageEntityInteraction (
+        Entity entity, MessageEntityInteractionData data
+    ) : base(entity) {
+        _textKeys = [.. data.TextKeys];
+    }
+
+    public override void Interact (Direction from) {
+        if (IsInteracting == true) return;
+
+        base.Interact(from);
+
+        foreach (var k in _textKeys) {
+            ScriptLoop.Enqueue(new MessageScriptEvent(Localization.Text(k)));
+        }
+        EnqueueEnd();
     }
 }

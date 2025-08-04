@@ -30,7 +30,7 @@ public abstract class EntityInteractionData {
     public static EntityInteractionData New (EntityInteractionDefinition def) {
         return def.Type switch {
             EntityInteractionType.Script => new ScriptEntityInteractionData(def),
-            EntityInteractionType.Message => throw new NotImplementedException(),
+            EntityInteractionType.Message => new MessageEntityInteractionData(def),
             _ => throw new InvalidDataException(
                 $"Unknown entity interaction type: '{def.Type}'"
             ),
@@ -46,7 +46,7 @@ public class ScriptEntityInteractionData : EntityInteractionData {
         }
         if (string.IsNullOrEmpty(def.Script)) {
             throw new InvalidDataException(
-                "Script interaction is missing field 'script'."
+                "Missing field: 'script'."
             );
         }
         if (Registry.Scripts.TryGetId(def.Script, out int scriptId) == false) {
@@ -56,5 +56,28 @@ public class ScriptEntityInteractionData : EntityInteractionData {
         }
 
         ScriptId = scriptId;
+    }
+}
+
+public class MessageEntityInteractionData : EntityInteractionData {
+    public List<string> TextKeys { get; }
+
+    public MessageEntityInteractionData (EntityInteractionDefinition def) {
+        if (def.Type != EntityInteractionType.Message) {
+            throw new ArgumentException("Invalid definition type.");
+        }
+
+        if (def.TextKeys is not null && def.TextKeys.Count > 0) {
+            TextKeys = [.. def.TextKeys];
+            return;
+        }
+
+        if (string.IsNullOrEmpty(def.TextKey)) {
+            throw new InvalidDataException(
+                "Missing field: 'text_key' or 'text_keys'."
+            );
+        }
+
+        TextKeys = [def.TextKey];
     }
 }
