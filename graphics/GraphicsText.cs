@@ -194,6 +194,9 @@ file class GlyphGenerator { // TODO: Texture aliases for fonts, rather than indi
         }
 
         if (_wordBuffer.Count > 0) {
+            if (_lineWidth + _wordWidth > _width) {
+                StartNewLine();
+            }
             CommitWord();
         }
 

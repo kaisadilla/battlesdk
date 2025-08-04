@@ -15,6 +15,7 @@ public static class Registry {
     public const string FOLDER_GRAPHICS_TILESETS = "graphics/tilesets";
     public const string FOLDER_GRAPHICS_UI = "graphics/ui";
     public const string FOLDER_FONTS = "fonts";
+    public const string FOLDER_LOCALIZATION = "localization";
     public const string FOLDER_MAPS = "maps";
     public const string FOLDER_MUSIC = "music";
     public const string FOLDER_WORLDS = "worlds";
@@ -24,6 +25,7 @@ public static class Registry {
 
     public static string ResFolderPath { get; private set; } = "res";
 
+    public static Collection<LanguageAsset> Languages { get; } = new();
     public static Collection<FontAsset> Fonts { get; } = new();
     public static Collection<Tileset> Tilesets { get; } = new();
     public static Collection<MapAsset> Maps { get; } = new();
@@ -77,6 +79,8 @@ public static class Registry {
         // NOTE: The order in which the resources are loaded is important, as
         // some resources depend on other resources.
 
+        LoadLanguages();
+        Localization.SetLanguage("en_US"); // TODO: Temporary hardcode.
         LoadCharSprites();
         LoadMiscSprites();
         LoadTextboxSprites();
@@ -136,6 +140,43 @@ public static class Registry {
             Worlds,
             (name, path) => new WorldAsset(name, path)
         );
+    }
+
+    private static void LoadLanguages () {
+        string dir = Path.Combine(ResFolderPath, FOLDER_LOCALIZATION);
+        if (Directory.Exists(dir) == false) return;
+
+        var mainFiles = new HashSet<string>();
+
+        // Add files only if they don't contain dots in their name. A file like
+        // "lang.toml" is the main file for the language "lang", while a file
+        // like "important.lang.toml" is actually a secondary file for the
+        // language "important"; instead of a language called "important.lang".
+        foreach (var path in Directory.EnumerateFiles(
+            dir,
+            "*.toml",
+            SearchOption.TopDirectoryOnly
+        )) {
+            var fileName = Path.GetFileName(path);
+            var noExt = Path.GetFileNameWithoutExtension(fileName);
+
+            if (noExt.Contains('.')) continue;
+
+            mainFiles.Add(path);
+        }
+
+        foreach (var f in mainFiles) {
+            try {
+                var name = GetAssetName(FOLDER_LOCALIZATION, f);
+                var el = new LanguageAsset(name, Path.GetFullPath(f));
+                Languages.Register(el);
+
+                LogLoadSuccess(AssetType.Language.ToString(), f);
+            }
+            catch (Exception ex) {
+                LogLoadError(AssetType.Language.ToString(), f, ex);
+            }
+        }
     }
 
     private static void LoadCharSprites () {
@@ -285,6 +326,7 @@ public enum AssetType {
     TilesetSprite,
     UiSprite,
     Font,
+    Language,
     Map,
     Music,
     Script,

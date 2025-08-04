@@ -124,7 +124,7 @@ public class MessageScriptEvent : ScriptEvent {
 
     public override void Update () {
         if (_textboxTask is null) {
-            _textboxTask = Hud.ShowTextbox(_text);
+            _textboxTask = Hud.ShowTextbox(Localization.Text(_text));
         }
 
         if (_textboxTask?.IsCompleted == true) {
