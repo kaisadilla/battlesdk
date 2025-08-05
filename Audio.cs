@@ -47,6 +47,13 @@ public static class Audio {
         _ = SDL3_mixer.Mix_PlayChannel(0, sound, 0);
     }
 
+    public static unsafe void Play (int soundId) {
+        var sound = GetSound(soundId);
+        if (sound is null) return;
+
+        _ = SDL3_mixer.Mix_PlayChannel(0, sound, 0);
+    }
+
     public static unsafe Mix_Chunk* GetSound (int id) {
         if (_sounds.TryGetValue(id, out var chunk)) return chunk.Raw;
 

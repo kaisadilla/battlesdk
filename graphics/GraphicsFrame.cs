@@ -2,8 +2,8 @@
 using SDL;
 
 namespace battlesdk.graphics;
-public class GraphicsTextboxFrame : GraphicsTexture {
-    public TextBoxAsset File { get; private init; }
+public class GraphicsFrame : GraphicsTexture {
+    public FrameAsset File { get; private init; }
 
     // Each of the 9 parts of a textbox: 4 corners, 4 borders and 1 center.
     private SDL_FRect _topLeft;
@@ -16,7 +16,7 @@ public class GraphicsTextboxFrame : GraphicsTexture {
     private SDL_FRect _bottom;
     private SDL_FRect _center;
 
-    public unsafe GraphicsTextboxFrame (SDL_Renderer* renderer, TextBoxAsset file)
+    public unsafe GraphicsFrame (SDL_Renderer* renderer, FrameAsset file)
         : base(renderer, file.Path)
     {
         File = file;

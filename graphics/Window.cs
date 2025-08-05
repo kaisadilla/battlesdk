@@ -6,7 +6,11 @@ public class Window {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     private unsafe SDL_Window* _window;
-    private Renderer _renderer;
+
+    /// <summary>
+    /// The renderer used to draw to this window.
+    /// </summary>
+    public Renderer Renderer { get; private set; }
 
     public bool CloseRequested { get; private set; } = false;
 
@@ -18,7 +22,7 @@ public class Window {
             0
         );
 
-        _renderer = new(_window, width, height, scale);
+        Renderer = new(_window, width, height, scale);
     }
 
     public unsafe void ProcessEvents () {
@@ -35,11 +39,11 @@ public class Window {
     }
 
     public unsafe void Render () {
-        _renderer.Render();
+        Renderer.Render();
     }
 
     public unsafe void Destroy () {
-        _renderer.Destroy();
+        Renderer.Destroy();
         SDL3.SDL_DestroyWindow(_window);
         SDL3.SDL_Quit();
     }

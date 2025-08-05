@@ -1,13 +1,13 @@
 ﻿using SDL;
 
 namespace battlesdk.graphics;
-public unsafe class TilesetTexture {
+public unsafe class GraphicsTileset {
     public SDL_Texture* Texture { get; private init; }
 
     public int Width { get; private init; }
     public int Height { get; private init; }
 
-    public TilesetTexture (SDL_Renderer* renderer, string path) {
+    public GraphicsTileset (SDL_Renderer* renderer, string path) {
         var surface = SDL3_image.IMG_Load(path);
 
         Width = surface->w / Constants.TILE_SIZE;

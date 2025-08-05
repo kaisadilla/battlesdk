@@ -13,7 +13,7 @@ public class Textbox : IInputListener {
     /// <summary>
     /// The texture used to draw this textbox's frame.
     /// </summary>
-    private GraphicsTextboxFrame _frame;
+    private GraphicsFrame _frame;
     /// <summary>
     /// The primary font of the textbox.
     /// </summary>
@@ -70,7 +70,7 @@ public class Textbox : IInputListener {
         IVec2 size,
         string text
     ) {
-        _frame = renderer.GetTextboxOrDefault(textboxId);
+        _frame = renderer.GetFrameOrDefault(textboxId);
         _pos = pos;
         _size = size;
 
@@ -90,10 +90,10 @@ public class Textbox : IInputListener {
         // arbitrary based on personal preference.
         int xOffset = 3;
         IRect viewport = new() {
-            Top = pos.Y + _frame.File.Padding.Top - xOffset,
-            Bottom = (pos.Y + size.Y + xOffset) - _frame.File.Padding.Bottom,
-            Left = pos.X + _frame.File.Padding.Left,
-            Right = (pos.X + size.X) - _frame.File.Padding.Right,
+            Top = pos.Y + _frame.File.TextPadding.Top - xOffset,
+            Bottom = (pos.Y + size.Y + xOffset) - _frame.File.TextPadding.Bottom,
+            Left = pos.X + _frame.File.TextPadding.Left,
+            Right = (pos.X + size.X) - _frame.File.TextPadding.Right,
         };
 
         _txtRenderer = new(renderer, fontId, text, viewport, xOffset);

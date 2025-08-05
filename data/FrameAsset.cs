@@ -3,7 +3,7 @@ using NLog;
 using SDL;
 
 namespace battlesdk.data;
-public class TextBoxAsset : AssetFile {
+public class FrameAsset : AssetFile {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     /// <summary>
@@ -41,11 +41,20 @@ public class TextBoxAsset : AssetFile {
     /// </summary>
     public ResizeMode CenterMode { get; private init; }
     /// <summary>
-    /// The padding applied to the text from each side.
+    /// The padding applied to text inside this frame. Ideally, this padding
+    /// defines the area inside the frame where text rendered will not be drawn
+    /// on top of the frame's borders, and the gap between the border and the
+    /// text will look good.
     /// </summary>
-    public IRect Padding { get; private set; }
+    public IRect TextPadding { get; private set; }
+    /// <summary>
+    /// The padding applied to content inside this frame. Ideally, this padding
+    /// defines the area inside the frame where things will not be drawn on top
+    /// of the frame's borders.
+    /// </summary>
+    public IRect ContentPadding { get; private set; }
 
-    public TextBoxAsset (string name, string path) : base(name, path) {
+    public FrameAsset (string name, string path) : base(name, path) {
         unsafe {
             var surface = SDL3_image.IMG_Load(path);
 
@@ -87,7 +96,8 @@ public class TextBoxAsset : AssetFile {
         YMode = obj.YMode;
         CenterMode = obj.CenterMode;
 
-        Padding = obj.Padding;
+        TextPadding = obj.TextPadding;
+        ContentPadding = obj.ContentPadding;
     }
 }
 
@@ -98,5 +108,6 @@ file class MetadataFile {
     public ResizeMode XMode { get; init; }
     public ResizeMode YMode { get; init; }
     public ResizeMode CenterMode { get; init; }
-    public IRect Padding { get; init; }
+    public IRect TextPadding { get; init; }
+    public IRect ContentPadding { get; init; }
 }

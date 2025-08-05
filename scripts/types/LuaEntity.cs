@@ -35,23 +35,23 @@ public class LuaEntity {
 
         // These functions are only valid when the entity is a character.
         if (_entity is Character) {
-            tbl["move_up"] = (Action<DynValue>)MoveUp;
-            tbl["move_down"] = (Action<DynValue>)MoveDown;
-            tbl["move_left"] = (Action<DynValue>)MoveLeft;
-            tbl["move_right"] = (Action<DynValue>)MoveRight;
-            tbl["look_up"] = (Action)LookUp; // TODO: These 4 can be available for entities and shouldn't be treated as moves.
-            tbl["look_down"] = (Action)LookDown;
-            tbl["look_left"] = (Action)LookLeft;
-            tbl["look_right"] = (Action)LookRight;
-            tbl["look_towards_player"] = (Action)LookTowardsPlayer;
-            tbl["jump"] = (Action<DynValue>)Jump;
-            tbl["ignore_characters"] = (Action<DynValue>)IgnoreCharacters;
+            tbl["move_up"] = (Action<DynValue>)LuaMoveUp;
+            tbl["move_down"] = (Action<DynValue>)LuaMoveDown;
+            tbl["move_left"] = (Action<DynValue>)LuaMoveLeft;
+            tbl["move_right"] = (Action<DynValue>)LuaMoveRight;
+            tbl["look_up"] = (Action)LuaLookUp; // TODO: These 4 can be available for entities and shouldn't be treated as moves.
+            tbl["look_down"] = (Action)LuaLookDown;
+            tbl["look_left"] = (Action)LuaLookLeft;
+            tbl["look_right"] = (Action)LuaLookRight;
+            tbl["look_towards_player"] = (Action)LuaLookTowardsPlayer;
+            tbl["jump"] = (Action<DynValue>)LuaJump;
+            tbl["ignore_characters"] = (Action<DynValue>)LuaIgnoreCharacters;
         }
 
         script.Globals[varName] = tbl;
     }
 
-    private void MoveUp (DynValue arg) {
+    private void LuaMoveUp (DynValue arg) {
         int steps = arg.Type == DataType.Number ? (int)arg.Number : 1;
 
         ScriptLoop.Enqueue(new MoveScriptEvent(
@@ -59,7 +59,7 @@ public class LuaEntity {
         ));
     }
 
-    private void MoveDown (DynValue arg) {
+    private void LuaMoveDown (DynValue arg) {
         int steps = arg.Type == DataType.Number ? (int)arg.Number : 1;
 
         ScriptLoop.Enqueue(new MoveScriptEvent(
@@ -67,7 +67,7 @@ public class LuaEntity {
         ));
     }
 
-    private void MoveLeft (DynValue arg) {
+    private void LuaMoveLeft (DynValue arg) {
         int steps = arg.Type == DataType.Number ? (int)arg.Number : 1;
 
         ScriptLoop.Enqueue(new MoveScriptEvent(
@@ -75,7 +75,7 @@ public class LuaEntity {
         ));
     }
 
-    private void MoveRight (DynValue arg) {
+    private void LuaMoveRight (DynValue arg) {
         int steps = arg.Type == DataType.Number ? (int)arg.Number : 1;
 
         ScriptLoop.Enqueue(new MoveScriptEvent(
@@ -83,31 +83,31 @@ public class LuaEntity {
         ));
     }
 
-    private void LookUp () {
+    private void LuaLookUp () {
         ScriptLoop.Enqueue(new MoveScriptEvent(
             (Character)_entity, new(MoveKind.LookUp, _ignoreCharacters), 1
         ));
     }
 
-    private void LookDown () {
+    private void LuaLookDown () {
         ScriptLoop.Enqueue(new MoveScriptEvent(
             (Character)_entity, new(MoveKind.LookDown, _ignoreCharacters), 1
         ));
     }
 
-    private void LookLeft () {
+    private void LuaLookLeft () {
         ScriptLoop.Enqueue(new MoveScriptEvent(
             (Character)_entity, new(MoveKind.LookLeft, _ignoreCharacters), 1
         ));
     }
 
-    private void LookRight () {
+    private void LuaLookRight () {
         ScriptLoop.Enqueue(new MoveScriptEvent(
             (Character)_entity, new(MoveKind.LookRight, _ignoreCharacters), 1
         ));
     }
 
-    private void LookTowardsPlayer () {
+    private void LuaLookTowardsPlayer () {
         var delta = G.World.Player.Position - _entity.Position;
 
         Direction dir;
@@ -123,7 +123,7 @@ public class LuaEntity {
         ));
     }
 
-    private void Jump (DynValue arg) {
+    private void LuaJump (DynValue arg) {
         int times = arg.Type == DataType.Number ? (int)arg.Number : 1;
 
         ScriptLoop.Enqueue(new MoveScriptEvent(
@@ -131,7 +131,7 @@ public class LuaEntity {
         ));
     }
 
-    private void IgnoreCharacters (DynValue argVal) {
+    private void LuaIgnoreCharacters (DynValue argVal) {
         bool val = argVal.Type == DataType.Boolean ? argVal.Boolean : true;
         _ignoreCharacters = val;
     }

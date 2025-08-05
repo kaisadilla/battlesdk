@@ -93,7 +93,7 @@ public class ScriptEntityInteraction : EntityInteraction {
             return;
         }
 
-        LuaGlobalFunctions.RegisterGlobals(_lua, script);
+        Lua.RegisterGlobals(_lua);
 
         LuaEntity luaCh = new(_target);
         luaCh.Register(_lua, script, "target");

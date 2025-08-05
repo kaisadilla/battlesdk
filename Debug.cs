@@ -1,5 +1,4 @@
-﻿using battlesdk.graphics;
-using NLog;
+﻿using NLog;
 using SDL;
 
 namespace battlesdk;
@@ -33,11 +32,6 @@ public static class Debug {
     /// </summary>
     private static readonly Dictionary<string, nint> _texes = [];
 
-    /// <summary>
-    /// The game's renderer.
-    /// </summary>
-    private static Renderer? _renderer = null;
-
     public static bool PrintToScreen { get; set; } = false;
     public static FpsCounter? FpsCounter { get; private set; } = null;
 
@@ -54,10 +48,6 @@ public static class Debug {
 
         FpsCounter = new();
         FpsCounter.SetUpdateTime(0.1f);
-    }
-
-    public static void Subscribe (Renderer renderer) {
-        _renderer = renderer;
     }
 
     public static void OnFrameStart () {
@@ -109,9 +99,6 @@ public static class Debug {
             );
         }
         string loadedMapsStr = $"Loaded maps: {G.World.Maps.Count}";
-        if (_renderer is not null) {
-            loadedMapsStr += $" (rendered: {_renderer.RenderedMapCount})";
-        }
         DrawText(
             renderer,
             "loaded_maps",

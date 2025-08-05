@@ -1,5 +1,6 @@
 ﻿using battlesdk.json;
 using SDL;
+using System.Text;
 using System.Text.Json.Serialization;
 
 namespace battlesdk.types;
@@ -199,5 +200,26 @@ public static class TypesUtils {
             b = b,
             a = a,
         };
+    }
+
+    /// <summary>
+    /// Returns a snake_case version of this string. Non-ASCII characters are
+    /// not supported.
+    /// </summary>
+    /// <param name="str">The string to transform, preferably ASCII.</param>
+    public static string ToSnakeCase (this string str) {
+        var sb = new StringBuilder();
+
+        for (int i = 0; i < str.Length; i++) {
+            char c = str[i];
+
+            if (char.IsUpper(c) && i > 0) {
+                sb.Append('_');
+            }
+
+            sb.Append(char.ToLowerInvariant(c));
+        }
+
+        return sb.ToString();
     }
 }

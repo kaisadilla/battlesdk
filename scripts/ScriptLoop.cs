@@ -1,8 +1,11 @@
 ﻿using battlesdk.world;
 using battlesdk.world.entities;
+using NLog;
 
 namespace battlesdk.scripts;
 public static class ScriptLoop {
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
     private static readonly Queue<ScriptEvent> _events = [];
     private static ScriptEvent? _current = null;
 

@@ -3,6 +3,7 @@ global using static battlesdk.types.TypesUtils;
 
 using battlesdk;
 using battlesdk.graphics;
+using battlesdk.screen;
 using battlesdk.scripts;
 using NLog;
 using SDL;
@@ -11,6 +12,7 @@ const int TARGET_FPS = 60;
 
 Logger _logger = LogManager.GetCurrentClassLogger();
 
+
 _logger.Info("Launching BattleSDK.");
 
 InitSdl();
@@ -18,7 +20,6 @@ Data.Init();
 Registry.Init();
 Settings.Init();
 
-G.LoadGame();
 Debug.Init();
 Time.Init();
 
@@ -29,6 +30,16 @@ var win = new Window(
     Constants.VIEWPORT_HEIGHT,
     Constants.DEFAULT_SCREEN_SCALE
 );
+ScreenManager.SetMainRenderer(win.Renderer);
+
+Lua.Init();
+
+G.LoadGame();
+ScreenManager.Push(new OverworldScreenLayer(win.Renderer));
+
+
+Registry.Scripts.TryGetElementByName("screens/main_menu", out var scr);
+var menu = new ScriptScreenLayer(win.Renderer, scr);
 
 while (win.CloseRequested == false) {
     var frameStart = SDL3.SDL_GetTicks();
@@ -44,6 +55,10 @@ while (win.CloseRequested == false) {
     InputManager.Update();
     ScriptLoop.Update();
     Hud.Update();
+
+    if (Controls.GetKeyDown(ActionKey.Menu)) {
+        menu.Open();
+    }
 
     win.Render();
 

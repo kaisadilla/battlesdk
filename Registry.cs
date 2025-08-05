@@ -11,9 +11,9 @@ public static class Registry {
 
     public const string FOLDER_GRAPHICS_CHARACTERS = "graphics/characters";
     public const string FOLDER_GRAPHICS_MISC = "graphics/misc";
-    public const string FOLDER_GRAPHICS_TEXTBOXES = "graphics/textboxes";
     public const string FOLDER_GRAPHICS_TILESETS = "graphics/tilesets";
     public const string FOLDER_GRAPHICS_UI = "graphics/ui";
+    public const string FOLDER_GRAPHICS_UI_FRAMES = "graphics/ui/frames";
     public const string FOLDER_FONTS = "fonts";
     public const string FOLDER_LOCALIZATION = "localization";
     public const string FOLDER_MAPS = "maps";
@@ -32,7 +32,7 @@ public static class Registry {
     public static Collection<WorldAsset> Worlds { get; } = new();
     public static Collection<AssetFile> CharSprites { get; } = new();
     public static Collection<AssetFile> MiscSprites { get; } = new();
-    public static Collection<TextBoxAsset> TextboxSprites { get; } = new();
+    public static Collection<FrameAsset> FrameSprites { get; } = new();
     public static Collection<AssetFile> UiSprites { get; } = new();
     public static Collection<MusicFile> Music { get; } = new();
     public static Collection<ScriptAsset> Scripts { get; } = new();
@@ -83,8 +83,8 @@ public static class Registry {
         Localization.SetLanguage("en_US"); // TODO: Temporary hardcode.
         LoadCharSprites();
         LoadMiscSprites();
-        LoadTextboxSprites();
         LoadUiSprites();
+        LoadUiFrameSprites();
         LoadFonts();
         LoadMusic();
         LoadScripts();
@@ -199,13 +199,13 @@ public static class Registry {
         );
     }
 
-    private static void LoadTextboxSprites () {
+    private static void LoadUiFrameSprites () {
         LoadAssets(
-            AssetType.TextboxSprite,
-            FOLDER_GRAPHICS_TEXTBOXES,
+            AssetType.UiFrameSprite,
+            FOLDER_GRAPHICS_UI_FRAMES,
             [".png"],
-            TextboxSprites,
-            (name, path) => new TextBoxAsset(name, path)
+            FrameSprites,
+            (name, path) => new FrameAsset(name, path)
         );
     }
 
@@ -322,9 +322,9 @@ public static class Registry {
 public enum AssetType {
     CharacterSprite,
     MiscSprite,
-    TextboxSprite,
     TilesetSprite,
     UiSprite,
+    UiFrameSprite,
     Font,
     Language,
     Map,
