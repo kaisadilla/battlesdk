@@ -13,7 +13,7 @@ public class Textbox : IInputListener {
     /// <summary>
     /// The texture used to draw this textbox's frame.
     /// </summary>
-    private GraphicsFrame _frame;
+    private IGraphicsSprite _frame;
     /// <summary>
     /// The primary font of the textbox.
     /// </summary>
@@ -21,7 +21,7 @@ public class Textbox : IInputListener {
     /// <summary>
     /// The arrow at the right of the textbox.
     /// </summary>
-    private GraphicsTexture? _arrow;
+    private IGraphicsSprite? _arrow;
     private UpDownAnimation? _arrowAnim;
 
     /// <summary>
@@ -70,17 +70,17 @@ public class Textbox : IInputListener {
         IVec2 size,
         string text
     ) {
-        _frame = renderer.GetFrameOrDefault(textboxId);
+        _frame = renderer.GetSprite(textboxId) ?? throw new("Invalid frame");
         _pos = pos;
         _size = size;
 
         _font = renderer.GetFontOrDefault(fontId);
 
-        if (_arrowId == -1 && Registry.UiSprites.TryGetId("pause_arrow", out _arrowId) == false) {
-            _logger.Error("Failed to load 'pause_arrow' texture.");
+        if (_arrowId == -1 && Registry.Sprites.TryGetId("ui/pause_arrow", out _arrowId) == false) {
+            _logger.Error("Failed to load 'ui/pause_arrow' texture.");
         }
         if (_arrowId != -1) {
-            _arrow = renderer.GetUiTex(_arrowId);
+            _arrow = renderer.GetSprite(_arrowId);
             _arrowAnim = new(0, 2, 0.6f);
         }
 
@@ -89,12 +89,19 @@ public class Textbox : IInputListener {
         // transitions look better. The number chosen for this offset is
         // arbitrary based on personal preference.
         int xOffset = 3;
-        IRect viewport = new() {
-            Top = pos.Y + _frame.File.TextPadding.Top - xOffset,
-            Bottom = (pos.Y + size.Y + xOffset) - _frame.File.TextPadding.Bottom,
-            Left = pos.X + _frame.File.TextPadding.Left,
-            Right = (pos.X + size.X) - _frame.File.TextPadding.Right,
-        };
+        IRect viewport;
+
+        if (_frame is GraphicsFrameSprite frameSprite) {
+             viewport = new() {
+                 Top = pos.Y + frameSprite.Asset.TextPadding.Top - xOffset,
+                 Bottom = (pos.Y + size.Y + xOffset) - frameSprite.Asset.TextPadding.Bottom,
+                 Left = pos.X + frameSprite.Asset.TextPadding.Left,
+                 Right = (pos.X + size.X) - frameSprite.Asset.TextPadding.Right,
+             };
+        }
+        else {
+            viewport = new();
+        }
 
         _txtRenderer = new(renderer, fontId, text, viewport, xOffset);
 

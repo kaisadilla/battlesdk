@@ -55,7 +55,7 @@ public abstract class Entity {
         MapId = mapId;
         EntityId = entityId;
         Position = worldPos;
-        if (Registry.CharSprites.TryGetId(sprite, out var spriteId)) {
+        if (Registry.Sprites.TryGetId(sprite, out var spriteId)) {
             Sprite = spriteId;
         }
         else {

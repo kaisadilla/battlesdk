@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿using battlesdk.data;
+using NLog;
 using SDL;
 
 namespace battlesdk.graphics;
@@ -12,10 +13,9 @@ public unsafe class Renderer {
     // if they don't already exist.
     private readonly Dictionary<int, GraphicsFont> _fonts = [];
     private readonly Dictionary<int, GraphicsTileset> _tilesets = [];
-    private readonly Dictionary<int, GraphicsFrame> _frames = [];
-    private readonly Dictionary<int, CharacterTexture> _characters = [];
-    private readonly Dictionary<int, GraphicsTexture> _misc = [];
-    private readonly Dictionary<int, GraphicsTexture> _ui = [];
+    private readonly Dictionary<int, IGraphicsSprite> _sprites = [];
+    private readonly Dictionary<int, GraphicsTexture> _spriteAtlases = [];
+    private readonly Dictionary<int, Dictionary<string, GraphicsAtlasSprite>> _spritesheetSprites = [];
 
     /// <summary>
     /// The SDL Renderer managed by this instance.
@@ -99,7 +99,7 @@ public unsafe class Renderer {
     /// </summary>
     /// <param name="id">The font's id.</param>
     public GraphicsFont? GetFont (int id) {
-        return GetGraphicResource(
+        return GetGraphicTexture(
             Registry.Fonts,
             _fonts,
             id,
@@ -111,48 +111,75 @@ public unsafe class Renderer {
         return GetFont(id) ?? GetFont(0) ?? throw new("No font available.");
     }
 
-    public GraphicsFrame? GetFrame (int id) {
-        return GetGraphicResource(
-            Registry.FrameSprites,
-            _frames,
-            id,
-            asset => new(SdlRenderer, asset)
-        );
+    public GraphicsTexture? GetSpriteAtlas (int id) {
+        if (_spriteAtlases.TryGetValue(id, out var atlas)) {
+            return atlas;
+        }
+
+        if (Registry.Sprites.TryGetElement(id, out var asset) == false) {
+            return null;
+        }
+
+        _spriteAtlases[id] = new GraphicsTexture(this, asset);
+        return _spriteAtlases[id];
     }
 
-    public GraphicsFrame GetFrameOrDefault (int id) {
-        return GetFrame(id) ?? GetFrame(0) ?? throw new("No textbox available.");
+    public IGraphicsSprite? GetSprite (int id) {
+        if (_sprites.TryGetValue(id, out var sprite)) {
+            return sprite;
+        }
+
+        if (Registry.Sprites.TryGetElement(id, out var asset) == false) {
+            return null;
+        }
+
+        else {
+            _sprites[id] = GraphicsTexture.New(this, asset);
+        }
+        
+        return _sprites[id];
     }
 
-    public CharacterTexture? GetCharacterTex (int id) {
-        return GetGraphicResource(
-            Registry.CharSprites,
-            _characters,
-            id,
-            asset => new(SdlRenderer, asset)
-        );
+    /// <summary>
+    /// Returns the frame with the id given if that sprite exists and it's a
+    /// frame.
+    /// </summary>
+    /// <param name="id">An id of a sprite that is expected to be a frame.</param>
+    public GraphicsFrameSprite? GetFrame (int id) {
+        var sprite = GetSprite(id);
+
+        if (sprite is null) return null;
+
+        if (sprite is not GraphicsFrameSprite frameSprite) {
+            _logger.Error($"Sprite #{id} is not a frame.");
+            return null;
+        }
+
+        return frameSprite;
     }
 
-    public GraphicsTexture? GetMiscTex (int id) {
-        return GetGraphicResource(
-            Registry.MiscSprites,
-            _misc,
-            id,
-            asset => new(SdlRenderer, asset.Path)
-        );
-    }
+    public GraphicsAtlasSprite? GetSpritesheetSprite (int id, string subsprite) {
+        if (_spritesheetSprites.TryGetValue(id, out var dict) == false) {
+            dict = _spritesheetSprites[id] = [];
+        }
 
-    public GraphicsTexture? GetUiTex (int id) {
-        return GetGraphicResource(
-            Registry.UiSprites,
-            _ui,
-            id,
-            asset => new(SdlRenderer, asset.Path)
-        );
+        if (dict.TryGetValue(subsprite, out var sprite)) {
+            return sprite;
+        }
+
+        if (
+            Registry.Sprites.TryGetElement(id, out var asset) == false
+            || asset is not SpritesheetFile ssAsset
+        ) {
+            return null;
+        }
+
+        dict[subsprite] = new(this, ssAsset, subsprite);
+        return dict[subsprite];
     }
 
     public GraphicsTileset? GetTileset (int id) {
-        return GetGraphicResource(
+        return GetGraphicTexture(
             Registry.Tilesets,
             _tilesets,
             id,
@@ -160,7 +187,7 @@ public unsafe class Renderer {
         );
     }
 
-    private static TGraphics? GetGraphicResource<TGraphics, TAsset> (
+    private static TGraphics? GetGraphicTexture<TGraphics, TAsset> (
         Collection<TAsset> assetCol,
         Dictionary<int, TGraphics> dictionary,
         int id,

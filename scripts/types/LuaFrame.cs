@@ -7,10 +7,10 @@ public class LuaFrame : ILuaType {
     [MoonSharpHidden]
     public const string CLASSNAME = "Frame";
 
-    private GraphicsFrame _frame;
+    private GraphicsFrameSprite _frame;
 
     [MoonSharpHidden]
-    public LuaFrame (GraphicsFrame frame) {
+    public LuaFrame (GraphicsFrameSprite frame) {
         _frame = frame;
     }
 

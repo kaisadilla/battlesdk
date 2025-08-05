@@ -11,7 +11,7 @@ public class Player : Character, IInputListener {
 
     public bool BlockOtherInput => true;
 
-    public Player (IVec2 position) : base(-1, -1, position, "dawn") {
+    public Player (IVec2 position) : base(-1, -1, position, "characters/dawn") {
         InputManager.Push(this);
     }
 

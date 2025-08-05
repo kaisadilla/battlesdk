@@ -202,6 +202,15 @@ public static class TypesUtils {
         };
     }
 
+    public static SDL_FRect SdlFRect (float x, float y, float w, float h) {
+        return new() {
+            x = x,
+            y = y,
+            w = w,
+            h = h,
+        };
+    }
+
     /// <summary>
     /// Returns a snake_case version of this string. Non-ASCII characters are
     /// not supported.

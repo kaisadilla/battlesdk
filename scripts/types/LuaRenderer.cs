@@ -18,21 +18,6 @@ public class LuaRenderer : ILuaType {
         _renderer = renderer;
     }
 
-    public LuaFrame? get_frame_or_default (DynValue arg) {
-        if (arg.Type != DataType.String) {
-            throw new ScriptRuntimeException("Invalid parameter type.");
-        }
-
-        string name = arg.String;
-
-        if (Registry.FrameSprites.TryGetId(name, out int id) == false) {
-            return null;
-        }
-
-        var frame = _renderer.GetFrameOrDefault(id);
-        return new(frame);
-    }
-
     public LuaFrame? get_frame (DynValue arg) {
         if (arg.Type != DataType.String) {
             throw new ScriptRuntimeException("Invalid parameter type.");
@@ -40,7 +25,7 @@ public class LuaRenderer : ILuaType {
 
         string name = arg.String;
 
-        if (Registry.FrameSprites.TryGetId(name, out int id) == false) {
+        if (Registry.Sprites.TryGetId(name, out int id) == false) {
             return null;
         }
 

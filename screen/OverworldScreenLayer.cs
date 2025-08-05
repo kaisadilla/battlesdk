@@ -135,18 +135,25 @@ public class OverworldScreenLayer : IScreenLayer {
 
         unsafe {
             if (Registry.CharSpriteShadow != -1) {
-                _renderer.GetMiscTex(Registry.CharSpriteShadow)?.Draw(
+                _renderer.GetSprite(Registry.CharSpriteShadow)?.Draw(
                     _camera.GetScreenPos(TileToPixelSpace(character.Subposition)) + new IVec2(0, 8)
                 );
             }
 
-            _renderer.GetCharacterTex(character.Sprite)?.Draw(
-                _renderer.SdlRenderer,
-                _camera.GetScreenPos(TileToPixelSpace(subpos)),
-                character.Direction,
+            var charSprite = _renderer.GetSprite(character.Sprite);
+            if (charSprite is null) return;
+
+            if (charSprite is GraphicsCharacterSprite gcs) {
+                gcs.Draw(
+                    _camera.GetScreenPos(TileToPixelSpace(subpos)),
+                    character.Direction,
                 (character.IsMoving && !character.IsJumping && character.IsRunning) ? 1 : 0,
                 frame
-            );
+                );
+            }
+            else {
+                charSprite.Draw(_camera.GetScreenPos(TileToPixelSpace(subpos)));
+            }
         }
     }
 

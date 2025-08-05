@@ -1,4 +1,6 @@
 ﻿using battlesdk.data;
+using battlesdk.data.definitions;
+using battlesdk.json;
 using NLog;
 
 namespace battlesdk;
@@ -9,11 +11,8 @@ public static class Registry {
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    public const string FOLDER_GRAPHICS_CHARACTERS = "graphics/characters";
-    public const string FOLDER_GRAPHICS_MISC = "graphics/misc";
-    public const string FOLDER_GRAPHICS_TILESETS = "graphics/tilesets";
-    public const string FOLDER_GRAPHICS_UI = "graphics/ui";
-    public const string FOLDER_GRAPHICS_UI_FRAMES = "graphics/ui/frames";
+    public const string FOLDER_GRAPHICS = "graphics";
+    public const string FOLDER_FRAMES = "frames";
     public const string FOLDER_FONTS = "fonts";
     public const string FOLDER_LOCALIZATION = "localization";
     public const string FOLDER_MAPS = "maps";
@@ -30,10 +29,7 @@ public static class Registry {
     public static Collection<Tileset> Tilesets { get; } = new();
     public static Collection<MapAsset> Maps { get; } = new();
     public static Collection<WorldAsset> Worlds { get; } = new();
-    public static Collection<AssetFile> CharSprites { get; } = new();
-    public static Collection<AssetFile> MiscSprites { get; } = new();
-    public static Collection<FrameAsset> FrameSprites { get; } = new();
-    public static Collection<AssetFile> UiSprites { get; } = new();
+    public static Collection<SpriteFile> Sprites { get; } = new();
     public static Collection<MusicFile> Music { get; } = new();
     public static Collection<ScriptAsset> Scripts { get; } = new();
     public static Collection<AssetFile> Sounds { get; } = new();
@@ -44,8 +40,7 @@ public static class Registry {
     /// The index of overworld characters' shadow in <see cref="MiscSprites"/>,
     /// or -1 if no such asset exists.
     /// </summary>
-    public static int CharSpriteShadow = -1;
-    public static int SfxTapShort = -1;
+    public static int CharSpriteShadow { get; private set; } = -1; // TODO: Remove. The registry doesn't cache anything.
 
     /// <summary>
     /// Given an assets folder and a path to a specific asset, generates the
@@ -81,10 +76,7 @@ public static class Registry {
 
         LoadLanguages();
         Localization.SetLanguage("en_US"); // TODO: Temporary hardcode.
-        LoadCharSprites();
-        LoadMiscSprites();
-        LoadUiSprites();
-        LoadUiFrameSprites();
+        LoadSprites();
         LoadFonts();
         LoadMusic();
         LoadScripts();
@@ -93,12 +85,8 @@ public static class Registry {
         LoadMaps(); // Maps require the tilesets they use to be loaded.
         LoadWorlds(); // Worlds require the maps they include to be loaded.
 
-        int id = -1;
-        if (MiscSprites.TryGetId("char_shadow", out id)) {
-            CharSpriteShadow = id;
-        }
-        if (MiscSprites.TryGetId("beep_short", out id)) {
-            SfxTapShort = id;
+        if (Sprites.TryGetId("misc/char_shadow", out var charShadowId)) {
+            CharSpriteShadow = charShadowId;
         }
     }
 
@@ -179,44 +167,52 @@ public static class Registry {
         }
     }
 
-    private static void LoadCharSprites () {
-        LoadAssets(
-            AssetType.CharacterSprite,
-            FOLDER_GRAPHICS_CHARACTERS,
-            [".png"],
-            CharSprites,
-            (name, path) => new AssetFile(name, path)
-        );
+    private static void LoadSprites () {
+        string dir = Path.Combine(ResFolderPath, FOLDER_GRAPHICS);
+        if (Directory.Exists(dir) == false) return;
+
+        var files = ReadSpriteFolder(dir);
+
+        foreach (var f in files) {
+            Sprites.Register(f);
+        }
     }
 
-    private static void LoadMiscSprites () {
-        LoadAssets(
-            AssetType.MiscSprite,
-            FOLDER_GRAPHICS_MISC,
-            [".png"],
-            MiscSprites,
-            (name, path) => new AssetFile(name, path)
-        );
-    }
+    private static List<SpriteFile> ReadSpriteFolder (string folderPath) {
+        List<SpriteFile> files = [];
 
-    private static void LoadUiFrameSprites () {
-        LoadAssets(
-            AssetType.UiFrameSprite,
-            FOLDER_GRAPHICS_UI_FRAMES,
-            [".png"],
-            FrameSprites,
-            (name, path) => new FrameAsset(name, path)
-        );
-    }
+        SpriteMetadataDefinition? baseMeta = null;
 
-    private static void LoadUiSprites () {
-        LoadAssets(
-            AssetType.UiSprite,
-            FOLDER_GRAPHICS_UI,
-            [".png"],
-            UiSprites,
-            (name, path) => new AssetFile(name, path)
-        );
+        var baseMetaPath = Path.Combine(folderPath, ".json");
+        if (File.Exists(baseMetaPath)) {
+            try {
+                var txt = File.ReadAllText(baseMetaPath);
+                baseMeta = Json.Parse<SpriteMetadataDefinition>(txt);
+            }
+            catch (Exception ex) {
+                _logger.Error(ex, $"Failed to read base metadata file '{baseMetaPath}'");
+            }
+        }
+
+        foreach (var f in EnumerateAssetFiles(folderPath, [".png"])) {
+            try {
+                var name = GetAssetName(FOLDER_GRAPHICS, f);
+                var path = Path.GetFullPath(f);
+
+                files.Add(SpriteFile.New(name, f, baseMeta));
+                LogLoadSuccess("sprite", f);
+            }
+            catch (Exception ex) {
+                LogLoadError("sprite", f, ex);
+            }
+        }
+
+        foreach (var dir in Directory.EnumerateDirectories(folderPath)) {
+            var dirFiles = ReadSpriteFolder(dir);
+            files.AddRange(dirFiles);
+        }
+
+        return files;
     }
 
     private static void LoadScripts () {
@@ -247,6 +243,23 @@ public static class Registry {
             Sounds,
             (name, path) => new AssetFile(name, path)
         );
+    }
+
+    private static IEnumerable<string> EnumerateAssetFiles (
+        string folderPath,
+        IEnumerable<string>? extensions
+    ) {
+        foreach (var f in Directory.EnumerateFiles(
+            folderPath,
+            "*",
+            SearchOption.TopDirectoryOnly
+        )) {
+            if (extensions is not null && extensions.Contains(Path.GetExtension(f)) == false) {
+                continue;
+            }
+
+            yield return f;
+        }
     }
 
     /// <summary>
@@ -320,11 +333,7 @@ public static class Registry {
 }
 
 public enum AssetType {
-    CharacterSprite,
-    MiscSprite,
-    TilesetSprite,
-    UiSprite,
-    UiFrameSprite,
+    Sprite,
     Font,
     Language,
     Map,

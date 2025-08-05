@@ -11,7 +11,7 @@ public abstract class EntityData {
         if (string.IsNullOrEmpty(def.Sprite)) {
             throw new InvalidDataException("Entity is missing field 'sprite'.");
         }
-        if (Registry.CharSprites.TryGetId(def.Sprite, out int spriteId) == false) {
+        if (Registry.Sprites.TryGetId(def.Sprite, out int spriteId) == false) {
             throw new InvalidDataException(
                 $"Couldn't find character sprite '{def.Sprite}'."
             );

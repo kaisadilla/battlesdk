@@ -1,10 +1,13 @@
-﻿using NLog;
+﻿using battlesdk.data;
+using NLog;
 using SDL;
 using System.Runtime.CompilerServices;
 
 namespace battlesdk.graphics;
-public class GraphicsTexture {
+public class GraphicsTexture : IGraphicsSprite {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
+    public virtual SpriteFile Asset { get; }
 
     /// <summary>
     /// The renderer this texture was loaded to.
@@ -18,27 +21,38 @@ public class GraphicsTexture {
     /// <summary>
     /// The width of the loaded texture, in pixels.
     /// </summary>
-    protected int _width;
+    public int Width { get; protected set; }
     /// <summary>
     /// The height of the loaded texture, in pixels.
     /// </summary>
-    protected int _height;
+    public int Height { get; protected set; }
 
-    public unsafe GraphicsTexture (SDL_Renderer* renderer, string path) {
-        _renderer = renderer;
+    public unsafe GraphicsTexture (Renderer renderer, SpriteFile asset) {
+        _renderer = renderer.SdlRenderer;
 
-        var surface = SDL3_image.IMG_Load(path);
+        Asset = asset;
 
-        _width = surface->w;
-        _height = surface->h;
+        var surface = SDL3_image.IMG_Load(asset.Path);
 
-        _texture = SDL3.SDL_CreateTextureFromSurface(renderer, surface);
+        Width = surface->w;
+        Height = surface->h;
+
+        _texture = SDL3.SDL_CreateTextureFromSurface(renderer.SdlRenderer, surface);
         if (_texture is null) {
             throw new Exception($"Failed to load texture: {SDL3.SDL_GetError()}.");
         }
 
         SDL3.SDL_DestroySurface(surface);
         SDL3.SDL_SetTextureBlendMode(_texture, SDL_BlendMode.SDL_BLENDMODE_BLEND);
+    }
+
+    public static GraphicsTexture New (Renderer renderer, SpriteFile asset) {
+        return asset switch {
+            SpritesheetFile f => new GraphicsTexture(renderer, f),
+            CharacterSpriteFile f => new GraphicsCharacterSprite(renderer, f),
+            FrameSpriteFile f => new GraphicsFrameSprite(renderer, f),
+            _ => new GraphicsTexture(renderer, asset)
+        };
     }
 
     /// <summary>
@@ -48,12 +62,18 @@ public class GraphicsTexture {
         SDL3.SDL_DestroyTexture(_texture);
     }
 
-    public unsafe void Draw (Vec2 position) {
+    public virtual unsafe void Draw (IVec2 position) {
+        Draw(position, new(Width, Height), ResizeMode.Stretch);
+    }
+
+    public virtual unsafe void Draw (
+        IVec2 position, IVec2 size, ResizeMode resizeMode = ResizeMode.Stretch
+    ) {
         SDL_FRect dst = new() {
-            x = (int)position.X,
-            y = (int)position.Y,
-            w = _width,
-            h = _height,
+            x = position.X,
+            y = position.Y,
+            w = size.X,
+            h = size.Y,
         };
 
         SDL3.SDL_RenderTexture(_renderer, _texture, null, &dst);
@@ -66,7 +86,7 @@ public class GraphicsTexture {
     /// <param name="section">The section of the texture to draw.</param>
     /// <param name="pos">The position in the screen (in pixels) at which to
     /// draw the texture.</param>
-    protected unsafe void DrawSection (SDL_FRect section, IVec2 pos) {
+    public virtual unsafe void DrawSection (SDL_FRect section, IVec2 pos) {
         SDL_FRect dst = new() {
             x = pos.X,
             y = pos.Y,
@@ -77,8 +97,11 @@ public class GraphicsTexture {
         SDL3.SDL_RenderTexture(_renderer, _texture, &section, &dst);
     }
 
-    protected unsafe void DrawSectionResize (
-        SDL_FRect section, IVec2 pos, IVec2 size, ResizeMode resizeMode
+    public virtual unsafe void DrawSection (
+        SDL_FRect section,
+        IVec2 pos,
+        IVec2 size,
+        ResizeMode resizeMode = ResizeMode.Stretch
     ) {
         switch (resizeMode) {
             case ResizeMode.Stretch:

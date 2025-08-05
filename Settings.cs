@@ -19,8 +19,8 @@ public static class Settings {
             TextFont = textFont;
         }
 
-        if (Registry.FrameSprites.TryGetId("dp_textbox_1", out var tb) == false) {
-            _logger.Warn("Textbox sprite 'dp_textbox_1' is not in the Registry.");
+        if (Registry.Sprites.TryGetId("ui/frames/dp_textbox_1", out var tb) == false) {
+            _logger.Warn("Textbox sprite 'ui/frames/dp_textbox_1' is not in the Registry.");
         }
         else {
             TextBox = tb;
