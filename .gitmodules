@@ -1,0 +1,3 @@
+[submodule "battlesdk/res"]
+	path = battlesdk/res
+	url = https://github.com/kaisadilla/battlesdk-example-res-folder.git
