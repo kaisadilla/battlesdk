@@ -12,7 +12,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Ben.Demystifier" Version="0.4.1" />
     <PackageReference Include="Betwixt" Version="1.4.1" />
+    <PackageReference Include="DanielWillett.StackCleaner" Version="1.5.1" />
     <PackageReference Include="MoonSharp" Version="2.0.0" />
     <PackageReference Include="NLog" Version="6.0.2" />
     <PackageReference Include="ppy.SDL3-CS" Version="2025.703.0" />

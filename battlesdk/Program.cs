@@ -7,58 +7,84 @@ using battlesdk.screen;
 using battlesdk.scripts;
 using NLog;
 using SDL;
+using static System.Diagnostics.ExceptionExtensions;
 
 const int TARGET_FPS = 60;
 
-Logger _logger = LogManager.GetCurrentClassLogger();
+Window win;
 
+Logger _logger = LogManager.GetCurrentClassLogger();
 
 _logger.Info("Launching BattleSDK.");
 
-InitSdl();
-Data.Init();
-Registry.Init();
-Settings.Init();
+try {
+    InitSdl();
+    Data.Init();
+    Registry.Init();
+    Settings.Init();
 
-Debug.Init();
-Time.Init();
+    Debug.Init();
+    Time.Init();
 
-Audio.Init();
+    Audio.Init();
 
-var win = new Window(
-    Constants.VIEWPORT_WIDTH,
-    Constants.VIEWPORT_HEIGHT,
-    Constants.DEFAULT_SCREEN_SCALE
-);
-Lua.Init();
-ScreenManager.Init(win.Renderer);
+    win = new Window(
+        Constants.VIEWPORT_WIDTH,
+        Constants.VIEWPORT_HEIGHT,
+        Constants.DEFAULT_SCREEN_SCALE
+    );
+    Lua.Init();
+    ScreenManager.Init(win.Renderer);
 
-G.LoadGame();
-ScreenManager.Push(new OverworldScreenLayer(win.Renderer));
-InputManager.Push(new OverworldScreenLayer(win.Renderer));
+    G.LoadGame();
+    ScreenManager.Push(new OverworldScreenLayer(win.Renderer));
+    InputManager.Push(new OverworldScreenLayer(win.Renderer));
+}
+catch (Exception ex) {
+    _logger.Fatal(ex.Demystify(), $"A fatal error occurred during initialization.");
+    ex.Demystify().PrintFancy();
+
+    Environment.Exit(1);
+    return;
+}
 
 while (win.CloseRequested == false) {
-    var frameStart = SDL3.SDL_GetTicks();
+    try {
+        var frameStart = SDL3.SDL_GetTicks();
 
-    win.ProcessEvents();
-    Debug.OnFrameStart();
-    G.World.FrameStart();
+        win.ProcessEvents();
+        Debug.OnFrameStart();
+        G.World.FrameStart();
 
-    ProcessInput();
+        ProcessInput();
 
-    Music.Update();
-    G.World.Update();
-    InputManager.Update();
-    ScriptLoop.Update();
-    Hud.Update();
+        Music.Update();
+        G.World.Update();
+        InputManager.Update();
+        ScriptLoop.Update();
+        Hud.Update();
 
-    win.Render();
+        win.Render();
 
-    var frameTime = (int)(SDL3.SDL_GetTicks() - frameStart);
-    var delay = 1000 / TARGET_FPS;
+        var frameTime = (int)(SDL3.SDL_GetTicks() - frameStart);
+        var delay = 1000 / TARGET_FPS;
 
-    if (frameTime < delay) {
-        SDL3.SDL_Delay((uint)(delay - frameTime));
+        if (frameTime < delay) {
+            SDL3.SDL_Delay((uint)(delay - frameTime));
+        }
+    }
+    catch (Exception ex) {
+        _logger.Fatal(
+            ex.Demystify(),
+            $"An unrecoverable error ocurred in the program loop."
+        );
+        ex.Demystify().PrintFancy();
+
+        win.Destroy();
+
+        Environment.Exit(1);
+        return;
+
     }
 }
 

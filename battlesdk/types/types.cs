@@ -1,5 +1,7 @@
 ﻿using battlesdk.json;
 using SDL;
+using StackCleaner;
+using System.Diagnostics;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -175,6 +177,16 @@ public readonly unsafe struct Ptr<T> where T : unmanaged {
 
 
 public static class TypesUtils {
+    private static readonly StackTraceCleaner _cleaner = new(new() {
+        ColorFormatting = StackColorFormatType.ExtendedANSIColor,
+        IncludeFileData = true,
+        IncludeILOffset = true,
+        IncludeNamespaces = false,
+        Colors = Color32Config.Default,
+        IncludeSourceData = true,
+        UseTypeAliases = true,
+    });
+
     public static DirectionMask ToMask (this Direction direction) {
         return direction switch {
             Direction.Down => DirectionMask.Down,
@@ -261,5 +273,42 @@ public static class TypesUtils {
         }
 
         return sb.ToString();
+    }
+
+    public static void PrintFancy (this Exception? exception) {
+        List<Exception> exceptionStack = [];
+
+        while (exception is not null) {
+            exceptionStack.Add(exception);
+            exception = exception.InnerException;
+        }
+
+        Console.WriteLine();
+        Console.WriteLine("============================");
+        Console.WriteLine("==== UNCAUGHT EXCEPTION ====");
+        Console.WriteLine("============================");
+        Console.WriteLine();
+
+        foreach (var ex in exceptionStack) {
+            var stack = StackTraceCleaner.GetStackTrace(ex);
+
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.WriteLine(ex.GetType().Name);
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(ex.Message);
+
+            if (stack is  null) return;
+            _cleaner.WriteToConsole(stack.Reverse());
+        }
+
+        Console.ResetColor();
+    }
+
+    public static StackTrace Reverse (this StackTrace stack) {
+        var frames = stack.GetFrames();
+
+        if (frames is null || frames.Length < 2) return stack;
+
+        return new StackTrace(frames.Reverse());
     }
 }

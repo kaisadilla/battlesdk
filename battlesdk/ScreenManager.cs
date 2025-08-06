@@ -1,8 +1,11 @@
 ﻿using battlesdk.graphics;
 using battlesdk.screen;
+using NLog;
 
 namespace battlesdk;
 public static class ScreenManager {
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
     // TODO: Check potential cross-thread bugs.
     private static readonly Stack<IScreenLayer> _layers = [];
     private static readonly List<IScreenLayer> _renderedLayers = [];
@@ -19,10 +22,20 @@ public static class ScreenManager {
         MainRenderer = renderer;
 
         if (Registry.Scripts.TryGetElementByName("screens/main_menu", out var scr) == false) {
-            throw new("Couldn't find 'screens/main_menu' script.");
+            throw new InitializationException(
+                "ScreenManager - Missing script: 'screens/main_menu'."
+            );
         }
 
-        MainMenu = new ScriptScreenLayer(MainRenderer, scr);
+        try {
+            MainMenu = new ScriptScreenLayer(MainRenderer, scr);
+        }
+        catch (Exception ex) {
+            throw new InitializationException(
+                "ScreenManager - Failed to load main menu's script.", ex
+            );
+        }
+
     }
 
     public static void Push (IScreenLayer layer) {
