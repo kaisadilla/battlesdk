@@ -2,6 +2,7 @@
 
 namespace battlesdk.scripts.types;
 
+[LuaApiClass]
 public class LuaVec2 : ILuaType {
     [MoonSharpHidden]
     public const string CLASSNAME = "Vec2";
@@ -18,13 +19,9 @@ public class LuaVec2 : ILuaType {
         return new(x, y);
     }
 
-    public string to_string () {
-        return ToString();
-    }
-
     [MoonSharpHidden]
     public override string ToString () {
-        return $"({x}, {y})";
+        return ToVec2().ToString();
     }
 
     [MoonSharpHidden]

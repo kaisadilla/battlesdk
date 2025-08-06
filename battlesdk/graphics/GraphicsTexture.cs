@@ -1,13 +1,10 @@
-﻿using battlesdk.data;
-using NLog;
+﻿using NLog;
 using SDL;
 using System.Runtime.CompilerServices;
 
 namespace battlesdk.graphics;
 public class GraphicsTexture : IGraphicsSprite {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
-    public virtual SpriteFile Asset { get; }
 
     /// <summary>
     /// The renderer this texture was loaded to.
@@ -27,32 +24,18 @@ public class GraphicsTexture : IGraphicsSprite {
     /// </summary>
     public int Height { get; protected set; }
 
-    public unsafe GraphicsTexture (Renderer renderer, SpriteFile asset) {
+    public unsafe GraphicsTexture (Renderer renderer) {
         _renderer = renderer.SdlRenderer;
-
-        Asset = asset;
-
-        var surface = SDL3_image.IMG_Load(asset.Path);
-
-        Width = surface->w;
-        Height = surface->h;
-
-        _texture = SDL3.SDL_CreateTextureFromSurface(renderer.SdlRenderer, surface);
-        if (_texture is null) {
-            throw new Exception($"Failed to load texture: {SDL3.SDL_GetError()}.");
-        }
-
-        SDL3.SDL_DestroySurface(surface);
-        SDL3.SDL_SetTextureBlendMode(_texture, SDL_BlendMode.SDL_BLENDMODE_BLEND);
     }
 
-    public static GraphicsTexture New (Renderer renderer, SpriteFile asset) {
-        return asset switch {
-            SpritesheetFile f => new GraphicsTexture(renderer, f),
-            CharacterSpriteFile f => new GraphicsCharacterSprite(renderer, f),
-            FrameSpriteFile f => new GraphicsFrameSprite(renderer, f),
-            _ => new GraphicsTexture(renderer, asset)
-        };
+    public unsafe GraphicsTexture (Renderer renderer, SDL_Texture* texture) {
+        _renderer = renderer.SdlRenderer;
+        _texture = texture;
+
+        Width = _texture->w;
+        Height = _texture->h;
+
+        SDL3.SDL_SetTextureBlendMode(_texture, SDL_BlendMode.SDL_BLENDMODE_BLEND);
     }
 
     /// <summary>
@@ -115,6 +98,16 @@ public class GraphicsTexture : IGraphicsSprite {
         }
     }
 
+    public virtual unsafe void SetTint (byte r, byte g, byte b, byte a = 255) {
+        SDL3.SDL_SetTextureColorMod(_texture, r, g, b);
+        SDL3.SDL_SetTextureAlphaMod(_texture, a);
+    }
+
+    public virtual unsafe void ResetTint () {
+        SDL3.SDL_SetTextureColorMod(_texture, 0, 0, 0);
+        SDL3.SDL_SetTextureAlphaMod(_texture, 255);
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected unsafe void DrawSectionResizeStretch (
         SDL_FRect section, IVec2 pos, IVec2 size
@@ -128,4 +121,5 @@ public class GraphicsTexture : IGraphicsSprite {
 
         SDL3.SDL_RenderTexture(_renderer, _texture, &section, &dst);
     }
+
 }

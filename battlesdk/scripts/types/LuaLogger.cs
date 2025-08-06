@@ -3,6 +3,7 @@ using NLog;
 
 namespace battlesdk.scripts.types;
 
+[LuaApiClass]
 public class LuaLogger {
     [MoonSharpHidden]
     public const string CLASSNAME = "Logger";

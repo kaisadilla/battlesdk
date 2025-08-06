@@ -1,4 +1,5 @@
 ﻿using battlesdk.scripts.types;
+using battlesdk.world.entities;
 using MoonSharp.Interpreter;
 using NLog;
 
@@ -16,10 +17,13 @@ public static class Lua {
         UserData.RegisterType<LuaLogger>(InteropAccessMode.Preoptimized, LuaLogger.CLASSNAME);
         UserData.RegisterType<LuaControls>(InteropAccessMode.Preoptimized, LuaControls.CLASSNAME);
         UserData.RegisterType<LuaAudio>(InteropAccessMode.Preoptimized, LuaAudio.CLASSNAME);
+        UserData.RegisterType<LuaG>(InteropAccessMode.Preoptimized, LuaG.CLASSNAME);
 
         UserData.RegisterType<LuaRenderer>(InteropAccessMode.Preoptimized, LuaRenderer.CLASSNAME);
         UserData.RegisterType<LuaSprite>(InteropAccessMode.Preoptimized, LuaFrameSprite.CLASSNAME);
         UserData.RegisterType<LuaFrameSprite>(InteropAccessMode.Preoptimized, LuaFrameSprite.CLASSNAME);
+        UserData.RegisterType<LuaFont>(InteropAccessMode.Preoptimized, LuaFont.CLASSNAME);
+        UserData.RegisterType<LuaEntity>(InteropAccessMode.Preoptimized, LuaEntity.CLASSNAME);
     }
 
     public static void RegisterGlobals (Script script) {
@@ -50,13 +54,23 @@ public static class Lua {
             Wait((int)arg.Number);
         });
 
-        script.Globals["IVec2"] = UserData.CreateStatic(typeof(LuaVec2));
-        script.Globals["Rect"] = UserData.CreateStatic(typeof(LuaRect));
-        script.Globals["Logger"] = UserData.CreateStatic(typeof(LuaLogger));
-        script.Globals["Controls"] = UserData.CreateStatic(typeof(LuaControls));
-        script.Globals["Audio"] = UserData.CreateStatic(typeof(LuaAudio));
+        script.Globals[LuaVec2.CLASSNAME] = UserData.CreateStatic(typeof(LuaVec2));
+        script.Globals[LuaRect.CLASSNAME] = UserData.CreateStatic(typeof(LuaRect));
+        script.Globals[LuaLogger.CLASSNAME] = UserData.CreateStatic(typeof(LuaLogger));
+        script.Globals[LuaControls.CLASSNAME] = UserData.CreateStatic(typeof(LuaControls));
+        script.Globals[LuaAudio.CLASSNAME] = UserData.CreateStatic(typeof(LuaAudio));
+        script.Globals[LuaG.CLASSNAME] = UserData.CreateStatic(typeof(LuaG));
+        script.Globals[LuaEntity.CLASSNAME] = UserData.CreateStatic(typeof(LuaEntity));
 
         script.Globals["renderer"] = new LuaRenderer(ScreenManager.MainRenderer);
+    }
+
+    public static void RegisterEntityInteraction (Script script, Entity target) {
+        LuaEntity luaTarget = new(target);
+        LuaEntity luaPlayer = new(G.World.Player);
+
+        script.Globals["target"] = luaTarget;
+        script.Globals["player"] = luaPlayer;
     }
 
     public static void RegisterEnumTable<T> (string tableName) where T : Enum {

@@ -94,11 +94,7 @@ public class ScriptEntityInteraction : EntityInteraction {
         }
 
         Lua.RegisterGlobals(_lua);
-
-        LuaEntity luaCh = new(_target);
-        luaCh.Register(_lua, script, "target");
-        LuaEntity luaPlayer = new(G.World.Player);
-        luaPlayer.Register(_lua, script, "player");
+        Lua.RegisterEntityInteraction(_lua, _target);
 
         _scriptFunc = _lua.LoadString(srcStr);
     }

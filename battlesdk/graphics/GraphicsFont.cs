@@ -1,6 +1,7 @@
 ﻿using battlesdk.data;
 using NLog;
 using SDL;
+using System.Text;
 
 namespace battlesdk.graphics;
 
@@ -9,7 +10,7 @@ public class GraphicsFont {
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    private unsafe SDL_Renderer* _renderer;
+    private Renderer _renderer;
 
     public unsafe TTF_Font* Font { get; private set; }
     public FontAsset Asset { get; private set; }
@@ -43,7 +44,7 @@ public class GraphicsFont {
     /// </summary>
     private int _cursorY = 0;
 
-    public unsafe GraphicsFont (SDL_Renderer* renderer, FontAsset asset) {
+    public unsafe GraphicsFont (Renderer renderer, FontAsset asset) {
         _renderer = renderer;
         Asset = asset;
 
@@ -55,7 +56,7 @@ public class GraphicsFont {
         SDL3_ttf.TTF_SetFontLineSkip(Font, asset.LineHeight);
 
         CharAtlas = SDL3.SDL_CreateTexture(
-            _renderer,
+            _renderer.SdlRenderer,
             SDL_PixelFormat.SDL_PIXELFORMAT_ARGB8888, // TODO: Maybe do not hardcode this.
             SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET,
             _atlasWidth,
@@ -69,7 +70,7 @@ public class GraphicsFont {
         SDL3.SDL_SetTextureBlendMode(CharAtlas, SDL_BlendMode.SDL_BLENDMODE_BLEND);
 
         ShadowAtlas = SDL3.SDL_CreateTexture(
-            _renderer,
+            _renderer.SdlRenderer,
             SDL_PixelFormat.SDL_PIXELFORMAT_ARGB8888, // TODO: Maybe do not hardcode this.
             SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET,
             _atlasWidth,
@@ -125,26 +126,26 @@ public class GraphicsFont {
         }
 
         // Draw the character texture to the char atlas.
-        SDL3.SDL_SetRenderTarget(_renderer, CharAtlas);
+        SDL3.SDL_SetRenderTarget(_renderer.SdlRenderer, CharAtlas);
         SDL_FRect charDst = new() {
             x = _cursorX,
             y = _cursorY,
             w = charTex->w,
             h = charTex->h,
         };
-        SDL3.SDL_RenderTexture(_renderer, charTex, null, &charDst);
-        SDL3.SDL_SetRenderTarget(_renderer, null);
+        SDL3.SDL_RenderTexture(_renderer.SdlRenderer, charTex, null, &charDst);
+        SDL3.SDL_SetRenderTarget(_renderer.SdlRenderer, null);
 
         // Draw the shadow texture to the shadow atlas.
-        SDL3.SDL_SetRenderTarget(_renderer, ShadowAtlas);
+        SDL3.SDL_SetRenderTarget(_renderer.SdlRenderer, ShadowAtlas);
         SDL_FRect shadowDst = new() {
             x = _cursorX,
             y = _cursorY,
             w = shadowTex->w,
             h = shadowTex->h,
         };
-        SDL3.SDL_RenderTexture(_renderer, shadowTex, null, &shadowDst);
-        SDL3.SDL_SetRenderTarget(_renderer, null);
+        SDL3.SDL_RenderTexture(_renderer.SdlRenderer, shadowTex, null, &shadowDst);
+        SDL3.SDL_SetRenderTarget(_renderer.SdlRenderer, null);
 
         SDL3.SDL_DestroyTexture(shadowTex);
 
@@ -180,12 +181,12 @@ public class GraphicsFont {
         if (shadow) {
             SDL3.SDL_SetTextureColorMod(ShadowAtlas, 0, 0, 0);
             SDL3.SDL_SetTextureAlphaMod(ShadowAtlas, Constants.TEXT_SHADOW_ALPHA);
-            SDL3.SDL_RenderTexture(_renderer, ShadowAtlas, &ch, &dst);
+            SDL3.SDL_RenderTexture(_renderer.SdlRenderer, ShadowAtlas, &ch, &dst);
         }
 
         SDL3.SDL_SetTextureColorMod(CharAtlas, color.r, color.g, color.b);
         SDL3.SDL_SetTextureAlphaMod(ShadowAtlas, color.a);
-        SDL3.SDL_RenderTexture(_renderer, CharAtlas, &ch, &dst);
+        SDL3.SDL_RenderTexture(_renderer.SdlRenderer, CharAtlas, &ch, &dst);
     }
 
     public unsafe void DrawCharInViewport (
@@ -224,12 +225,12 @@ public class GraphicsFont {
         if (shadow) {
             SDL3.SDL_SetTextureColorMod(ShadowAtlas, 0, 0, 0);
             SDL3.SDL_SetTextureAlphaMod(ShadowAtlas, Constants.TEXT_SHADOW_ALPHA);
-            SDL3.SDL_RenderTexture(_renderer, ShadowAtlas, &src, &dst);
+            SDL3.SDL_RenderTexture(_renderer.SdlRenderer, ShadowAtlas, &src, &dst);
         }
 
         SDL3.SDL_SetTextureColorMod(CharAtlas, color.r, color.g, color.b);
         SDL3.SDL_SetTextureAlphaMod(ShadowAtlas, color.a);
-        SDL3.SDL_RenderTexture(_renderer, CharAtlas, &src, &dst);
+        SDL3.SDL_RenderTexture(_renderer.SdlRenderer, CharAtlas, &src, &dst);
 
     }
 
@@ -242,6 +243,61 @@ public class GraphicsFont {
         SDL3.SDL_DestroyTexture(CharAtlas);
         Font = null;
         CharAtlas = null;
+    }
+
+    /// <summary>
+    /// Creates a sprite containing a string of plain text. This sprite does
+    /// not use this font's sprite atlas and can't include advanced features
+    /// like multiple colors or fonts.
+    /// </summary>
+    /// <param name="str">A string of plain text to render.</param>
+    public unsafe IGraphicsSprite RenderPlainText (string str) {
+        int maxBytes = str.Length * 4;
+
+        Span<byte> strBuffer = str.Length <= 256
+            ? stackalloc byte[maxBytes]
+            : new byte[maxBytes];
+        int len = Encoding.UTF8.GetBytes(str, strBuffer);
+
+        SDL_Surface* surface;
+
+        fixed (byte* ptr = strBuffer) {
+            surface = SDL3_ttf.TTF_RenderText_Solid(Font, ptr, (nuint)len, WHITE);
+        }
+
+        SDL_Texture* tex = SDL3.SDL_CreateTextureFromSurface(_renderer.SdlRenderer, surface);
+        if (tex is null) {
+            throw new Exception($"Couldn't create texture: {SDL3.SDL_GetError()}.");
+        }
+
+        SDL3.SDL_DestroySurface(surface);
+
+        return new GraphicsPlainTextSprite(_renderer, tex, null);
+    }
+
+    public unsafe IGraphicsSprite RenderShadowedPlainText (string str) {
+        int maxBytes = str.Length * 4;
+
+        Span<byte> strBuffer = str.Length <= 256
+            ? stackalloc byte[maxBytes]
+            : new byte[maxBytes];
+        int len = Encoding.UTF8.GetBytes(str, strBuffer);
+
+        SDL_Surface* surface;
+
+        fixed (byte* ptr = strBuffer) {
+            surface = SDL3_ttf.TTF_RenderText_Solid(Font, ptr, (nuint)len, WHITE);
+        }
+
+        SDL_Texture* tex = CreateCharTexture(surface);
+        SDL_Texture* shadowTex = CreateShadowTexture(surface);
+        if (tex is null) {
+            throw new Exception($"Couldn't create texture: {SDL3.SDL_GetError()}.");
+        }
+
+        SDL3.SDL_DestroySurface(surface);
+
+        return new GraphicsPlainTextSprite(_renderer, tex, shadowTex);
     }
 
     /// <summary>
@@ -258,7 +314,7 @@ public class GraphicsFont {
     /// </summary>
     /// <param name="surface">The surface to use.</param>
     private unsafe SDL_Texture* CreateCharTexture (SDL_Surface* surface) {
-        var tex = SDL3.SDL_CreateTextureFromSurface(_renderer, surface);
+        var tex = SDL3.SDL_CreateTextureFromSurface(_renderer.SdlRenderer, surface);
         return tex;
     }
 
@@ -269,14 +325,14 @@ public class GraphicsFont {
     /// <param name="surface">The surface to use as reference.</param>
     private unsafe SDL_Texture* CreateShadowTexture (SDL_Surface* surface) {
         // Create a raw texture. This is only done to get the format, really.
-        var rawTex = SDL3.SDL_CreateTextureFromSurface(_renderer, surface); // TODO: Maybe remove this step.
+        var rawTex = SDL3.SDL_CreateTextureFromSurface(_renderer.SdlRenderer, surface); // TODO: Maybe remove this step.
 
         // Convert the surface to the format we'll use in the streaming texture.
         var compatSurface = SDL3.SDL_ConvertSurface(surface, rawTex->format);
 
         // Create a texture to draw to.
         var streamingTex = SDL3.SDL_CreateTexture(
-            _renderer,
+            _renderer.SdlRenderer,
             compatSurface->format,
             SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING,
             rawTex->w,
@@ -367,7 +423,7 @@ public class GraphicsFont {
 
     private unsafe SDL_Texture* GrowAtlas (SDL_Texture* atlas, int newHeight) {
         var newAtlas = SDL3.SDL_CreateTexture(
-            _renderer,
+            _renderer.SdlRenderer,
             SDL_PixelFormat.SDL_PIXELFORMAT_ARGB8888, // TODO: Maybe do not hardcode this.
             SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET,
             _atlasWidth,
@@ -378,9 +434,9 @@ public class GraphicsFont {
             throw new Exception("Failed to grow atlas texture.");
         }
 
-        SDL3.SDL_SetRenderTarget(_renderer, newAtlas);
-        SDL3.SDL_RenderTexture(_renderer, atlas, null, null);
-        SDL3.SDL_SetRenderTarget(_renderer, null);
+        SDL3.SDL_SetRenderTarget(_renderer.SdlRenderer, newAtlas);
+        SDL3.SDL_RenderTexture(_renderer.SdlRenderer, atlas, null, null);
+        SDL3.SDL_SetRenderTarget(_renderer.SdlRenderer, null);
 
         SDL3.SDL_DestroyTexture(atlas);
 

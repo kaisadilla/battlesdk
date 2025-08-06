@@ -7,7 +7,7 @@ namespace battlesdk;
 public static class Hud {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    private static Renderer _renderer = null;
+    private static Renderer? _renderer = null;
 
     private static Textbox? _textbox = null;
     private static Task? _textboxTask = null;

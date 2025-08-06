@@ -1,11 +1,8 @@
-﻿using battlesdk.data;
-using SDL;
+﻿using SDL;
 
 namespace battlesdk.graphics;
 
 public interface IGraphicsSprite {
-    SpriteFile Asset { get; }
-
     /// <summary>
     /// Draws this sprite at the position given.
     /// </summary>

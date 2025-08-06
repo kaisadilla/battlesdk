@@ -3,6 +3,7 @@
 using battlesdk.graphics;
 using MoonSharp.Interpreter;
 
+[LuaApiClass]
 public class LuaSprite : ILuaType {
     [MoonSharpHidden]
     public const string CLASSNAME = "Sprite";
@@ -22,7 +23,7 @@ public class LuaSprite : ILuaType {
         _sprite.Draw(pos.ToIVec2(), size.ToIVec2());
     }
 
-    public string? to_string () {
-        return $"<frame {_sprite.Asset.Name}]";
+    public override string ToString () {
+        return $"<sprite>";
     }
 }

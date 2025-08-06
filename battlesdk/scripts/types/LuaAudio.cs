@@ -3,6 +3,7 @@ using NLog;
 
 namespace battlesdk.scripts.types;
 
+[LuaApiClass]
 public class LuaAudio {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 

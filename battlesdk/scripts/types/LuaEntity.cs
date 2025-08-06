@@ -1,16 +1,15 @@
-﻿using battlesdk.data;
+﻿using battlesdk.scripts.types;
 using battlesdk.world;
 using battlesdk.world.entities;
 using MoonSharp.Interpreter;
 
 namespace battlesdk.scripts;
 
-/// <summary>
-/// Represents an instance of an entity in a Lua script. This class is not
-/// intended to be used in C# for any purpose other than registering an entity
-/// instance in a Lua script.
-/// </summary>
+[LuaApiClass]
 public class LuaEntity {
+    [MoonSharpHidden]
+    public const string CLASSNAME = "Entity";
+
     /// <summary>
     /// The entity this instance acts on.
     /// </summary>
@@ -24,90 +23,55 @@ public class LuaEntity {
         _entity = entity;
     }
 
-    /// <summary>
-    /// Stores this instance in a global variable in the Lua VM given.
-    /// </summary>
-    /// <param name="script">The Lua VM.</param>
-    /// <param name="asset">The script that will be executed in said VM.</param>
-    /// <param name="varName">The name of the global variable to register.</param>
-    public void Register (Script script, ScriptAsset asset, string varName) {
-        Table tbl = new(script);
-
-        // These functions are only valid when the entity is a character.
-        if (_entity is Character) {
-            tbl["move_up"] = (Action<DynValue>)LuaMoveUp;
-            tbl["move_down"] = (Action<DynValue>)LuaMoveDown;
-            tbl["move_left"] = (Action<DynValue>)LuaMoveLeft;
-            tbl["move_right"] = (Action<DynValue>)LuaMoveRight;
-            tbl["look_up"] = (Action)LuaLookUp; // TODO: These 4 can be available for entities and shouldn't be treated as moves.
-            tbl["look_down"] = (Action)LuaLookDown;
-            tbl["look_left"] = (Action)LuaLookLeft;
-            tbl["look_right"] = (Action)LuaLookRight;
-            tbl["look_towards_player"] = (Action)LuaLookTowardsPlayer;
-            tbl["jump"] = (Action<DynValue>)LuaJump;
-            tbl["ignore_characters"] = (Action<DynValue>)LuaIgnoreCharacters;
-        }
-
-        script.Globals[varName] = tbl;
-    }
-
-    private void LuaMoveUp (DynValue arg) {
-        int steps = arg.Type == DataType.Number ? (int)arg.Number : 1;
-
+    public void move_up (int? times) {
         ScriptLoop.Enqueue(new MoveScriptEvent(
-            (Character)_entity, new(MoveKind.StepUp, _ignoreCharacters), steps
+            (Character)_entity, new(MoveKind.StepUp, _ignoreCharacters), times ?? 1
         ));
     }
 
-    private void LuaMoveDown (DynValue arg) {
-        int steps = arg.Type == DataType.Number ? (int)arg.Number : 1;
-
+    public void move_down (int? times) {
         ScriptLoop.Enqueue(new MoveScriptEvent(
-            (Character)_entity, new(MoveKind.StepDown, _ignoreCharacters), steps
+            (Character)_entity, new(MoveKind.StepDown, _ignoreCharacters), times ?? 1
         ));
     }
 
-    private void LuaMoveLeft (DynValue arg) {
-        int steps = arg.Type == DataType.Number ? (int)arg.Number : 1;
-
+    public void move_left (int? times) {
         ScriptLoop.Enqueue(new MoveScriptEvent(
-            (Character)_entity, new(MoveKind.StepLeft, _ignoreCharacters), steps
+            (Character)_entity, new(MoveKind.StepLeft, _ignoreCharacters), times ?? 1
         ));
     }
 
-    private void LuaMoveRight (DynValue arg) {
-        int steps = arg.Type == DataType.Number ? (int)arg.Number : 1;
-
+    public void move_right (int? times) {
         ScriptLoop.Enqueue(new MoveScriptEvent(
-            (Character)_entity, new(MoveKind.StepRight, _ignoreCharacters), steps
+            (Character)_entity, new(MoveKind.StepRight, _ignoreCharacters), times ?? 1
         ));
     }
 
-    private void LuaLookUp () {
+    public void look_up () {
         ScriptLoop.Enqueue(new MoveScriptEvent(
             (Character)_entity, new(MoveKind.LookUp, _ignoreCharacters), 1
         ));
     }
 
-    private void LuaLookDown () {
+    public void look_down () {
         ScriptLoop.Enqueue(new MoveScriptEvent(
             (Character)_entity, new(MoveKind.LookDown, _ignoreCharacters), 1
         ));
     }
 
-    private void LuaLookLeft () {
+    public void look_left () {
         ScriptLoop.Enqueue(new MoveScriptEvent(
             (Character)_entity, new(MoveKind.LookLeft, _ignoreCharacters), 1
         ));
     }
 
-    private void LuaLookRight () {
+    public void look_right () {
         ScriptLoop.Enqueue(new MoveScriptEvent(
             (Character)_entity, new(MoveKind.LookRight, _ignoreCharacters), 1
         ));
     }
 
-    private void LuaLookTowardsPlayer () {
+    public void look_towards_player () {
         var delta = G.World.Player.Position - _entity.Position;
 
         Direction dir;
@@ -123,16 +87,13 @@ public class LuaEntity {
         ));
     }
 
-    private void LuaJump (DynValue arg) {
-        int times = arg.Type == DataType.Number ? (int)arg.Number : 1;
-
+    public void jump (int? times) {
         ScriptLoop.Enqueue(new MoveScriptEvent(
-            (Character)_entity, new(MoveKind.Jump, _ignoreCharacters), times
+            (Character)_entity, new(MoveKind.Jump, _ignoreCharacters), times ?? 1
         ));
     }
 
-    private void LuaIgnoreCharacters (DynValue argVal) {
-        bool val = argVal.Type == DataType.Boolean ? argVal.Boolean : true;
+    public void ignore_characters (bool val) {
         _ignoreCharacters = val;
     }
 }

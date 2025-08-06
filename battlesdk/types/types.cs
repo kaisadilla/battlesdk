@@ -123,6 +123,11 @@ public readonly record struct ColorRGB (int R, int G, int B) {
 
 }
 
+[JsonConverter(typeof(ColorRGBAConverter))]
+public readonly record struct ColorRGBA (int R, int G, int B, int A) {
+
+}
+
 public enum Direction {
     Down,
     Right,

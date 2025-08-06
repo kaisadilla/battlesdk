@@ -2,7 +2,7 @@
 using SDL;
 
 namespace battlesdk.graphics;
-public unsafe class GraphicsCharacterSprite : GraphicsTexture {
+public unsafe class GraphicsCharacterSprite : GraphicsSprite {
     public override CharacterSpriteFile Asset { get; }
 
     private int _offsetX;

@@ -14,7 +14,7 @@ public unsafe class Renderer {
     private readonly Dictionary<int, GraphicsFont> _fonts = [];
     private readonly Dictionary<int, GraphicsTileset> _tilesets = [];
     private readonly Dictionary<int, IGraphicsSprite> _sprites = [];
-    private readonly Dictionary<int, GraphicsTexture> _spriteAtlases = [];
+    private readonly Dictionary<int, GraphicsSprite> _spriteAtlases = [];
     private readonly Dictionary<int, Dictionary<string, GraphicsAtlasSprite>> _spritesheetSprites = [];
 
     /// <summary>
@@ -103,7 +103,7 @@ public unsafe class Renderer {
             Registry.Fonts,
             _fonts,
             id,
-            asset => new(SdlRenderer, asset)
+            asset => new(this, asset)
         );
     }
 
@@ -111,7 +111,7 @@ public unsafe class Renderer {
         return GetFont(id) ?? GetFont(0) ?? throw new("No font available.");
     }
 
-    public GraphicsTexture? GetSpriteAtlas (int id) {
+    public GraphicsSprite? GetSpriteAtlas (int id) {
         if (_spriteAtlases.TryGetValue(id, out var atlas)) {
             return atlas;
         }
@@ -120,7 +120,7 @@ public unsafe class Renderer {
             return null;
         }
 
-        _spriteAtlases[id] = new GraphicsTexture(this, asset);
+        _spriteAtlases[id] = new GraphicsSprite(this, asset);
         return _spriteAtlases[id];
     }
 
@@ -134,7 +134,7 @@ public unsafe class Renderer {
         }
 
         else {
-            _sprites[id] = GraphicsTexture.New(this, asset);
+            _sprites[id] = GraphicsSprite.New(this, asset);
         }
         
         return _sprites[id];

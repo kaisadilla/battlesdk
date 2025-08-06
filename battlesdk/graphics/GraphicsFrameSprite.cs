@@ -2,7 +2,7 @@
 using SDL;
 
 namespace battlesdk.graphics;
-public class GraphicsFrameSprite : GraphicsTexture {
+public class GraphicsFrameSprite : GraphicsSprite {
     public new FrameSpriteFile Asset => (FrameSpriteFile)base.Asset;
 
     // Each of the 9 parts of a textbox: 4 corners, 4 borders and 1 center.

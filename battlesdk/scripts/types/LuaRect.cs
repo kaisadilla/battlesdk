@@ -2,6 +2,7 @@
 
 namespace battlesdk.scripts.types;
 
+[LuaApiClass]
 public class LuaRect : ILuaType {
     [MoonSharpHidden]
     public const string CLASSNAME = "Rect";
@@ -34,10 +35,6 @@ public class LuaRect : ILuaType {
 
     public static LuaRect @new (float top, float left, float bottom, float right) {
         return new(top, left, bottom, right);
-    }
-
-    public string to_string () {
-        return ToString();
     }
 
     [MoonSharpHidden]

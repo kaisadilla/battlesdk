@@ -3,6 +3,7 @@
 using battlesdk.graphics;
 using MoonSharp.Interpreter;
 
+[LuaApiClass]
 public class LuaFrameSprite : ILuaType {
     [MoonSharpHidden]
     public const string CLASSNAME = "FrameSprite";
@@ -20,7 +21,7 @@ public class LuaFrameSprite : ILuaType {
         _frame.Draw(pos.ToIVec2(), size.ToIVec2());
     }
 
-    public string? to_string () {
-        return $"<frame {_frame.Asset.Name}]";
+    public override string ToString () {
+        return $"<frame {_frame.Asset.Name}>";
     }
 }
