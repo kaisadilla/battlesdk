@@ -1,21 +1,111 @@
 ﻿using battlesdk.data;
 using battlesdk.graphics;
+using battlesdk.input;
 using battlesdk.world;
 using battlesdk.world.entities;
 using SDL;
 
 namespace battlesdk.screen;
 
-public class OverworldScreenLayer : IScreenLayer {
-    public bool IsTransparent => false;
+public class OverworldScreenLayer : IScreenLayer, IInputListener {
+    private const float MOVE_INPUT_DELAY = 0.1f;
 
     private Renderer _renderer;
-
     private Camera _camera;
+    private Player _player;
+
+    private float _leftKeyStart = float.MinValue;
+    private float _rightKeyStart = float.MinValue;
+    private float _upKeyStart = float.MinValue;
+    private float _downKeyStart = float.MinValue;
+
+    public bool IsTransparent => false;
+    public bool BlockOtherInput => true;
 
     public OverworldScreenLayer (Renderer renderer) {
         _renderer = renderer;
         _camera = new(renderer.Width, renderer.Height, IVec2.Zero);
+        _player = G.World.Player;
+    }
+
+    public void HandleInput () {
+        if (_player.IsMoving == false) {
+            if (Controls.GetKeyDown(ActionKey.Left)) {
+                _player.SetDirection(Direction.Left);
+                _leftKeyStart = Time.TotalTime;
+            }
+            else if (Controls.GetKeyDown(ActionKey.Right)) {
+                _player.SetDirection(Direction.Right);
+                _rightKeyStart = Time.TotalTime;
+            }
+            else if (Controls.GetKeyDown(ActionKey.Up)) {
+                _player.SetDirection(Direction.Up);
+                _upKeyStart = Time.TotalTime;
+            }
+            else if (Controls.GetKeyDown(ActionKey.Down)) {
+                _player.SetDirection(Direction.Down);
+                _downKeyStart = Time.TotalTime;
+            }
+
+            if (Controls.GetKey(ActionKey.Left)) {
+                if (Time.TotalTime - _leftKeyStart > MOVE_INPUT_DELAY) {
+                    _player.Move(Direction.Left, false);
+                }
+            }
+            else if (Controls.GetKey(ActionKey.Right)) {
+                if (Time.TotalTime - _rightKeyStart > MOVE_INPUT_DELAY) {
+                    _player.Move(Direction.Right, false);
+                }
+            }
+            else if (Controls.GetKey(ActionKey.Up)) {
+                if (Time.TotalTime - _upKeyStart > MOVE_INPUT_DELAY) {
+                    _player.Move(Direction.Up, false);
+                }
+            }
+            else if (Controls.GetKey(ActionKey.Down)) {
+                if (Time.TotalTime - _downKeyStart > MOVE_INPUT_DELAY) {
+                    _player.Move(Direction.Down, false);
+                }
+            }
+
+            if (_player.Collided) {
+                Audio.PlayCollision();
+            }
+            if (_player.IsJumping) {
+                Audio.PlayJump();
+            }
+        }
+
+        if (Controls.GetKeyUp(ActionKey.Left)) {
+            _leftKeyStart = float.MinValue;
+        }
+        else if (Controls.GetKeyUp(ActionKey.Right)) {
+            _rightKeyStart = float.MinValue;
+        }
+        else if (Controls.GetKeyUp(ActionKey.Up)) {
+            _upKeyStart = float.MinValue;
+        }
+        else if (Controls.GetKeyUp(ActionKey.Down)) {
+            _downKeyStart = float.MinValue;
+        }
+
+        if (Controls.GetKeyDown(ActionKey.Primary)) {
+            _player.HandlePrimaryInput();
+        }
+        if (Controls.GetKeyDown(ActionKey.Secondary)) {
+            _player.SetRunning(true);
+        }
+        if (Controls.GetKeyDown(ActionKey.Menu)) {
+            ScreenManager.MainMenu.Open();
+        }
+
+        if (Controls.GetKeyUp(ActionKey.Secondary)) {
+            _player.SetRunning(false);
+        }
+
+        if (_player.IsMoving) {
+            G.World.SetFocus(_player.Position);
+        }
     }
 
     public void Draw () {
@@ -153,6 +243,10 @@ public class OverworldScreenLayer : IScreenLayer {
             }
             else {
                 charSprite.Draw(_camera.GetScreenPos(TileToPixelSpace(subpos)));
+            }
+
+            if (Registry.Sprites.TryGetId("ui/menu_icons", out int testId)) {
+                var test = _renderer.GetSheetSprite(testId, "pokemon");
             }
         }
     }

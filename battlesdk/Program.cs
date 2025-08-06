@@ -30,16 +30,12 @@ var win = new Window(
     Constants.VIEWPORT_HEIGHT,
     Constants.DEFAULT_SCREEN_SCALE
 );
-ScreenManager.SetMainRenderer(win.Renderer);
-
 Lua.Init();
+ScreenManager.Init(win.Renderer);
 
 G.LoadGame();
 ScreenManager.Push(new OverworldScreenLayer(win.Renderer));
-
-
-Registry.Scripts.TryGetElementByName("screens/main_menu", out var scr);
-var menu = new ScriptScreenLayer(win.Renderer, scr);
+InputManager.Push(new OverworldScreenLayer(win.Renderer));
 
 while (win.CloseRequested == false) {
     var frameStart = SDL3.SDL_GetTicks();
@@ -55,10 +51,6 @@ while (win.CloseRequested == false) {
     InputManager.Update();
     ScriptLoop.Update();
     Hud.Update();
-
-    if (Controls.GetKeyDown(ActionKey.Menu)) {
-        menu.Open();
-    }
 
     win.Render();
 

@@ -48,7 +48,7 @@ public class FrameSpriteFile : SpriteFile {
     /// defines the area inside the frame where things will not be drawn on top
     /// of the frame's borders.
     /// </summary>
-    public IRect ContentPadding { get; private set; }
+    public IRect Padding { get; private set; }
 
     public FrameSpriteFile (string name, string path, SpriteMetadataDefinition def)
         : base(name, path)
@@ -79,7 +79,7 @@ public class FrameSpriteFile : SpriteFile {
         if (def.TextPadding is null) {
             _logger.Warn($"Field 'text_padding' for {path} is not defined.");
         }
-        if (def.ContentPadding is null) {
+        if (def.Padding is null) {
             _logger.Warn($"Field 'content_padding' for {path} is not defined.");
         }
 
@@ -91,6 +91,6 @@ public class FrameSpriteFile : SpriteFile {
         CenterMode = def.CenterMode ?? ResizeMode.Stretch;
 
         TextPadding = def.TextPadding ?? new(0, 0, 0, 0);
-        ContentPadding = def.ContentPadding ?? new(0, 0, 0, 0);
+        Padding = def.Padding ?? new(0, 0, 0, 0);
     }
 }

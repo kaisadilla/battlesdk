@@ -92,6 +92,32 @@ public readonly record struct IRect (int Top, int Left, int Bottom, int Right) {
     }
 }
 
+public readonly record struct Rect (float Top, float Left, float Bottom, float Right) {
+    public readonly static IRect Zero = new(0, 0, 0, 0);
+
+    public override string ToString () {
+        return $"(top: {Top}, left: {Left}, bottom: {Bottom}, right: {Right})";
+    }
+
+    public static Rect operator + (Rect rect, Vec2 pos) {
+        return new() {
+            Top = rect.Top + pos.Y,
+            Left = rect.Left + pos.X,
+            Bottom = rect.Bottom + pos.Y,
+            Right = rect.Right + pos.X
+        };
+    }
+
+    public static Rect operator * (Rect rect, float val) {
+        return new() {
+            Top = rect.Top * val,
+            Left = rect.Left * val,
+            Bottom = rect.Bottom * val,
+            Right = rect.Right * val,
+        };
+    }
+}
+
 [JsonConverter(typeof(ColorRGBConverter))]
 public readonly record struct ColorRGB (int R, int G, int B) {
 

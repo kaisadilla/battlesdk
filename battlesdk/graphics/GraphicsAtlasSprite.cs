@@ -26,6 +26,7 @@ public class GraphicsAtlasSprite : IGraphicsSprite {
         _atlas = atlas;
 
         var index = asset.Names.IndexOf(name);
+        if (index == -1) throw new("Invalid sheet sprite name.");
 
         var spritesPerRow = _atlas.Width / asset.SpriteSize.X;
         var x = (index % spritesPerRow) * asset.SpriteSize.X;

@@ -158,7 +158,7 @@ public unsafe class Renderer {
         return frameSprite;
     }
 
-    public GraphicsAtlasSprite? GetSpritesheetSprite (int id, string subsprite) {
+    public GraphicsAtlasSprite? GetSheetSprite (int id, string subsprite) {
         if (_spritesheetSprites.TryGetValue(id, out var dict) == false) {
             dict = _spritesheetSprites[id] = [];
         }

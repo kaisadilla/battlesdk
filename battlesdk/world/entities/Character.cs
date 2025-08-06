@@ -203,4 +203,8 @@ public abstract class Character : Entity {
         PreviousPosition = Position;
         Audio.PlayJump();
     }
+
+    public virtual void SetRunning (bool value) {
+        IsRunning = value;
+    }
 }

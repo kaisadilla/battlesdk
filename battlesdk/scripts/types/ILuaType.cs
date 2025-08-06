@@ -2,4 +2,5 @@
 
 public interface ILuaType {
     string? ToString();
+    string? to_string();
 }

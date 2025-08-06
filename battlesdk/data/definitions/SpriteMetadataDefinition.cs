@@ -33,9 +33,7 @@ public class SpriteMetadataDefinition {
 
     [JsonPropertyName("text_padding")]
     public IRect? TextPadding { get; init; }
-
-    [JsonPropertyName("content_padding")]
-    public IRect? ContentPadding { get; init; }
+    public IRect? Padding { get; init; }
 
     /// <summary>
     /// Returns a new definition that is a copy of this one, with its values
@@ -53,7 +51,7 @@ public class SpriteMetadataDefinition {
             YMode = prioritary?.YMode ?? YMode,
             CenterMode = prioritary?.CenterMode ?? CenterMode,
             TextPadding = prioritary?.TextPadding ?? TextPadding,
-            ContentPadding = prioritary?.ContentPadding ?? ContentPadding,
+            Padding = prioritary?.Padding ?? Padding,
         };
         
         return clone;

@@ -11,13 +11,15 @@ public static class Lua {
     public static void Init () {
         RegisterEnumTable<ActionKey>("ActionKey");
 
-        UserData.RegisterType<LuaIVec2>(InteropAccessMode.Preoptimized, LuaIVec2.CLASSNAME);
+        UserData.RegisterType<LuaVec2>(InteropAccessMode.Preoptimized, LuaVec2.CLASSNAME);
+        UserData.RegisterType<LuaRect>(InteropAccessMode.Preoptimized, LuaRect.CLASSNAME);
         UserData.RegisterType<LuaLogger>(InteropAccessMode.Preoptimized, LuaLogger.CLASSNAME);
         UserData.RegisterType<LuaControls>(InteropAccessMode.Preoptimized, LuaControls.CLASSNAME);
         UserData.RegisterType<LuaAudio>(InteropAccessMode.Preoptimized, LuaAudio.CLASSNAME);
 
         UserData.RegisterType<LuaRenderer>(InteropAccessMode.Preoptimized, LuaRenderer.CLASSNAME);
-        UserData.RegisterType<LuaFrame>(InteropAccessMode.Preoptimized, LuaFrame.CLASSNAME);
+        UserData.RegisterType<LuaSprite>(InteropAccessMode.Preoptimized, LuaFrameSprite.CLASSNAME);
+        UserData.RegisterType<LuaFrameSprite>(InteropAccessMode.Preoptimized, LuaFrameSprite.CLASSNAME);
     }
 
     public static void RegisterGlobals (Script script) {
@@ -48,7 +50,8 @@ public static class Lua {
             Wait((int)arg.Number);
         });
 
-        script.Globals["IVec2"] = UserData.CreateStatic(typeof(LuaIVec2));
+        script.Globals["IVec2"] = UserData.CreateStatic(typeof(LuaVec2));
+        script.Globals["Rect"] = UserData.CreateStatic(typeof(LuaRect));
         script.Globals["Logger"] = UserData.CreateStatic(typeof(LuaLogger));
         script.Globals["Controls"] = UserData.CreateStatic(typeof(LuaControls));
         script.Globals["Audio"] = UserData.CreateStatic(typeof(LuaAudio));
