@@ -64,6 +64,8 @@ while (win.CloseRequested == false) {
         ScriptLoop.Update();
         Hud.Update();
 
+        CoroutineRuntime.Update();
+
         win.Render();
 
         var frameTime = (int)(SDL3.SDL_GetTicks() - frameStart);

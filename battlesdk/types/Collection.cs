@@ -7,6 +7,11 @@ public class Collection<T> : IEnumerable<T> where T : IIdentifiable {
     private Dictionary<string, int> _ids = [];
 
     /// <summary>
+    /// The number of elements in the collection.
+    /// </summary>
+    public int Count => _elements.Count;
+
+    /// <summary>
     /// Returns the element at the given index.
     /// </summary>
     /// <returns></returns>

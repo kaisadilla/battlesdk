@@ -21,9 +21,15 @@ public class GraphicsAtlasSprite : IGraphicsSprite {
         _renderer = renderer.SdlRenderer;
         Asset = asset;
 
-        var atlas = renderer.GetSpriteAtlas(asset.Id)
+        var atlas = renderer.GetSprite(asset.Id)
             ?? throw new("Couldn't find spritesheet atlas.");
-        _atlas = atlas;
+
+        if (atlas is GraphicsTexture gt) {
+            _atlas = gt;
+        }
+        else {
+            throw new("Base sprite is not a valid sprite.");
+        }
 
         var index = asset.Names.IndexOf(name);
         if (index == -1) throw new("Invalid sheet sprite name.");
@@ -46,6 +52,10 @@ public class GraphicsAtlasSprite : IGraphicsSprite {
         IVec2 position, IVec2 size, ResizeMode resizeMode = ResizeMode.Stretch
     ) {
         _atlas.DrawSection(_src, position, size, resizeMode);
+    }
+
+    public void DrawSubsprite (IVec2 position, int subsprite) {
+        _atlas.Draw(position);
     }
 
     public unsafe void DrawSection (SDL_FRect section, IVec2 position) {

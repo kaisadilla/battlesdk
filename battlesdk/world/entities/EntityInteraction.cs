@@ -5,7 +5,33 @@ using NLog;
 
 namespace battlesdk.world.entities;
 
+public enum InteractionTrigger {
+    /// <summary>
+    /// This interaction triggers when the player, while being next to the
+    /// entity and looking towards it, presses the <see cref="ActionKey.Primary"/>
+    /// button.
+    /// </summary>
+    ActionButton,
+    /// <summary>
+    /// This interaction triggers when the player tries to move into the
+    /// position the entity is in.This is the reserve of
+    /// <see cref="EntityTouchesPlayer"/>.
+    /// </summary>
+    PlayerTouchesEntity,
+    /// <summary>
+    /// This interaction triggers when this entity tries to move into the
+    /// position the player is in. This is the reserve of
+    /// <see cref="PlayerTouchesEntity"/>.
+    /// </summary>
+    EntityTouchesPlayer,
+}
+
 public abstract class EntityInteraction {
+    /// <summary>
+    /// The event that triggers this interaction.
+    /// </summary>
+    public InteractionTrigger Trigger { get; protected set; }
+
     /// <summary>
     /// True if this entity's interaction is currently ongoing.
     /// </summary>
@@ -37,6 +63,12 @@ public abstract class EntityInteraction {
 
         if (LookToSource) {
             _target.SetDirection(from);
+        }
+    }
+
+    public virtual void OnPlayerTouchEvent (Direction from) {
+        if (Trigger == InteractionTrigger.PlayerTouchesEntity) {
+            Interact(from);
         }
     }
 
@@ -126,12 +158,51 @@ public class MessageEntityInteraction : EntityInteraction {
 
     public override void Interact (Direction from) {
         if (IsInteracting == true) return;
+        IsInteracting = true;
 
         base.Interact(from);
 
         foreach (var k in _textKeys) {
             ScriptLoop.Enqueue(new MessageScriptEvent(Localization.Text(k)));
         }
+        EnqueueEnd();
+    }
+}
+
+public class DoorEntityInteraction : EntityInteraction {
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
+    private string _warpTo;
+    private IVec2 _pos;
+
+    public DoorEntityInteraction (Entity entity, string warpTo, IVec2 pos) : base(entity) {
+        _warpTo = warpTo;
+        _pos = pos;
+        Trigger = InteractionTrigger.PlayerTouchesEntity;
+    }
+
+    public DoorEntityInteraction (
+        Entity entity, MessageEntityInteractionData data
+    ) : base(entity) {
+    }
+
+    public override void Interact (Direction from) {
+        if (IsInteracting == true) return;
+        IsInteracting = true;
+
+        InputManager.PushBlock();
+
+        Coroutine.Start(InteractionTask());
+    }
+
+    private CoroutineTask InteractionTask () {
+        if (_target.Sprite is SpritesheetFile spr) {
+            for (int i = 1; i <= 3; i++) {
+                _target.SetSpriteIndex(i);
+                yield return new WaitForSeconds(0.51f);
+            }
+        }
+
         EnqueueEnd();
     }
 }

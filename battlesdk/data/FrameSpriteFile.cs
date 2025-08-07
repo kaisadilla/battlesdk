@@ -1,19 +1,10 @@
 ﻿using battlesdk.data.definitions;
 using NLog;
-using SDL;
 
 namespace battlesdk.data;
 public class FrameSpriteFile : SpriteFile {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    /// <summary>
-    /// The sprite's width.
-    /// </summary>
-    public int Width { get; private init; }
-    /// <summary>
-    /// The sprite's height.
-    /// </summary>
-    public int Height { get; private init; }
     /// <summary>
     /// The horizontal cutoff points of the textbox. This array will always
     /// contain two values.
@@ -53,15 +44,6 @@ public class FrameSpriteFile : SpriteFile {
     public FrameSpriteFile (string name, string path, SpriteMetadataDefinition def)
         : base(name, path)
     {
-        unsafe {
-            var surface = SDL3_image.IMG_Load(path);
-
-            Width = surface->w;
-            Height = surface->h;
-
-            SDL3.SDL_DestroySurface(surface);
-        }
-
         if (def.X is null || def.X.Count != 2 || def.Y is null || def.Y.Count != 2) {
             throw new Exception(
                 "Fields 'x' and 'y' must exist and contain exactly 2 integers."

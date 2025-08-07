@@ -10,6 +10,7 @@ public class World {
 
     private IVec2 _focus = IVec2.Zero;
 
+    private Dictionary<string, Warp> _warps { get; } = [];
     /// <summary>
     /// The NPCs in the world, indexed by a unique id that encodes the map
     /// they belong to as well as their individual id.
@@ -32,6 +33,7 @@ public class World {
     /// </summary>
     public Player Player { get; }
 
+    public IEnumerable<Warp> Warps => _warps.Values;
     /// <summary>
     /// Contains all the NPCs that are currently loaded in the world.
     /// </summary>
@@ -48,6 +50,14 @@ public class World {
     }
 
     private void LoadMapEntities (GameMap map) {
+        for (int i = 0; i < map.Data.Warps.Count; i++) {
+            var warpData = map.Data.Warps[i];
+            string id = $"{map.Data.Id}_{i}";
+
+            if (_npcs.ContainsKey(id)) continue;
+
+            _warps[id] = new(map.Data.Id, i, map, warpData);
+        }
         for (int i = 0; i < map.Data.Npcs.Count; i++) {
             var npcData = map.Data.Npcs[i];
             string id = $"{map.Data.Id}_{i}";
@@ -59,7 +69,12 @@ public class World {
     }
 
     public void CullEntities () {
-        foreach (var kv in _npcs) {
+        CullEntities(_warps);
+        CullEntities(_npcs);
+    }
+
+    protected void CullEntities<T> (Dictionary<string, T> dict) where T : Entity {
+        foreach (var kv in dict) {
             bool remove = true;
             foreach (var map in Maps) {
                 // If the map this npc belongs to is loaded, this npc stays loaded.
@@ -77,7 +92,7 @@ public class World {
             }
 
             // TODO: Clean up method for the npc.
-            _npcs.Remove(kv.Key);
+            dict.Remove(kv.Key);
         }
     }
 
@@ -115,6 +130,7 @@ public class World {
     /// Loads the world given, placing the player at the position given.
     /// </summary>
     /// <param name="world"></param>
+    /// <param name="position"></param>
     public void TransferTo (WorldAsset world, IVec2 position) {
         _logger.Info($"Player transferred to world '{world.Name}' at pos {position}.");
 
@@ -196,11 +212,15 @@ public class World {
     /// This method will return the player if the player is at the given position.
     /// </summary>
     /// <param name="worldPos">A position in the world.</param>
-    public Character? GetCharacterAt (IVec2 worldPos) {
+    public Entity? GetEntityAt (IVec2 worldPos) {
         if (Player.Position == worldPos) return Player;
 
         foreach (var ch in Npcs) {
             if (ch.Position == worldPos) return ch;
+        }
+
+        foreach (var warp in Warps) {
+            if (warp.Position == worldPos) return warp;
         }
 
         return null;

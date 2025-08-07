@@ -1,4 +1,5 @@
 ﻿using battlesdk.data.definitions;
+using battlesdk.world.entities;
 
 namespace battlesdk.data;
 
@@ -27,6 +28,12 @@ public abstract class EntityData {
 }
 
 public abstract class EntityInteractionData {
+    public InteractionTrigger Trigger { get; }
+
+    protected EntityInteractionData (EntityInteractionDefinition def) {
+        Trigger = def.Trigger ?? InteractionTrigger.ActionButton;
+    }
+
     public static EntityInteractionData New (EntityInteractionDefinition def) {
         return def.Type switch {
             EntityInteractionType.Script => new ScriptEntityInteractionData(def),
@@ -40,7 +47,8 @@ public abstract class EntityInteractionData {
 
 public class ScriptEntityInteractionData : EntityInteractionData {
     public int ScriptId { get; }
-    public ScriptEntityInteractionData (EntityInteractionDefinition def) {
+
+    public ScriptEntityInteractionData (EntityInteractionDefinition def) : base(def) {
         if (def.Type != EntityInteractionType.Script) {
             throw new ArgumentException("Invalid definition type.");
         }
@@ -62,7 +70,7 @@ public class ScriptEntityInteractionData : EntityInteractionData {
 public class MessageEntityInteractionData : EntityInteractionData {
     public List<string> TextKeys { get; }
 
-    public MessageEntityInteractionData (EntityInteractionDefinition def) {
+    public MessageEntityInteractionData (EntityInteractionDefinition def) : base(def) {
         if (def.Type != EntityInteractionType.Message) {
             throw new ArgumentException("Invalid definition type.");
         }

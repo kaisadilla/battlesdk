@@ -16,6 +16,12 @@ public interface IGraphicsSprite {
     /// <param name="resizeMode">The strategy to use to resize the sprite.</param>
     void Draw (IVec2 position, IVec2 size, ResizeMode resizeMode = ResizeMode.Stretch);
     /// <summary>
+    /// Draws the subsprite given at the position given.
+    /// </summary>
+    /// <param name="position">The position to draw the sprite at.</param>
+    /// <param name="subsprite">The subsprite's index.</param>
+    void DrawSubsprite (IVec2 position, int subsprite);
+    /// <summary>
     /// Draws a section of the sprite at the position given.
     /// </summary>
     /// <param name="section">The section of the sprite to draw.</param>

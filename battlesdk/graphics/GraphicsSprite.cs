@@ -27,11 +27,26 @@ public class GraphicsSprite : GraphicsTexture {
 
     public static GraphicsSprite New (Renderer renderer, SpriteFile asset) {
         return asset switch {
-            SpritesheetFile f => new GraphicsSprite(renderer, f),
             CharacterSpriteFile f => new GraphicsCharacterSprite(renderer, f),
+            SpritesheetFile f => new GraphicsSprite(renderer, f),
             FrameSpriteFile f => new GraphicsFrameSprite(renderer, f),
             _ => new GraphicsSprite(renderer, asset)
         };
     }
 
+    public override void DrawSubsprite (IVec2 position, int subsprite) {
+        if (Asset is SpritesheetFile spritesheet) {
+            var origin = spritesheet.GetSubspriteOrigin(subsprite);
+
+            DrawSection(
+                SdlFRect(
+                    origin.X,
+                    origin.Y,
+                    spritesheet.SpriteSize.X,
+                    spritesheet.SpriteSize.Y
+                ),
+                position
+            );
+        }
+    }
 }

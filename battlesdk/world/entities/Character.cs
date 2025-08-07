@@ -74,6 +74,20 @@ public abstract class Character : Entity {
     public override void Update () {
         base.Update();
 
+        if (Sprite is not null && Sprite is CharacterSpriteFile cs) {
+            int frame = 0;
+            if (IsMoving && MoveProgress >= 0.25f && MoveProgress < 0.75f) {
+                frame = 1 + (MoveCount % 2);
+            }
+
+            if (IsRunning && IsMoving && IsJumping == false) {
+                SpriteIndex = cs.GetRunningSprite(Direction, frame);
+            }
+            else {
+                SpriteIndex = cs.GetWalkingSprite(Direction, frame);
+            }
+        }
+
         if (IsMoving) {
             if (IsJumping) {
                 MoveProgress += Time.DeltaTime / Constants.LEDGE_JUMP_SPEED;
@@ -117,8 +131,7 @@ public abstract class Character : Entity {
 
     /// <summary>
     /// The character executes the move described. If the character is already
-    /// moving, the call is ignored. To queue up moves, use
-    /// <see cref="QueueMove(CharacterMove)"/> instead.
+    /// moving, the call is ignored.
     /// </summary>
     /// <param name="direction">The direction in which to move.</param>
     /// <param name="ignoreCharacters">If true, the move will ignore characters.</param>
@@ -159,8 +172,12 @@ public abstract class Character : Entity {
             }
         }
         if (moveAllowed && ignoreCharacters == false) {
-            var ch = G.World.GetCharacterAt(destination);
-            if (ch is not null) moveAllowed = false;
+            var ch = G.World.GetEntityAt(destination);
+            if (ch is not null) {
+                moveAllowed = false;
+
+                // TODO: Touch door.
+            }
         }
 
         SetDirection(direction);
@@ -172,7 +189,7 @@ public abstract class Character : Entity {
         MoveCount++;
         if (jumpDir == Direction.None) {
             IsMoving = true;
-            MoveProgress = 0; //Constants.WALK_SPEED* Time.DeltaTime;
+            MoveProgress = 0;
             SetPosition(destination);
         }
         else {

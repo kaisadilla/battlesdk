@@ -37,6 +37,8 @@ internal class LuaDocGenerator {
         foreach (var t in types) {
             DescribeClass(writer, t);
         }
+
+        // TODO: DescribeEnum, describe globals
     }
 
     private void DescribeClass (StreamWriter writer, Type type) {

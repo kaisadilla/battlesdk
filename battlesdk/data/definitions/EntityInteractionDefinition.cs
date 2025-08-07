@@ -1,4 +1,6 @@
-﻿namespace battlesdk.data.definitions;
+﻿using battlesdk.world.entities;
+
+namespace battlesdk.data.definitions;
 
 public enum EntityInteractionType {
     Script,
@@ -7,6 +9,7 @@ public enum EntityInteractionType {
 
 public class EntityInteractionDefinition {
     public required EntityInteractionType Type { get; init; }
+    public InteractionTrigger? Trigger { get; init; }
     public string? Script { get; init; } = null;
     public string? TextKey { get; init; } = null;
     public List<string>? TextKeys { get; init; } = null;

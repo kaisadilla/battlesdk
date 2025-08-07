@@ -8,7 +8,7 @@ public class Player : Character {
     }
 
     public void HandlePrimaryInput () { // TODO: Better name
-        var ch = G.World.GetCharacterAt(GetPositionInFront());
+        var ch = G.World.GetEntityAt(GetPositionInFront());
         if (ch is not null) {
             ch.Interact(Direction.Opposite());
             return;

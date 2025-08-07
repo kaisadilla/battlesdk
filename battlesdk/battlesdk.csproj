@@ -32,6 +32,22 @@
     </Content>
 </ItemGroup>
 
+<Target Name="CleanOutputResFolder" AfterTargets="Build">
+    <PropertyGroup>
+        <SourceResDir>$(ProjectDir)res\</SourceResDir>
+        <OutputResDir>$(OutputPath)res\</OutputResDir>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- Files in output but not in source -->
+        <ExtraOutputFiles Remove="@(Content->'%(RecursiveDir)%(Filename)%(Extension)')" />
+        <ExtraOutputFiles Include="$(OutputResDir)**\*.*"
+                            Condition="!Exists('$(SourceResDir)%(RecursiveDir)%(Filename)%(Extension)')" />
+    </ItemGroup>
+
+    <Delete Files="@(ExtraOutputFiles)" />
+</Target>
+
 <ItemGroup>
   <Folder Include="map\" />
   <Folder Include="audio\" />

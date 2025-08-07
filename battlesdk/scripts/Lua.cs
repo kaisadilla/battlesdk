@@ -41,6 +41,8 @@ public static class Lua {
             script.Globals[e.TableName] = tbl;
         }
 
+        // TODO: Just use func pointer and annotate with [LuaApiGlobal]
+        // TODO: Maybe message is part of Hud static class.
         script.Globals["message"] = (Action<DynValue>)(arg => {
             if (arg.Type != DataType.String) {
                 throw new ScriptRuntimeException($"Invalid type.");

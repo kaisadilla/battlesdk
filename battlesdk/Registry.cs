@@ -85,6 +85,10 @@ public static class Registry {
         LoadMaps(); // Maps require the tilesets they use to be loaded.
         LoadWorlds(); // Worlds require the maps they include to be loaded.
 
+        foreach (var map in Maps) {
+            map.Bind();
+        }
+
         if (Sprites.TryGetId("misc/char_shadow", out var charShadowId)) {
             CharSpriteShadow = charShadowId;
         }

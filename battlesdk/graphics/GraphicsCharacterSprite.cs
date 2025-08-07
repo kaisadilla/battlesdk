@@ -1,5 +1,4 @@
 ﻿using battlesdk.data;
-using SDL;
 
 namespace battlesdk.graphics;
 public unsafe class GraphicsCharacterSprite : GraphicsSprite {
@@ -16,24 +15,14 @@ public unsafe class GraphicsCharacterSprite : GraphicsSprite {
         _offsetY = -(asset.SpriteSize.Y - Constants.TILE_SIZE);
     }
 
-    public SDL_FRect GetSprite (Direction dir, int set, int frame) {
-        return new() {
-            x = frame * Constants.DEFAULT_CHAR_SIZE + (set * 3 * Constants.DEFAULT_CHAR_SIZE),
-            y = (int)dir * Constants.DEFAULT_CHAR_SIZE,
-            w = Constants.DEFAULT_CHAR_SIZE,
-            h = Constants.DEFAULT_CHAR_SIZE,
-        };
-    }
-
     public override void Draw (IVec2 position) {
-        DrawSection(SdlFRect(0, 0, Asset.SpriteSize.X, Asset.SpriteSize.Y), position);
+        DrawSection(
+            SdlFRect(0, 0, Asset.SpriteSize.X, Asset.SpriteSize.Y),
+            position + new IVec2(_offsetX, _offsetY)
+        );
     }
 
-    public unsafe void Draw (
-        IVec2 position, Direction dir, int set, int frame
-    ) {
-        var src = GetSprite(dir, set, frame);
-
-        DrawSection(src, position + new IVec2(_offsetX, _offsetY));
+    public override void DrawSubsprite (IVec2 position, int subsprite) {
+        base.DrawSubsprite(position + new IVec2(_offsetX, _offsetY), subsprite);
     }
 }

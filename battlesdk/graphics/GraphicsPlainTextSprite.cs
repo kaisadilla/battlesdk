@@ -39,6 +39,10 @@ public class GraphicsPlainTextSprite : IGraphicsSprite {
         _tex.Draw(position, size, resizeMode);
     }
 
+    public void DrawSubsprite (IVec2 position, int subsprite) {
+        Draw(position);
+    }
+
     public unsafe void DrawSection (SDL_FRect section, IVec2 position) {
         _shadowTex?.DrawSection(section, position);
         _tex.DrawSection(section, position);

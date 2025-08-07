@@ -41,6 +41,7 @@ public class MapAsset : IIdentifiable {
     /// </summary>
     public int BackgroundMusic { get; private set; } = -1;
 
+    public List<WarpData> Warps { get; } = [];
     public List<NpcData> Npcs { get; } = [];
 
     public MapAsset (string name, string path) {
@@ -48,6 +49,9 @@ public class MapAsset : IIdentifiable {
         Path = path;
 
         ReadMapData();
+    }
+
+    public void Bind () {
         ReadEntityData();
     }
 
@@ -244,6 +248,9 @@ public class MapAsset : IIdentifiable {
                 try {
                     if (def.Type == EntityType.Npc) {
                         Npcs.Add(new NpcData(def));
+                    }
+                    else if (def.Type == EntityType.Warp) {
+                        Warps.Add(new WarpData(def));
                     }
                 }
                 catch (Exception ex) {

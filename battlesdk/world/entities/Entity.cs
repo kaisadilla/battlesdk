@@ -2,7 +2,7 @@
 
 namespace battlesdk.world.entities;
 
-public abstract class Entity {
+public class Entity {
     /// <summary>
     /// The behavior called when interacting with this entity via the primary
     /// action. If this entity has no interaction, this value is null.
@@ -30,7 +30,8 @@ public abstract class Entity {
     /// <summary>
     /// The id of this entity's sprite.
     /// </summary>
-    public int Sprite { get; private set; }
+    public SpriteFile? Sprite { get; private set; } = null;
+    public int SpriteIndex { get; protected set; } = 0;
 
     /// <summary>
     /// This entity's Z position, which indicates the height at which it
@@ -56,7 +57,7 @@ public abstract class Entity {
         EntityId = entityId;
         Position = worldPos;
         if (Registry.Sprites.TryGetId(sprite, out var spriteId)) {
-            Sprite = spriteId;
+            Sprite = Registry.Sprites[spriteId];
         }
         else {
             throw new Exception($"Sprite '{sprite}' doesn't exist.");
@@ -67,7 +68,9 @@ public abstract class Entity {
         MapId = mapId;
         EntityId = entityId;
         Position = map.GetWorldPos(data.Position);
-        Sprite = data.Sprite;
+        if (data.Sprite != -1) { // TODO: Null instead.
+            Sprite = Registry.Sprites[data.Sprite];
+        }
 
         if (data.Interaction is not null) {
             _interaction = EntityInteraction.New(this, data.Interaction);
@@ -108,6 +111,10 @@ public abstract class Entity {
     /// <param name="direction">A direction for this entity to face.</param>
     public virtual void SetDirection (Direction direction) {
         Direction = direction;
+    }
+
+    public void SetSpriteIndex (int index) {
+        SpriteIndex = index;
     }
 
     /// <summary>

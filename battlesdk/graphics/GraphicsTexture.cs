@@ -62,6 +62,10 @@ public class GraphicsTexture : IGraphicsSprite {
         SDL3.SDL_RenderTexture(_renderer, _texture, null, &dst);
     }
 
+    public virtual void DrawSubsprite (IVec2 position, int subsprite) {
+        Draw(position);
+    }
+
     /// <summary>
     /// Draws the given section of the texture to the position given, at its
     /// original resolution.
@@ -121,5 +125,4 @@ public class GraphicsTexture : IGraphicsSprite {
 
         SDL3.SDL_RenderTexture(_renderer, _texture, &section, &dst);
     }
-
 }

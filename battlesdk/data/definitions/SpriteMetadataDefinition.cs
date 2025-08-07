@@ -10,7 +10,7 @@ public enum SpriteType {
 }
 
 public class SpriteMetadataDefinition {
-    public required SpriteType Type { get; init; }
+    public SpriteType? Type { get; init; }
 
     [JsonPropertyName("sprite_size")]
     public IVec2? SpriteSize { get; init; }

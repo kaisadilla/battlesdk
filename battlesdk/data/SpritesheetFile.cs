@@ -6,12 +6,11 @@ public class SpritesheetFile : SpriteFile {
     public IVec2 SpriteSize { get; }
     public List<string> Names { get; }
 
+    protected int _spritesPerRow;
+
     public SpritesheetFile (string name, string path, SpriteMetadataDefinition def)
         : base(name, path) 
     {
-        if (def.Type != SpriteType.Spritesheet) {
-            throw new ArgumentException("Invalid type.");
-        }
         if (def.SpriteSize is null) {
             throw new InvalidDataException(
                 $"Spritesheet metadata must contain a field " +
@@ -21,5 +20,18 @@ public class SpritesheetFile : SpriteFile {
 
         SpriteSize = def.SpriteSize.Value;
         Names = [.. def.Names ?? []];
+
+        _spritesPerRow = Width / SpriteSize.X;
+    }
+
+    /// <summary>
+    /// Returns the position of the given sprite in the spritesheet.
+    /// </summary>
+    /// <param name="index">The index of the sprite.</param>
+    public IVec2 GetSubspriteOrigin (int index) {
+        return new(
+            (index % _spritesPerRow) * SpriteSize.X,
+            (index / _spritesPerRow) * SpriteSize.Y
+        );
     }
 }

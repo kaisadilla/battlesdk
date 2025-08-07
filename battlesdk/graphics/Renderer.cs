@@ -111,19 +111,6 @@ public unsafe class Renderer {
         return GetFont(id) ?? GetFont(0) ?? throw new("No font available.");
     }
 
-    public GraphicsSprite? GetSpriteAtlas (int id) {
-        if (_spriteAtlases.TryGetValue(id, out var atlas)) {
-            return atlas;
-        }
-
-        if (Registry.Sprites.TryGetElement(id, out var asset) == false) {
-            return null;
-        }
-
-        _spriteAtlases[id] = new GraphicsSprite(this, asset);
-        return _spriteAtlases[id];
-    }
-
     public IGraphicsSprite? GetSprite (int id) {
         if (_sprites.TryGetValue(id, out var sprite)) {
             return sprite;

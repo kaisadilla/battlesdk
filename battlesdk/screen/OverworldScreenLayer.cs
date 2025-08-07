@@ -128,6 +128,13 @@ public class OverworldScreenLayer : IScreenLayer, IInputListener {
             }
 
             List<Character> chars = [];
+            List<Entity> entities = [];
+
+            foreach (var warp in G.World.Warps) {
+                if (warp.VisualZ == z) {
+                    entities.Add(warp);
+                }
+            }
 
             foreach (var npc in G.World.Npcs) {
                 if (npc.VisualZ == z) {
@@ -140,6 +147,10 @@ public class OverworldScreenLayer : IScreenLayer, IInputListener {
             }
 
             chars.Sort((a, b) => a.Subposition.Y.CompareTo(b.Subposition.Y));
+
+            foreach (var ent in entities) {
+                DrawEntity(ent);
+            }
 
             foreach (var ch in chars) {
                 DrawCharacter(ch);
@@ -194,18 +205,20 @@ public class OverworldScreenLayer : IScreenLayer, IInputListener {
         }
     }
 
+    private void DrawEntity (Entity entity) {
+        if (entity.Sprite is null) return;
+
+        var sprite = _renderer.GetSprite(entity.Sprite.Id);
+        if (sprite is null) return;
+
+        sprite.DrawSubsprite(_camera.GetScreenPos(TileToPixelSpace(entity.Subposition)), entity.SpriteIndex);
+    }
+
     private void DrawCharacter (Character character) {
-        int frame = 0;
-        if (
-            character.IsMoving
-            && character.MoveProgress >= 0.25f
-            && character.MoveProgress < 0.75f
-        ) {
-            frame = 1 + (character.MoveCount % 2);
-        }
-
+        if (character.Sprite is null) return;
+        
         var subpos = character.Subposition;
-
+        
         if (character.IsJumping) {
             if (character.MoveProgress < 0.5) {
                 subpos += new Vec2(0, -2 * character.MoveProgress);
@@ -222,33 +235,20 @@ public class OverworldScreenLayer : IScreenLayer, IInputListener {
                 subpos = (Vec2)character.Position + new Vec2(0, -1 * (1 - character.MoveProgress));
             }
         }
-
-        unsafe {
-            if (Registry.CharSpriteShadow != -1) {
-                _renderer.GetSprite(Registry.CharSpriteShadow)?.Draw(
-                    _camera.GetScreenPos(TileToPixelSpace(character.Subposition)) + new IVec2(0, 8)
-                );
-            }
-
-            var charSprite = _renderer.GetSprite(character.Sprite);
-            if (charSprite is null) return;
-
-            if (charSprite is GraphicsCharacterSprite gcs) {
-                gcs.Draw(
-                    _camera.GetScreenPos(TileToPixelSpace(subpos)),
-                    character.Direction,
-                (character.IsMoving && !character.IsJumping && character.IsRunning) ? 1 : 0,
-                frame
-                );
-            }
-            else {
-                charSprite.Draw(_camera.GetScreenPos(TileToPixelSpace(subpos)));
-            }
-
-            if (Registry.Sprites.TryGetId("ui/menu_icons", out int testId)) {
-                var test = _renderer.GetSheetSprite(testId, "pokemon");
-            }
+        
+        if (Registry.CharSpriteShadow != -1) {
+            _renderer.GetSprite(Registry.CharSpriteShadow)?.Draw(
+                _camera.GetScreenPos(TileToPixelSpace(character.Subposition)) + new IVec2(0, 8)
+            );
         }
+        
+        var charSprite = _renderer.GetSprite(character.Sprite.Id);
+        if (charSprite is null) return;
+
+        charSprite.DrawSubsprite(
+            _camera.GetScreenPos(TileToPixelSpace(subpos)),
+            character.SpriteIndex
+        );
     }
 
     /// <summary>
