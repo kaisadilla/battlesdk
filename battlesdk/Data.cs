@@ -62,6 +62,7 @@ public static class Data {
         }
         catch (Exception ex) {
             _logger.Error(ex, "Failed to raed time_tints.");
+            ex.PrintFancy();
             return null;
         }
     }

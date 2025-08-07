@@ -275,6 +275,11 @@ public static class TypesUtils {
         return sb.ToString();
     }
 
+    /// <summary>
+    /// Prints the exception fancily to the console. IMPORTANT: This output is
+    /// not added to any logger.
+    /// </summary>
+    /// <param name="exception">The exception to fancily print.</param>
     public static void PrintFancy (this Exception? exception) {
         List<Exception> exceptionStack = [];
 
@@ -284,9 +289,9 @@ public static class TypesUtils {
         }
 
         Console.WriteLine();
-        Console.WriteLine("============================");
-        Console.WriteLine("==== UNCAUGHT EXCEPTION ====");
-        Console.WriteLine("============================");
+        Console.WriteLine("===========================");
+        Console.WriteLine("====     EXCEPTION     ====");
+        Console.WriteLine("===========================");
         Console.WriteLine();
 
         foreach (var ex in exceptionStack) {

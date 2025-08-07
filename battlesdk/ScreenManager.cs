@@ -22,18 +22,14 @@ public static class ScreenManager {
         MainRenderer = renderer;
 
         if (Registry.Scripts.TryGetElementByName("screens/main_menu", out var scr) == false) {
-            throw new InitializationException(
-                "ScreenManager - Missing script: 'screens/main_menu'."
-            );
+            throw new InitializationException("Missing script: 'screens/main_menu'.");
         }
 
         try {
             MainMenu = new ScriptScreenLayer(MainRenderer, scr);
         }
         catch (Exception ex) {
-            throw new InitializationException(
-                "ScreenManager - Failed to load main menu's script.", ex
-            );
+            throw new InitializationException("Failed to load main menu's script.", ex);
         }
 
     }

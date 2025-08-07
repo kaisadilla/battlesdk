@@ -329,6 +329,7 @@ public static class Registry {
 
     private static void LogLoadError (string assetKind, string path, Exception? ex) {
         _logger.Error(ex, $"Failed to load {assetKind} '{path}'.");
+        ex.PrintFancy();
     }
 }
 

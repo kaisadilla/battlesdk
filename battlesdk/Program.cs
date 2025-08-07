@@ -95,16 +95,18 @@ unsafe void InitSdl () {
         _logger.Info("SDL initialized.");
     }
     else {
-        _logger.Fatal($"Failed to initialize SDL: {SDL3.SDL_GetError()}.");
-        SDL3.SDL_Quit();
+        throw new InitializationException(
+            $"Failed to initialize SDL: {SDL3.SDL_GetError()}."
+        );
     }
 
     if (SDL3_ttf.TTF_Init()) {
         _logger.Info("SDL_ttf initialized.");
     }
     else {
-        _logger.Fatal($"Failed to initialize SDL_ttf: {SDL3.SDL_GetError()}.");
-        SDL3.SDL_Quit();
+        throw new InitializationException(
+            $"Failed to initialize SDL_ttf: {SDL3.SDL_GetError()}."
+        );
     }
 
     SDL_AudioSpec spec = new();
@@ -119,8 +121,10 @@ unsafe void InitSdl () {
         _logger.Info("Audio device opened.");
     }
     else {
-        _logger.Fatal($"Failed to open audio device: {SDL3.SDL_GetError()}.");
-        SDL3.SDL_Quit();
+        // TODO: Allow playing without music, even though it sucks.
+        throw new InitializationException(
+            $"Failed to open audio device: {SDL3.SDL_GetError()}."
+        );
     }
 
     SDL3_mixer.Mix_AllocateChannels(32);

@@ -239,9 +239,19 @@ public class MapAsset : IIdentifiable {
             var defs = Json.Parse<List<EntityDefinition>>(json);
             if (defs is null) return;
 
-            foreach (var def in defs) {
-                if (def.Type == EntityType.Npc) {
-                    Npcs.Add(new NpcData(def));
+            for (int i = 0; i < defs.Count; i++) {
+                var def = defs[i];
+                try {
+                    if (def.Type == EntityType.Npc) {
+                        Npcs.Add(new NpcData(def));
+                    }
+                }
+                catch (Exception ex) {
+                    _logger.Error(
+                        ex,
+                        $"Failed to read entity #{i}. Entity will be ignored."
+                    );
+                    ex.PrintFancy();
                 }
             }
         }
@@ -251,6 +261,7 @@ public class MapAsset : IIdentifiable {
                 $"Failed to read entities file for {Path}. The map will work, " +
                 "but it won't have any entities."
             );
+            ex.PrintFancy();
         }
     }
 
