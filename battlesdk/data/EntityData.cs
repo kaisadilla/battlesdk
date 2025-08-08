@@ -4,22 +4,27 @@ using battlesdk.world.entities;
 namespace battlesdk.data;
 
 public abstract class EntityData {
-    public int Sprite { get; }
+    public int? Sprite { get; } = null;
+    public string? Name { get; } = null;
     public IVec2 Position { get; }
     public EntityInteractionData? Interaction { get; } = null;
 
     public EntityData (EntityDefinition def) {
-        if (string.IsNullOrEmpty(def.Sprite)) {
-            throw new InvalidDataException("Entity is missing field 'sprite'.");
-        }
-        if (Registry.Sprites.TryGetId(def.Sprite, out int spriteId) == false) {
-            throw new InvalidDataException(
-                $"Couldn't find character sprite '{def.Sprite}'."
-            );
+        if (string.IsNullOrEmpty(def.Sprite) == false) {
+            if (Registry.Sprites.TryGetId(def.Sprite, out int spriteId) == false) {
+                throw new InvalidDataException(
+                    $"Couldn't find character sprite '{def.Sprite}'."
+                );
+            }
+
+            Sprite = spriteId;
         }
 
-        Sprite = spriteId;
         Position = def.Position;
+
+        if (string.IsNullOrEmpty(def.Name) == false) {
+            Name = def.Name;
+        }
 
         if (def.Interaction is not null) {
             Interaction = EntityInteractionData.New(def.Interaction);

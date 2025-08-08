@@ -96,7 +96,7 @@ public class MoveScriptEvent : ScriptEvent {
 
             // Else, we apply a new move.
             if (_move.Move <= MoveKind.StepLeft) {
-                _character.Move((Direction)_move.Move, _move.IgnoreCharacters);
+                _character.TryMove((Direction)_move.Move, _move.IgnoreCharacters);
             }
             else if (_move.Move <= MoveKind.LookLeft) {
                 _character.SetDirection((Direction)((int)_move.Move - 4));

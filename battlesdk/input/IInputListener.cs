@@ -10,4 +10,10 @@ public interface IInputListener {
     /// Processes input received this frame.
     /// </summary>
     void HandleInput();
+
+    /// <summary>
+    /// This method is called when a newer input source blocks this input,
+    /// if this input wasn't blocked until now.
+    /// </summary>
+    void OnInputBlocked();
 }

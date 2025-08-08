@@ -78,7 +78,7 @@ public unsafe class Renderer {
         SDL3.SDL_SetRenderDrawColor(SdlRenderer, 0, 0, 0, 255);
         SDL3.SDL_RenderClear(SdlRenderer);
 
-        ScreenManager.Draw();
+        Screen.Draw();
         Hud.Draw();
 
         DisableScale();

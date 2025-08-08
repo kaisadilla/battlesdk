@@ -5,7 +5,25 @@ public static class InputManager {
     // TODO: Check potential cross-thread bugs.
     private static readonly Stack<IInputListener> _listeners = [];
 
+    /// <summary>
+    /// Pushes a new input listener on top of the stack, taking precedence
+    /// over any existing listeners.
+    /// </summary>
+    /// <param name="listener">The listener to add to the stack.</param>
     public static void Push (IInputListener listener) {
+        // If this listener blocks previous listeners, we notify them.
+        if (listener.BlockOtherInput) {
+            foreach (var l in _listeners) {
+                l.OnInputBlocked();
+
+                // If this listener also blocks, then any listener before it
+                // was already blocked and doesn't need any notification.
+                if (l.BlockOtherInput) {
+                    break;
+                }
+            }
+        }
+
         _listeners.Push(listener);
     }
     
@@ -15,9 +33,12 @@ public static class InputManager {
     /// blocked. To remove the block, pop it normally.
     /// </summary>
     public static void PushBlock () {
-        _listeners.Push(new InputBlock());
+        Push(new InputBlock());
     }
 
+    /// <summary>
+    /// Removes the most recent listener from the stack.
+    /// </summary>
     public static void Pop () {
         _listeners.Pop();
     }
@@ -36,4 +57,5 @@ public class InputBlock : IInputListener {
     public bool BlockOtherInput => true;
 
     public void HandleInput () {}
+    public void OnInputBlocked () {}
 }

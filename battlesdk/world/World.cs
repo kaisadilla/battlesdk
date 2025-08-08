@@ -43,59 +43,6 @@ public class World {
         Player = new(new(0, 0));
     }
 
-    public void LoadNearbyEntities () {
-        foreach (var gm in Maps) {
-            LoadMapEntities(gm);
-        }
-    }
-
-    private void LoadMapEntities (GameMap map) {
-        for (int i = 0; i < map.Data.Warps.Count; i++) {
-            var warpData = map.Data.Warps[i];
-            string id = $"{map.Data.Id}_{i}";
-
-            if (_npcs.ContainsKey(id)) continue;
-
-            _warps[id] = new(map.Data.Id, i, map, warpData);
-        }
-        for (int i = 0; i < map.Data.Npcs.Count; i++) {
-            var npcData = map.Data.Npcs[i];
-            string id = $"{map.Data.Id}_{i}";
-
-            if (_npcs.ContainsKey(id)) continue;
-
-            _npcs[id] = new(map.Data.Id, i, map, npcData);
-        }
-    }
-
-    public void CullEntities () {
-        CullEntities(_warps);
-        CullEntities(_npcs);
-    }
-
-    protected void CullEntities<T> (Dictionary<string, T> dict) where T : Entity {
-        foreach (var kv in dict) {
-            bool remove = true;
-            foreach (var map in Maps) {
-                // If the map this npc belongs to is loaded, this npc stays loaded.
-                if (kv.Value.MapId == map.Data.Id) {
-                    remove = false;
-                    break;
-                }
-            }
-            if (remove == false) continue;
-
-            var distX = Math.Abs(kv.Value.Position.X - Player.Position.X);
-            var distY = Math.Abs(kv.Value.Position.Y - Player.Position.Y);
-            if (distX < Constants.LOAD_DISTANCE_X && distY < Constants.LOAD_DISTANCE_Y) {
-                continue;
-            }
-
-            // TODO: Clean up method for the npc.
-            dict.Remove(kv.Key);
-        }
-    }
-
     public void FrameStart () {
         foreach (var npc in Npcs) {
             npc.FrameStart();
@@ -134,14 +81,122 @@ public class World {
     public void TransferTo (WorldAsset world, IVec2 position) {
         _logger.Info($"Player transferred to world '{world.Name}' at pos {position}.");
 
+        CleanUp();
         CurrentWorld = world;
         Player.SetPosition(position);
         SetFocus(Player.Position);
+
+        var entities = GetEntitiesAt(Player.Position);
+        foreach (var e in entities) {
+            if (e is Warp warp) {
+                warp.OnPlayerArrive();
+            }
+        }
     }
 
+    /// <summary>
+    /// Loads the map given, placing the player at the position given.
+    /// </summary>
+    /// <param name="map"></param>
+    /// <param name="position"></param>
     public void TransferTo (MapAsset map, IVec2 position) {
-        throw new NotImplementedException();
+        _logger.Info($"Player transferred to map '{map.Name}' at pos {position}.");
+
+        CleanUp();
+        CurrentWorld = null;
+        AddMap(map, 0, 0);
+        Player.SetPosition(position);
+
+        _focus = position;
+        LoadEntities();
+
+        var entities = GetEntitiesAt(Player.Position);
+        foreach (var e in entities) {
+            if (e is Warp warp) {
+                warp.OnPlayerArrive();
+            }
+        }
     }
+
+    /// <summary>
+    /// Removes everything loaded in the world: maps, entities, etc.
+    /// </summary>
+    private void CleanUp () {
+        CurrentWorld = null;
+        Maps.Clear();
+        _warps.Clear();
+        _npcs.Clear();
+    }
+
+    /// <summary>
+    /// Loads all the entities in all loaded maps that aren't loaded yet.
+    /// </summary>
+    private void LoadEntities () {
+        foreach (var gm in Maps) {
+            LoadMapEntities(gm);
+        }
+    }
+
+    /// <summary>
+    /// Removes all the entities that belong to map that are no longer active,
+    /// unless they are close to the player.
+    /// </summary>
+    private void CullEntities () {
+        CullEntities(_warps);
+        CullEntities(_npcs);
+    }
+
+    /// <summary>
+    /// Loads all entities in the given map that aren't loaded yet.
+    /// </summary>
+    /// <param name="map">The map from which to obtain the entities.</param>
+    private void LoadMapEntities (GameMap map) {
+        for (int i = 0; i < map.Data.Warps.Count; i++) {
+            var warpData = map.Data.Warps[i];
+            string id = $"{map.Data.Id}_{i}";
+
+            if (_npcs.ContainsKey(id)) continue;
+
+            _warps[id] = new(map.Data.Id, i, map, warpData);
+        }
+        for (int i = 0; i < map.Data.Npcs.Count; i++) {
+            var npcData = map.Data.Npcs[i];
+            string id = $"{map.Data.Id}_{i}";
+
+            if (_npcs.ContainsKey(id)) continue;
+
+            _npcs[id] = new(map.Data.Id, i, map, npcData);
+        }
+    }
+
+    /// <summary>
+    /// Culls all entities from inside one specific entity container.
+    /// </summary>
+    /// <typeparam name="T">The type of entity to cull.</typeparam>
+    /// <param name="dict">The dictionary that stores the entities.</param>
+    protected void CullEntities<T> (Dictionary<string, T> dict) where T : Entity {
+        foreach (var kv in dict) {
+            bool remove = true;
+            foreach (var map in Maps) {
+                // If the map this npc belongs to is loaded, this npc stays loaded.
+                if (kv.Value.MapId == map.Data.Id) {
+                    remove = false;
+                    break;
+                }
+            }
+            if (remove == false) continue;
+
+            var distX = Math.Abs(kv.Value.Position.X - Player.Position.X);
+            var distY = Math.Abs(kv.Value.Position.Y - Player.Position.Y);
+            if (distX < Constants.LOAD_DISTANCE_X && distY < Constants.LOAD_DISTANCE_Y) {
+                continue;
+            }
+
+            // TODO: Clean up method for the npc.
+            dict.Remove(kv.Key);
+        }
+    }
+
 
     public void SetFocus (IVec2 worldPos) {
         if (CurrentWorld is null) return;
@@ -169,7 +224,7 @@ public class World {
         }
 
         CullEntities();
-        LoadNearbyEntities();
+        LoadEntities();
     }
 
     private void AddMap (MapAsset mapData, int x, int y) {
@@ -191,39 +246,24 @@ public class World {
         }
     }
 
-    public List<TileProperties> GetTilesAt (IVec2 worldPos) {
-        if (TryGetMapAt(worldPos, out var map) == false) return [];
-
-        List<TileProperties> tiles = [];
-
-        foreach (var l in map.Terrain) {
-            var props = l[worldPos];
-            if (props is not null) {
-                tiles.Add(props.Properties);
-            }
-        }
-
-        return tiles;
-    }
-
     /// <summary>
-    /// Returns the character that is at the given position, if any. If multiple
-    /// characters exist in the same position, only one of them will be returned.
-    /// This method will return the player if the player is at the given position.
+    /// Returns a list of entities located at the given position.
     /// </summary>
     /// <param name="worldPos">A position in the world.</param>
-    public Entity? GetEntityAt (IVec2 worldPos) {
-        if (Player.Position == worldPos) return Player;
+    public List<Entity> GetEntitiesAt (IVec2 worldPos) {
+        List<Entity> entities = [];
+
+        if (Player.Position == worldPos) entities.Add(Player);
 
         foreach (var ch in Npcs) {
-            if (ch.Position == worldPos) return ch;
+            if (ch.Position == worldPos) entities.Add(ch);
         }
 
         foreach (var warp in Warps) {
-            if (warp.Position == worldPos) return warp;
+            if (warp.Position == worldPos) entities.Add(warp);
         }
 
-        return null;
+        return entities;
     }
 
     /// <summary>
@@ -243,6 +283,21 @@ public class World {
         return false;
     }
 
+    public List<MapTile> GetTilesAt (IVec2 worldPos) {
+        if (TryGetMapAt(worldPos, out var map) == false) return [];
+
+        List<MapTile> tiles = [];
+
+        foreach (var l in map.Terrain) {
+            var mapTile = l[worldPos];
+            if (mapTile is not null) {
+                tiles.Add(mapTile);
+            }
+        }
+
+        return tiles;
+    }
+
     /// <summary>
     /// Returns all the tiles at the given position that are interactable from
     /// the given z position.
@@ -250,7 +305,7 @@ public class World {
     /// <param name="worldPos">The position to check.</param>
     /// <param name="zIndex">The z position to check.</param>
     /// <returns></returns>
-    public List<TileProperties> GetTilesAt (IVec2 worldPos, int zIndex) {
+    public List<MapTile> GetTilesAt (IVec2 worldPos, int zIndex) {
         /*
          * A tile is interactable from a given z position if one of three
          * conditions apply:
@@ -262,7 +317,7 @@ public class World {
         if (TryGetMapAt(worldPos, out var map) == false) return [];
         var localPos = map.GetLocalPos(worldPos);
 
-        List<TileProperties> tiles = [];
+        List<MapTile> tiles = [];
 
         var zWarp = GetZWarpAt(worldPos);
 
@@ -273,9 +328,9 @@ public class World {
                 || (zWarp is not null && l.ZIndex == zWarp)
                 || (zWarp is not null && l.ZIndex == zWarp - 1)
             ) {
-                var props = l[localPos];
-                if (props is not null) {
-                    tiles.Add(props.Properties);
+                var mapTile = l[localPos];
+                if (mapTile is not null) {
+                    tiles.Add(mapTile);
                 }
             }
         }

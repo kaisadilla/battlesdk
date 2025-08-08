@@ -41,16 +41,20 @@
     <ItemGroup>
         <!-- Files in output but not in source -->
         <ExtraOutputFiles Remove="@(Content->'%(RecursiveDir)%(Filename)%(Extension)')" />
-        <ExtraOutputFiles Include="$(OutputResDir)**\*.*"
-                            Condition="!Exists('$(SourceResDir)%(RecursiveDir)%(Filename)%(Extension)')" />
+        <ExtraOutputFiles Include="$(OutputResDir)**\*.*" Condition="!Exists('$(SourceResDir)%(RecursiveDir)%(Filename)%(Extension)')" />
     </ItemGroup>
 
     <Delete Files="@(ExtraOutputFiles)" />
 </Target>
 
 <ItemGroup>
+  <Compile Remove="audio\**" />
+  <EmbeddedResource Remove="audio\**" />
+  <None Remove="audio\**" />
+</ItemGroup>
+
+<ItemGroup>
   <Folder Include="map\" />
-  <Folder Include="audio\" />
   <Folder Include="res\worlds\" />
 </ItemGroup>
 

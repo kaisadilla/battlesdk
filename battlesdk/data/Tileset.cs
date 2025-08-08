@@ -55,7 +55,7 @@ public class Tileset : IIdentifiable {
         else {
             for (int i = 0; i < TileCount; i++) {
                 var tiledTile = Array.Find(tiled.Tiles, t => t.id == i);
-                Tiles.Add(new(tiledTile));
+                Tiles.Add(new(this, i, tiledTile));
             }
         }
     }

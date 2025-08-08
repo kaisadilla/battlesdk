@@ -49,22 +49,22 @@ public class OverworldScreenLayer : IScreenLayer, IInputListener {
 
             if (Controls.GetKey(ActionKey.Left)) {
                 if (Time.TotalTime - _leftKeyStart > MOVE_INPUT_DELAY) {
-                    _player.Move(Direction.Left, false);
+                    _player.TryMove(Direction.Left, false);
                 }
             }
             else if (Controls.GetKey(ActionKey.Right)) {
                 if (Time.TotalTime - _rightKeyStart > MOVE_INPUT_DELAY) {
-                    _player.Move(Direction.Right, false);
+                    _player.TryMove(Direction.Right, false);
                 }
             }
             else if (Controls.GetKey(ActionKey.Up)) {
                 if (Time.TotalTime - _upKeyStart > MOVE_INPUT_DELAY) {
-                    _player.Move(Direction.Up, false);
+                    _player.TryMove(Direction.Up, false);
                 }
             }
             else if (Controls.GetKey(ActionKey.Down)) {
                 if (Time.TotalTime - _downKeyStart > MOVE_INPUT_DELAY) {
-                    _player.Move(Direction.Down, false);
+                    _player.TryMove(Direction.Down, false);
                 }
             }
 
@@ -89,23 +89,25 @@ public class OverworldScreenLayer : IScreenLayer, IInputListener {
             _downKeyStart = float.MinValue;
         }
 
-        if (Controls.GetKeyDown(ActionKey.Primary)) {
-            _player.HandlePrimaryInput();
-        }
-        if (Controls.GetKeyDown(ActionKey.Secondary)) {
-            _player.SetRunning(true);
-        }
-        if (Controls.GetKeyDown(ActionKey.Menu)) {
-            ScreenManager.MainMenu.Open();
+        if (_player.IsMoving == false) {
+            if (Controls.GetKeyDown(ActionKey.Primary)) {
+                _player.HandlePrimaryInput();
+            }
+            if (Controls.GetKeyDown(ActionKey.Menu)) {
+                Screen.MainMenu.Open();
+            }
         }
 
-        if (Controls.GetKeyUp(ActionKey.Secondary)) {
-            _player.SetRunning(false);
-        }
+        _player.SetRunning(Controls.GetKey(ActionKey.Secondary));
 
         if (_player.IsMoving) {
             G.World.SetFocus(_player.Position);
         }
+    }
+
+
+    public void OnInputBlocked () {
+        _player.SetRunning(false);
     }
 
     public void Draw () {
@@ -153,7 +155,29 @@ public class OverworldScreenLayer : IScreenLayer, IInputListener {
             }
 
             foreach (var ch in chars) {
-                DrawCharacter(ch);
+                var tiles = G.World.GetTilesAt(ch.Position);
+                var onTop = ch.IsMoving && ch.PreviousPosition.Y > ch.Position.Y;
+
+                foreach (var tile in tiles) {
+                    if (tile.OnStepUnderTile is not null) {
+                        DrawTile(
+                            tile.OnStepUnderTile,
+                            _camera.GetScreenX(ch.Position.X * Constants.TILE_SIZE),
+                            _camera.GetScreenY(ch.Position.Y * Constants.TILE_SIZE)
+                        );
+                    }
+                }
+                if (onTop == false) DrawCharacter(ch);
+                foreach (var tile in tiles) {
+                    if (tile.OnStepOverTile is not null) {
+                        DrawTile(
+                            tile.OnStepOverTile,
+                            _camera.GetScreenX(ch.Position.X * Constants.TILE_SIZE),
+                            _camera.GetScreenY(ch.Position.Y * Constants.TILE_SIZE)
+                        );
+                    }
+                }
+                if (onTop) DrawCharacter(ch);
             }
         }
 
@@ -186,9 +210,11 @@ public class OverworldScreenLayer : IScreenLayer, IInputListener {
         var ts = Registry.Tilesets[tile.TilesetId];
         var tex = _renderer.GetTileset(tile.TilesetId);
 
+        var tileId = tile.Properties.GetCurrentTileId();
+
         SDL_FRect src = new() {
-            x = (tile.TileId % ts.Width) * Constants.TILE_SIZE,
-            y = (tile.TileId / ts.Width) * Constants.TILE_SIZE,
+            x = (tileId % ts.Width) * Constants.TILE_SIZE,
+            y = (tileId / ts.Width) * Constants.TILE_SIZE,
             h = Constants.TILE_SIZE,
             w = Constants.TILE_SIZE,
         };
@@ -207,6 +233,7 @@ public class OverworldScreenLayer : IScreenLayer, IInputListener {
 
     private void DrawEntity (Entity entity) {
         if (entity.Sprite is null) return;
+        if (entity.IsInvisible) return;
 
         var sprite = _renderer.GetSprite(entity.Sprite.Id);
         if (sprite is null) return;
@@ -216,6 +243,7 @@ public class OverworldScreenLayer : IScreenLayer, IInputListener {
 
     private void DrawCharacter (Character character) {
         if (character.Sprite is null) return;
+        if (character.IsInvisible) return;
         
         var subpos = character.Subposition;
         
@@ -291,5 +319,7 @@ public class OverworldScreenLayer : IScreenLayer, IInputListener {
             255
         );
         SDL3.SDL_RenderFillRect(_renderer.SdlRenderer, null);
+
+        SDL3.SDL_SetRenderDrawBlendMode(_renderer.SdlRenderer, SDL_BlendMode.SDL_BLENDMODE_NONE);
     }
 }

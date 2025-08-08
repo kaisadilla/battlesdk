@@ -8,9 +8,9 @@ public class Player : Character {
     }
 
     public void HandlePrimaryInput () { // TODO: Better name
-        var ch = G.World.GetEntityAt(GetPositionInFront());
-        if (ch is not null) {
-            ch.Interact(Direction.Opposite());
+        var entities = G.World.GetEntitiesAt(GetPositionInFront());
+        if (entities.Count > 0) {
+            entities[0].OnPrimaryAction(Direction.Opposite());
             return;
         }
     }

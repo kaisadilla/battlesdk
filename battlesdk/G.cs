@@ -9,7 +9,7 @@ public static class G {
     public static bool DexUnlocked { get; private set; } = true;
 
     public static void LoadGame () {
-        World.TransferTo(Registry.Worlds[0], new(6, -3));
+        World.TransferTo(Registry.Worlds[0], new(9, 16));
         _logger.Info("Loaded game.");
     }
 }

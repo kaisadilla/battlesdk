@@ -67,7 +67,7 @@ public class RouteCharacterMovement : CharacterMovement {
     public override void Update () {
         if (_character.IsMoving) return;
 
-        _character.Move((Direction)Route[_cursor], IgnoreCharacters);
+        _character.TryMove((Direction)Route[_cursor], IgnoreCharacters);
         _cursor++;
         _cursor %= Route.Count;
     }
@@ -130,7 +130,7 @@ public class RandomCharacterMovement : CharacterMovement {
                 _character.SetDirection(dir);
             }
             else {
-                _character.Move(dir, IgnoreCharacters);
+                _character.TryMove(dir, IgnoreCharacters);
             }
 
         }

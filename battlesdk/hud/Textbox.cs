@@ -141,6 +141,10 @@ public class Textbox : IInputListener {
         }
     }
 
+    public void OnInputBlocked () {
+
+    }
+
     public unsafe void Draw () {
         _frame.Draw(_pos, _size);
 

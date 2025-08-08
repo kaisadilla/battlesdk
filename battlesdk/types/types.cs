@@ -236,6 +236,16 @@ public static class TypesUtils {
         return a + (b - a) * t;
     }
 
+    public static IVec2 OffsetAt (this IVec2 v, Direction dir) {
+        return dir switch {
+            Direction.Down => v + new IVec2(0, 1),
+            Direction.Right => v + new IVec2(1, 0),
+            Direction.Up => v + new IVec2(0, -1),
+            Direction.Left => v + new IVec2(-1, 0),
+            _ => v,
+        };
+    }
+
     public static SDL_Color SdlColor (byte r, byte g, byte b, byte a) {
         return new() {
             r = r,

@@ -32,6 +32,10 @@ public class Entity {
     /// </summary>
     public SpriteFile? Sprite { get; private set; } = null;
     public int SpriteIndex { get; protected set; } = 0;
+    /// <summary>
+    /// True if the entity is fully invisible (not rendered at all).
+    /// </summary>
+    public bool IsInvisible { get; set; } = false;
 
     /// <summary>
     /// This entity's Z position, which indicates the height at which it
@@ -68,8 +72,8 @@ public class Entity {
         MapId = mapId;
         EntityId = entityId;
         Position = map.GetWorldPos(data.Position);
-        if (data.Sprite != -1) { // TODO: Null instead.
-            Sprite = Registry.Sprites[data.Sprite];
+        if (data.Sprite is not null) {
+            Sprite = Registry.Sprites[data.Sprite.Value];
         }
 
         if (data.Interaction is not null) {
@@ -86,14 +90,29 @@ public class Entity {
     }
 
     /// <summary>
-    /// The player interacts with this entity. The behavior of this interaction
-    /// depends on the entity. For example, an NPC may open a textbox with a
-    /// line of text if configured like so.
+    /// Called when the player presses the primary action button on this entity.
     /// </summary>
-    public virtual void Interact (Direction from) {
-        if (_interaction is null) return;
+    public virtual void OnPrimaryAction (Direction from) {
+        if (_interaction?.Trigger != InteractionTrigger.ActionButton) return;
 
-        _interaction?.Interact(from);
+        _interaction.Interact(from);
+    }
+
+    /// <summary>
+    /// Called when an entity tries to walk into the tile this entity is in.
+    /// Returns true if an interaction was triggered.
+    /// </summary>
+    /// <param name="source">The entity triggering this interaction.</param>
+    /// <param name="from">The direction the interaction comes from.</param>
+    public virtual bool OnTryStepInto (Entity source, Direction from) {
+        if (_interaction?.Trigger == InteractionTrigger.PlayerTouchesEntity) {
+            if (source is Player) {
+                _interaction.Interact(from);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>

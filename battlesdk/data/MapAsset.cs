@@ -178,10 +178,22 @@ public class MapAsset : IIdentifiable {
                     // Only normal tilesets can be used to define terrain.
                     if (tileset.Kind != TilesetKind.Normal) continue;
 
+                    var props = tileset.Tiles[tileId];
+
                     layer[x, y] = new() {
                         TilesetId = tilesetIds[tilesetIndex],
                         TileId = tileId,
-                        Properties = tileset.Tiles[tileId],
+                        Properties = props,
+                        OnStepUnderTile = props.OnStepUnderTile == -1 ? null : new() {
+                            TilesetId = tilesetIds[tilesetIndex],
+                            TileId = props.OnStepUnderTile,
+                            Properties = tileset.Tiles[props.OnStepUnderTile]
+                        },
+                        OnStepOverTile = props.OnStepOverTile == -1 ? null : new() {
+                            TilesetId = tilesetIds[tilesetIndex],
+                            TileId = props.OnStepOverTile,
+                            Properties = tileset.Tiles[props.OnStepOverTile]
+                        },
                     };
                 }
             }
@@ -278,5 +290,13 @@ public class MapAsset : IIdentifiable {
     /// <param name="pos">The position to check.</param>
     public bool IsWithinBounds (IVec2 pos) {
         return (pos.X >= 0 && pos.X < Width) && pos.Y >= 0 && pos.Y < Height;
+    }
+
+    /// <summary>
+    /// Enumerates all the entities in this map.
+    /// </summary>
+    public IEnumerable<EntityData> EnumerateEntities () {
+        foreach (var e in Npcs) yield return e;
+        foreach (var e in Warps) yield return e;
     }
 }

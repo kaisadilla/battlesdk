@@ -35,6 +35,7 @@ public static class Controls {
     private static readonly Dictionary<SDL_Scancode, ActionKey> _bindings = new() {
         [SDL_Scancode.SDL_SCANCODE_X] = ActionKey.Primary,
         [SDL_Scancode.SDL_SCANCODE_C] = ActionKey.Secondary,
+        [SDL_Scancode.SDL_SCANCODE_KP_0] = ActionKey.Secondary,
         [SDL_Scancode.SDL_SCANCODE_UP] = ActionKey.Up,
         [SDL_Scancode.SDL_SCANCODE_KP_8] = ActionKey.Up,
         [SDL_Scancode.SDL_SCANCODE_DOWN] = ActionKey.Down,
@@ -44,9 +45,9 @@ public static class Controls {
         [SDL_Scancode.SDL_SCANCODE_RIGHT] = ActionKey.Right,
         [SDL_Scancode.SDL_SCANCODE_KP_6] = ActionKey.Right,
         [SDL_Scancode.SDL_SCANCODE_Z] = ActionKey.Menu,
+        [SDL_Scancode.SDL_SCANCODE_ESCAPE] = ActionKey.Menu,
         [SDL_Scancode.SDL_SCANCODE_RETURN] = ActionKey.Enter,
         [SDL_Scancode.SDL_SCANCODE_KP_ENTER] = ActionKey.Enter,
-        [SDL_Scancode.SDL_SCANCODE_ESCAPE] = ActionKey.Escape,
         [SDL_Scancode.SDL_SCANCODE_F3] = ActionKey.ToggleDebugInfo,
     };
 
@@ -105,6 +106,5 @@ public enum ActionKey {
     Right,
     Menu,
     Enter,
-    Escape,
     ToggleDebugInfo,
 }

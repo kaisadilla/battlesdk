@@ -85,6 +85,10 @@ public class Coroutine {
     public Task WaitComplete () {
         return _tcs.Task;
     }
+
+    public Task Then (Action<Task> callback) {
+        return WaitComplete().ContinueWith(callback);
+    }
 }
 
 public abstract class WaitInstruction {

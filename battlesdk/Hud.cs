@@ -37,6 +37,8 @@ public static class Hud {
     /// </summary>
     /// <param name="text">The text to display.</param>
     public static Task ShowTextbox (string text) {
+        if (_renderer is null) return Task.CompletedTask;
+
         _textbox = new(
             _renderer,
             Settings.TextBox,
@@ -48,6 +50,20 @@ public static class Hud {
         _textboxTask = _textbox.WaitUntilClose();
 
         return _textboxTask;
+    }
+
+    public static Textbox __TEXTBOX2 (string text) {
+        _textbox = new(
+            _renderer,
+            Settings.TextBox,
+            Settings.TextFont,
+            new(3, Constants.VIEWPORT_HEIGHT - 48),
+            new(Constants.VIEWPORT_WIDTH - 6, 46),
+            text
+        );
+        _textboxTask = _textbox.WaitUntilClose();
+
+        return _textbox;
     }
 }
 

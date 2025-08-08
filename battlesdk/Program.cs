@@ -34,10 +34,10 @@ try {
         Constants.DEFAULT_SCREEN_SCALE
     );
     Lua.Init();
-    ScreenManager.Init(win.Renderer);
+    Screen.Init(win.Renderer);
 
     G.LoadGame();
-    ScreenManager.Push(new OverworldScreenLayer(win.Renderer));
+    Screen.Push(new OverworldScreenLayer(win.Renderer));
     InputManager.Push(new OverworldScreenLayer(win.Renderer));
 }
 catch (Exception ex) {
@@ -63,6 +63,7 @@ while (win.CloseRequested == false) {
         InputManager.Update();
         ScriptLoop.Update();
         Hud.Update();
+        Screen.Update();
 
         CoroutineRuntime.Update();
 

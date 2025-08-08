@@ -17,6 +17,7 @@ public static class Lua {
         UserData.RegisterType<LuaLogger>(InteropAccessMode.Preoptimized, LuaLogger.CLASSNAME);
         UserData.RegisterType<LuaControls>(InteropAccessMode.Preoptimized, LuaControls.CLASSNAME);
         UserData.RegisterType<LuaAudio>(InteropAccessMode.Preoptimized, LuaAudio.CLASSNAME);
+        UserData.RegisterType<LuaHud>(InteropAccessMode.Preoptimized, LuaHud.CLASSNAME);
         UserData.RegisterType<LuaG>(InteropAccessMode.Preoptimized, LuaG.CLASSNAME);
 
         UserData.RegisterType<LuaRenderer>(InteropAccessMode.Preoptimized, LuaRenderer.CLASSNAME);
@@ -27,7 +28,7 @@ public static class Lua {
     }
 
     public static void RegisterGlobals (Script script) {
-        if (ScreenManager.MainRenderer is null) {
+        if (Screen.MainRenderer is null) {
             throw new("Cannot load Lua scripts yet.");
         }
 
@@ -41,30 +42,16 @@ public static class Lua {
             script.Globals[e.TableName] = tbl;
         }
 
-        // TODO: Just use func pointer and annotate with [LuaApiGlobal]
-        // TODO: Maybe message is part of Hud static class.
-        script.Globals["message"] = (Action<DynValue>)(arg => {
-            if (arg.Type != DataType.String) {
-                throw new ScriptRuntimeException($"Invalid type.");
-            }
-            Message(arg.String);
-        });
-        script.Globals["wait"] = (Action<DynValue>)(arg => {
-            if (arg.Type != DataType.Number) {
-                throw new ScriptRuntimeException($"Invalid type.");
-            }
-            Wait((int)arg.Number);
-        });
-
         script.Globals[LuaVec2.CLASSNAME] = UserData.CreateStatic(typeof(LuaVec2));
         script.Globals[LuaRect.CLASSNAME] = UserData.CreateStatic(typeof(LuaRect));
         script.Globals[LuaLogger.CLASSNAME] = UserData.CreateStatic(typeof(LuaLogger));
         script.Globals[LuaControls.CLASSNAME] = UserData.CreateStatic(typeof(LuaControls));
         script.Globals[LuaAudio.CLASSNAME] = UserData.CreateStatic(typeof(LuaAudio));
+        script.Globals[LuaHud.CLASSNAME] = UserData.CreateStatic(typeof(LuaHud));
         script.Globals[LuaG.CLASSNAME] = UserData.CreateStatic(typeof(LuaG));
         script.Globals[LuaEntity.CLASSNAME] = UserData.CreateStatic(typeof(LuaEntity));
 
-        script.Globals["renderer"] = new LuaRenderer(ScreenManager.MainRenderer);
+        script.Globals["renderer"] = new LuaRenderer(Screen.MainRenderer);
     }
 
     public static void RegisterEntityInteraction (Script script, Entity target) {
@@ -92,16 +79,6 @@ public static class Lua {
 
         _enums.Add(new(tableName, values));
     }
-
-    #region Exposed Lua functions
-    private static void Wait (int ms) {
-        ScriptLoop.Enqueue(new WaitScriptEvent(ms));
-    }
-
-    private static void Message (string text) {
-        ScriptLoop.Enqueue(new MessageScriptEvent(text));
-    }
-    #endregion Exposed Lua functions
 }
 
 

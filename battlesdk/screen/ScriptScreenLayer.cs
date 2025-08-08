@@ -66,7 +66,7 @@ public class ScriptScreenLayer : IScreenLayer, IInputListener {
     }
 
     public void Open () {
-        ScreenManager.Push(this);
+        Screen.Push(this);
         InputManager.Push(this);
         if (_openFunc is not null) _lua.Call(_openFunc);
     }
@@ -79,8 +79,12 @@ public class ScriptScreenLayer : IScreenLayer, IInputListener {
         if (_handleInputFunc is not null) _lua.Call(_handleInputFunc); // TODO: Not working.
     }
 
+    public void OnInputBlocked () {
+
+    }
+
     public void Close () {
-        ScreenManager.Pop();
+        Screen.Pop();
         InputManager.Pop();
     }
 }

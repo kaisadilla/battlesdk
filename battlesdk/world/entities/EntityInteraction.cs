@@ -140,8 +140,23 @@ public class ScriptEntityInteraction : EntityInteraction {
 
         IsInteracting = true;
 
-        _lua.Call(_scriptFunc);
-        EnqueueEnd();
+        var cor = _lua.CreateCoroutine(_scriptFunc);
+        Coroutine.Start(CompleteLuaCoroutine(cor.Coroutine));
+    }
+
+    private CoroutineTask CompleteLuaCoroutine (MoonSharp.Interpreter.Coroutine luaCor) {
+        var res = luaCor.Resume();
+        while (true) {
+            if (luaCor.State == CoroutineState.Dead) {
+                _logger.Debug("NPC is no longer interacting.");
+                IsInteracting = false;
+                InputManager.Pop();
+                break;
+            }
+            else {
+                yield return null;
+            }
+        }
     }
 }
 
@@ -172,18 +187,40 @@ public class MessageEntityInteraction : EntityInteraction {
 public class DoorEntityInteraction : EntityInteraction {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    private string _warpTo;
-    private IVec2 _pos;
+    private int _worldId;
+    private int _mapId;
+    private IVec2 _targetPos;
 
-    public DoorEntityInteraction (Entity entity, string warpTo, IVec2 pos) : base(entity) {
-        _warpTo = warpTo;
-        _pos = pos;
-        Trigger = InteractionTrigger.PlayerTouchesEntity;
-    }
+    public DoorEntityInteraction (Entity entity, WarpData data) : base(entity) {
+        Trigger = InteractionTrigger.PlayerTouchesEntity; // TODO: Not hardcoded.
+        _worldId = data.WorldId;
+        _mapId = data.MapId;
+        _targetPos = data.TargetPosition;
 
-    public DoorEntityInteraction (
-        Entity entity, MessageEntityInteractionData data
-    ) : base(entity) {
+        if (data.TargetEntity is not null) {
+            MapAsset map;
+            if (_worldId != -1) {
+                map = Registry.Maps[Registry.Worlds[_worldId].Maps[_mapId].Id];
+            }
+            else {
+                map = Registry.Maps[_mapId];
+            }
+
+            bool found = false;
+            foreach (var e in map.EnumerateEntities()) {
+                if (e.Name is not null && e.Name == data.TargetEntity) {
+                    _targetPos = e.Position;
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found == false) {
+                _logger.Error(
+                    $"Couldn't find entity named '{data.TargetEntity}' in map {map.Name}."
+                );
+            }
+        }
     }
 
     public override void Interact (Direction from) {
@@ -192,17 +229,83 @@ public class DoorEntityInteraction : EntityInteraction {
 
         InputManager.PushBlock();
 
-        Coroutine.Start(InteractionTask());
+        if (_target is Warp warp) {
+            if (warp.WarpType == WarpType.Door) {
+                Coroutine.Start(DoorAnimation(from));
+            }
+            else if (warp.WarpType == WarpType.Hall) {
+                Coroutine.Start(HallAnimation(from));
+            }
+        }
     }
 
-    private CoroutineTask InteractionTask () {
-        if (_target.Sprite is SpritesheetFile spr) {
-            for (int i = 1; i <= 3; i++) {
-                _target.SetSpriteIndex(i);
-                yield return new WaitForSeconds(0.51f);
-            }
+    private CoroutineTask HallAnimation (Direction from) {
+        G.World.Player.SetDirection(from.Opposite());
+
+        PlayEntrySound();
+        G.World.Player.SetRunning(false);
+        G.World.Player.Move(G.World.Player.Position.OffsetAt(from.Opposite()));
+        Screen.FadeToBlack(0.5f);
+        yield return new WaitForSeconds(0.2f);
+
+        G.World.Player.IsInvisible = true;
+        yield return new WaitForSeconds(0.5f);
+
+        if (_worldId == -1) {
+            var map = Registry.Maps[_mapId];
+            G.World.TransferTo(map, _targetPos);
+        }
+        else {
+            var world = Registry.Worlds[_worldId];
+            G.World.TransferTo(world, _targetPos);
         }
 
         EnqueueEnd();
+    }
+
+    private CoroutineTask DoorAnimation (Direction from) {
+        G.World.Player.SetDirection(from.Opposite());
+
+        PlayEntrySound();
+
+        if (_target.Sprite is SpritesheetFile) {
+            for (int i = 1; i <= 3; i++) {
+                _target.SetSpriteIndex(i);
+                yield return new WaitForSeconds(0.12f);
+            }
+        }
+
+        G.World.Player.SetRunning(false);
+        G.World.Player.Move(G.World.Player.Position.OffsetAt(from.Opposite()));
+        yield return new WaitForSeconds(0.4f);
+        G.World.Player.IsInvisible = true;
+        yield return new WaitForSeconds(0.2f);
+
+        Screen.FadeToBlack(0.5f);
+        if (_target.Sprite is SpritesheetFile) {
+            for (int i = 2; i >= 0; i--) {
+                _target.SetSpriteIndex(i);
+                yield return new WaitForSeconds(0.12f);
+            }
+        }
+
+        yield return new WaitForSeconds(0.25f);
+
+        if (_worldId == -1) {
+            var map = Registry.Maps[_mapId];
+            G.World.TransferTo(map, _targetPos);
+        }
+        else {
+            var world = Registry.Worlds[_worldId];
+            G.World.TransferTo(world, _targetPos);
+        }
+
+        EnqueueEnd();
+    }
+
+    private void PlayEntrySound () {
+        if (_target is Warp warp && warp.EntrySound is not null) {
+            Audio.Play(warp.EntrySound.Value);
+        }
     }
 }
