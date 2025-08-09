@@ -283,6 +283,10 @@ public class World {
         return false;
     }
 
+    /// <summary>
+    /// Returns all the tiles at the given position.
+    /// </summary>
+    /// <param name="worldPos">The position to check.</param>
     public List<MapTile> GetTilesAt (IVec2 worldPos) {
         if (TryGetMapAt(worldPos, out var map) == false) return [];
 
@@ -304,7 +308,6 @@ public class World {
     /// </summary>
     /// <param name="worldPos">The position to check.</param>
     /// <param name="zIndex">The z position to check.</param>
-    /// <returns></returns>
     public List<MapTile> GetTilesAt (IVec2 worldPos, int zIndex) {
         /*
          * A tile is interactable from a given z position if one of three
