@@ -50,15 +50,14 @@ public class LuaHud : ILuaType {
         string msg = args[0].String;
         List<string> choices = args[1].ToObject<List<string>>();
         bool canBeCancelled = args.Count >= 3 ? args[2].Boolean : true;
-        int defaultChoice = args.Count >= 4 ? (int)args[3].Number : -1;
+        int defaultChoice = args.Count >= 4 ? (int)(args[3].Number - 1) : -1; // Lua index to C# index.
 
         var choice = Hud.ShowChoiceMessage(
             Localization.Text(msg), choices, canBeCancelled, defaultChoice
         );
         choice.OnClose += (s, evt) => {
             var c = choice.Choice;
-            if (c != -1) c++;
-            Console.WriteLine(c);
+            if (c != -1) c++; // C# index to Lua index.
             luaCor.Resume(c);
         };
 

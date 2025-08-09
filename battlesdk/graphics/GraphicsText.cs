@@ -184,7 +184,8 @@ file class GlyphGenerator { // TODO: Texture aliases for fonts, rather than indi
         _width = width;
         _text = text;
 
-        _colors.Push(SdlColor(48, 80, 200, 255));
+        //_colors.Push(SdlColor(48, 80, 200, 255));
+        _colors.Push(SdlColor(85, 85, 93, 255));
     }
 
     public void Generate () {

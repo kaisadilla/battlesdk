@@ -1,7 +1,10 @@
 ﻿using battlesdk.input;
+using NLog;
 
 namespace battlesdk;
 public static class InputManager {
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
     // TODO: Check potential cross-thread bugs.
     private static readonly Stack<IInputListener> _listeners = [];
 
@@ -25,6 +28,7 @@ public static class InputManager {
         }
 
         _listeners.Push(listener);
+        _logger.Debug($"Pushed input listener: {listener.Name}.");
     }
     
     /// <summary>
@@ -40,7 +44,8 @@ public static class InputManager {
     /// Removes the most recent listener from the stack.
     /// </summary>
     public static void Pop () {
-        _listeners.Pop();
+        var discard = _listeners.Pop();
+        _logger.Debug($"Popped input listener: {discard.Name}.");
     }
 
     public static void Update () {
@@ -55,6 +60,8 @@ public static class InputManager {
 
 public class InputBlock : IInputListener {
     public bool BlockOtherInput => true;
+
+    public string Name => "Input block";
 
     public void HandleInput () {}
     public void OnInputBlocked () {}

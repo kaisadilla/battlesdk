@@ -1,5 +1,5 @@
 ﻿using battlesdk.data;
-using battlesdk.scripts;
+using battlesdk.scripts.types;
 using MoonSharp.Interpreter;
 using NLog;
 
@@ -91,17 +91,10 @@ public abstract class EntityInteraction {
 public class ScriptEntityInteraction : EntityInteraction {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    /// <summary>
-    /// The Lua VM that will execute this interaction's script.
-    /// </summary>
-    private Script _lua = new();
-    /// <summary>
-    /// Contains the compiled script as a Lua function.
-    /// </summary>
-    private DynValue? _scriptFunc;
+    private LuaScriptHost _lua;
 
     public ScriptEntityInteraction (Entity entity, ScriptAsset script) : base(entity) {
-        LoadScript(script);
+        _lua = LuaScriptHost.EntityInteractionScript(script, _target);
     }
 
     public ScriptEntityInteraction (
@@ -113,23 +106,7 @@ public class ScriptEntityInteraction : EntityInteraction {
             );
         }
 
-        LoadScript(script);
-    }
-
-    public void LoadScript (ScriptAsset script) {
-        string srcStr;
-        try {
-            srcStr = script.GetSource();
-        }
-        catch (Exception ex) {
-            _logger.ErrorEx(ex, "Failed to load script.");
-            return;
-        }
-
-        Lua.RegisterGlobals(_lua);
-        Lua.RegisterEntityInteraction(_lua, _target);
-
-        _scriptFunc = _lua.LoadString(srcStr);
+        _lua = LuaScriptHost.EntityInteractionScript(script, _target);
     }
 
     public override void Interact (Direction from) {
@@ -137,12 +114,17 @@ public class ScriptEntityInteraction : EntityInteraction {
 
         base.Interact(from);
 
-        if (_scriptFunc is null) return;
-
         IsInteracting = true;
 
-        var cor = _lua.CreateCoroutine(_scriptFunc);
-        Coroutine.Start(CompleteLuaCoroutine(cor.Coroutine));
+        var id = _lua.Run();
+        _lua.OnExecutionComplete += _Callback;
+
+        void _Callback (object? sender, LuaScriptHost.EventArgs args) {
+            if (args.Id != id) return;
+
+            End();
+            _lua.OnExecutionComplete -= _Callback;
+        }
     }
 
     private CoroutineTask CompleteLuaCoroutine (MoonSharp.Interpreter.Coroutine luaCor) {

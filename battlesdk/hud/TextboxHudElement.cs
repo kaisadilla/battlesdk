@@ -60,6 +60,7 @@ public class TextboxHudElement : IInputListener, IHudElement {
     /// </summary>
     private GraphicsAnimatableText _txtRenderer;
 
+    public string Name => "Textbox Hud Element";
     public bool BlockOtherInput => true;
 
     /// <summary>

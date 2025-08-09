@@ -1,7 +1,7 @@
 ﻿using battlesdk.data;
 using battlesdk.graphics;
 using battlesdk.input;
-using battlesdk.scripts;
+using battlesdk.scripts.types;
 using MoonSharp.Interpreter;
 using NLog;
 
@@ -10,19 +10,12 @@ namespace battlesdk.screen;
 public class ScriptScreenLayer : IScreenLayer, IInputListener {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
+    public string Name { get; }
     public bool IsTransparent => true;
-
     public bool BlockOtherInput => true;
 
     private Renderer _renderer;
-    /// <summary>
-    /// The Lua VM that will execute this interaction's script.
-    /// </summary>
-    private Script _lua = new();
-    /// <summary>
-    /// Contains the compiled script as a Lua function.
-    /// </summary>
-    private DynValue? _scriptFunc;
+    private LuaScriptHost _lua;
 
     // These fields contain specific functions in the script.
     private DynValue? _openFunc;
@@ -31,52 +24,27 @@ public class ScriptScreenLayer : IScreenLayer, IInputListener {
 
     public ScriptScreenLayer (Renderer renderer, ScriptAsset script) {
         _renderer = renderer;
+        Name = $"Script Layer: {script.Name}";
 
-        LoadScript(script);
-    }
-
-    private void LoadScript (ScriptAsset asset) {
-        string srcStr;
-
-        try {
-            srcStr = asset.GetSource();
-        }
-        catch (Exception ex) {
-            _logger.ErrorEx(ex, "Failed to load script.");
-            return;
-        }
-        
-        Lua.RegisterGlobals(_lua);
-
-        Table tbl = new(_lua);
-
-        tbl["open"] = () => { };
-        tbl["draw"] = () => { };
-        tbl["handle_input"] = () => { };
-        tbl["close"] = (Action)Close;
-
-        _lua.Globals["Screen"] = tbl;
-
-        _scriptFunc = _lua.LoadString(srcStr);
-        _lua.Call(_scriptFunc);
-
-        _openFunc = _lua.Globals.Get("Screen").Table.Get("open");
-        _drawFunc = _lua.Globals.Get("Screen").Table.Get("draw");
-        _handleInputFunc = _lua.Globals.Get("Screen").Table.Get("handle_input");
+        _lua = LuaScriptHost.ScreenScript(script, this);
+        _lua.RunSync();
+        _openFunc = _lua.GetFunction("target", "open");
+        _drawFunc = _lua.GetFunction("target", "draw");
+        _handleInputFunc = _lua.GetFunction("target", "handle_input");
     }
 
     public void Open () {
         Screen.Push(this);
         InputManager.Push(this);
-        if (_openFunc is not null) _lua.Call(_openFunc);
+        if (_openFunc is not null) _lua.Run(_openFunc);
     }
 
     public unsafe void Draw () {
-        if (_drawFunc is not null) _lua.Call(_drawFunc);
+        if (_drawFunc is not null) _lua.RunSync(_drawFunc);
     }
 
     public unsafe void HandleInput () {
-        if (_handleInputFunc is not null) _lua.Call(_handleInputFunc); // TODO: Not working.
+        if (_handleInputFunc is not null) _lua.Run(_handleInputFunc); // TODO: Not working.
     }
 
     public void OnInputBlocked () {

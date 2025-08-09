@@ -1,4 +1,6 @@
-﻿using battlesdk.scripts.types;
+﻿global using LuaCoroutine = MoonSharp.Interpreter.Coroutine;
+using battlesdk.screen;
+using battlesdk.scripts.types;
 using battlesdk.world.entities;
 using MoonSharp.Interpreter;
 using NLog;
@@ -18,6 +20,7 @@ public static class Lua {
         UserData.RegisterType<LuaControls>(InteropAccessMode.Preoptimized, LuaControls.CLASSNAME);
         UserData.RegisterType<LuaAudio>(InteropAccessMode.Preoptimized, LuaAudio.CLASSNAME);
         UserData.RegisterType<LuaHud>(InteropAccessMode.Preoptimized, LuaHud.CLASSNAME);
+        UserData.RegisterType<LuaScreen>(InteropAccessMode.Preoptimized, LuaScreen.CLASSNAME);
         UserData.RegisterType<LuaG>(InteropAccessMode.Preoptimized, LuaG.CLASSNAME);
 
         UserData.RegisterType<LuaRenderer>(InteropAccessMode.Preoptimized, LuaRenderer.CLASSNAME);
@@ -48,6 +51,7 @@ public static class Lua {
         script.Globals[LuaControls.CLASSNAME] = UserData.CreateStatic(typeof(LuaControls));
         script.Globals[LuaAudio.CLASSNAME] = UserData.CreateStatic(typeof(LuaAudio));
         script.Globals[LuaHud.CLASSNAME] = UserData.CreateStatic(typeof(LuaHud));
+        script.Globals[LuaScreen.CLASSNAME] = UserData.CreateStatic(typeof(LuaScreen));
         script.Globals[LuaG.CLASSNAME] = UserData.CreateStatic(typeof(LuaG));
         script.Globals[LuaEntity.CLASSNAME] = UserData.CreateStatic(typeof(LuaEntity));
 
@@ -60,6 +64,19 @@ public static class Lua {
 
         script.Globals["target"] = luaTarget;
         script.Globals["player"] = luaPlayer;
+    }
+
+    public static void RegisterScreenHandler (Script script, ScriptScreenLayer screen) {
+        Table tbl = new(script);
+        tbl["close"] = (Action)screen.Close;
+
+        script.Globals["target"] = tbl;
+
+        script.DoString(
+            @"function target:open() end
+            function target:draw() end
+            function target:handle_input() end"
+        );
     }
 
     public static void RegisterEnumTable<T> (string tableName) where T : Enum {

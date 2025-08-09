@@ -289,7 +289,7 @@ public class World {
         List<MapTile> tiles = [];
 
         foreach (var l in map.Terrain) {
-            var mapTile = l[worldPos];
+            var mapTile = l[map.GetLocalPos(worldPos)];
             if (mapTile is not null) {
                 tiles.Add(mapTile);
             }

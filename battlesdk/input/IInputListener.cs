@@ -1,6 +1,11 @@
 ﻿namespace battlesdk.input;
 public interface IInputListener {
     /// <summary>
+    /// A name that identifies this listener.
+    /// </summary>
+    string Name { get; }
+
+    /// <summary>
     /// If true, while this listener is active, input listeners with a lower
     /// priority will be ignored.
     /// </summary>

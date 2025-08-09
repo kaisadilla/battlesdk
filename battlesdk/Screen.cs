@@ -17,6 +17,7 @@ public static class Screen {
 
     // Note: These fields will be null if you call them before calling Init().
     public static ScriptScreenLayer MainMenu { get; private set; } = null!;
+    public static ScriptScreenLayer SaveGame { get; private set; } = null!;
 
     /// <summary>
     /// The renderer that works on the game's main window.
@@ -26,25 +27,31 @@ public static class Screen {
     public static void Init (Renderer renderer) {
         MainRenderer = renderer;
 
-        if (Registry.Scripts.TryGetElementByName("screens/main_menu", out var scr) == false) {
+        if (Registry.Scripts.TryGetElementByName("screens/main_menu", out var mainMenuScr) == false) {
             throw new InitializationException("Missing script: 'screens/main_menu'.");
         }
 
-        try {
-            MainMenu = new ScriptScreenLayer(MainRenderer, scr);
-        }
-        catch (Exception ex) {
-            throw new InitializationException("Failed to load main menu's script.", ex);
+        if (Registry.Scripts.TryGetElementByName("screens/save_game", out var saveGameScr) == false) {
+            throw new InitializationException("Missing script: 'screens/save_game'.");
         }
 
+        try {
+            MainMenu = new ScriptScreenLayer(MainRenderer, mainMenuScr);
+            SaveGame = new ScriptScreenLayer(MainRenderer, saveGameScr);
+        }
+        catch (Exception ex) {
+            throw new InitializationException("Failed to load screen layer.", ex);
+        }
     }
 
     public static void Push (IScreenLayer layer) {
         _layers.Push(layer);
+        _logger.Debug($"Pushed screen layer: {layer.Name}.");
     }
 
     public static void Pop () {
-        _layers.Pop();
+        var discard = _layers.Pop();
+        _logger.Debug($"Popped screen layer: {discard.Name}.");
     }
 
     public static void Update () {
@@ -112,6 +119,11 @@ public static class Screen {
 }
 
 public interface IScreenLayer {
+    /// <summary>
+    /// A name that identifies this screen.
+    /// </summary>
+    string Name { get; }
+
     /// <summary>
     /// If true, layers below this one won't be rendered.
     /// </summary>

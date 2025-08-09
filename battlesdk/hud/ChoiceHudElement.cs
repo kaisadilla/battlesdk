@@ -42,13 +42,13 @@ public class ChoiceHudElement : IHudElement, IInputListener {
     /// </summary>
     private int _cursor = 0;
 
+    public string Name => "Choice Hud Element";
     public bool BlockOtherInput => true;
     public bool IsClosed { get; private set; } = false;
     /// <summary>
     /// The choice made by the player.
     /// </summary>
     public int Choice { get; private set; } = -1;
-
 
     public event EventHandler<EventArgs>? OnClose;
 
@@ -69,7 +69,7 @@ public class ChoiceHudElement : IHudElement, IInputListener {
         _canBeCancelled = canBeCancelled;
         _defaultChoice = defaultChoice;
 
-        int width = 0;
+        int width = 40; // min width = 40
         int height = 0;
 
         foreach (var c in choices) {
@@ -85,7 +85,7 @@ public class ChoiceHudElement : IHudElement, IInputListener {
         _size = new(width, height);
 
         if (_frame is GraphicsFrameSprite frameSprite) {
-            _padding = frameSprite.Asset.Padding + new IRect(2, 9, 2, 5);
+            _padding = frameSprite.Asset.Padding + new IRect(2, 9, 1, 5);
             _size += new IVec2(
                 _padding.Left + _padding.Right, _padding.Top + _padding.Bottom
             );

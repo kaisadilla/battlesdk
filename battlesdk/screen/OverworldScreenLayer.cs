@@ -19,6 +19,7 @@ public class OverworldScreenLayer : IScreenLayer, IInputListener {
     private float _upKeyStart = float.MinValue;
     private float _downKeyStart = float.MinValue;
 
+    public string Name => "Overworld screen";
     public bool IsTransparent => false;
     public bool BlockOtherInput => true;
 
