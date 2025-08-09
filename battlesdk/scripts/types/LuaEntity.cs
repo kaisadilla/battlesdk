@@ -25,32 +25,52 @@ public class LuaEntity {
         _entity = entity;
     }
 
-    private int GetTimes (CallbackArguments args) {
-        if (args.Count > 0 && args[0].Type == DataType.Number) {
-            return (int)args[0].Number;
-        }
-
-        return 1;
-    }
-
+    /// <summary>
+    /// Moves the character up once, unless a different amount of steps is
+    /// specified.
+    /// </summary>
+    [LuaApiCoroutine]
+    [LuaApiFunctionParam(0, "steps", typeof(int?), "The amount of steps to take.")]
+    [LuaApiFunctionReturnValue(typeof(void))]
     public DynValue move_up (ScriptExecutionContext ctx, CallbackArguments args) {
         return ExecuteMove(
             ctx, args, ch => ch.TryMove(Direction.Up, _ignoreCharacters)
         );
     }
 
+    /// <summary>
+    /// Moves the character up down, unless a different amount of steps is
+    /// specified.
+    /// </summary>
+    [LuaApiCoroutine]
+    [LuaApiFunctionParam(0, "steps", typeof(int?), "The amount of steps to take.")]
+    [LuaApiFunctionReturnValue(typeof(void))]
     public DynValue move_down (ScriptExecutionContext ctx, CallbackArguments args) {
         return ExecuteMove(
             ctx, args, ch => ch.TryMove(Direction.Down, _ignoreCharacters)
         );
     }
 
+    /// <summary>
+    /// Moves the character left once, unless a different amount of steps is
+    /// specified.
+    /// </summary>
+    [LuaApiCoroutine]
+    [LuaApiFunctionParam(0, "steps", typeof(int?), "The amount of steps to take.")]
+    [LuaApiFunctionReturnValue(typeof(void))]
     public DynValue move_left (ScriptExecutionContext ctx, CallbackArguments args) {
         return ExecuteMove(
             ctx, args, ch => ch.TryMove(Direction.Left, _ignoreCharacters)
         );
     }
 
+    /// <summary>
+    /// Moves the character right once, unless a different amount of steps is
+    /// specified.
+    /// </summary>
+    [LuaApiCoroutine]
+    [LuaApiFunctionParam(0, "steps", typeof(int?), "The amount of steps to take.")]
+    [LuaApiFunctionReturnValue(typeof(void))]
     public DynValue move_right (ScriptExecutionContext ctx, CallbackArguments args) {
         return ExecuteMove(
             ctx, args, ch => ch.TryMove(Direction.Right, _ignoreCharacters)
@@ -87,6 +107,9 @@ public class LuaEntity {
         _entity.SetDirection(dir);
     }
 
+    [LuaApiCoroutine]
+    [LuaApiFunctionParam(0, "steps", typeof(int?), "The amount of steps to take.")]
+    [LuaApiFunctionReturnValue(typeof(void))]
     public DynValue jump (ScriptExecutionContext ctx, CallbackArguments args) {
         return ExecuteMove(
             ctx, args, ch => ch.JumpInPlace()
@@ -128,5 +151,13 @@ public class LuaEntity {
         }
 
         return DynValue.NewYieldReq([]);
+    }
+
+    private static int GetTimes (CallbackArguments args) {
+        if (args.Count > 0 && args[0].Type == DataType.Number) {
+            return (int)args[0].Number;
+        }
+
+        return 1;
     }
 }

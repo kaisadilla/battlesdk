@@ -70,8 +70,6 @@ internal class LuaDocGenerator {
         }
         writer.WriteLine($"{className} = {{}}");
 
-
-
         for (int i = 0; i < methods.Length; i++) {
             var method = methods[i];
             if (method.IsPublic == false) continue;
@@ -84,6 +82,7 @@ internal class LuaDocGenerator {
 
             writer.WriteLine();
             DescribeMethod(writer, className, method);
+            writer.WriteLine();
         }
 
         writer.WriteLine($"-- #endregion {className}");
@@ -128,6 +127,9 @@ internal class LuaDocGenerator {
         StreamWriter writer, string className, MethodInfo method
     ) {
         var name = method.Name.ToSnakeCase();
+        bool isAttrDescribed // whether this function is described via attributes.
+            = method.GetCustomAttribute<LuaApiCoroutineAttribute>() is not null;
+
         var xmlDoc = GetSummary(method);
         string? summary = xmlDoc?.Element("summary")?.Value?.Trim();
 
@@ -137,38 +139,56 @@ internal class LuaDocGenerator {
             }
         }
 
-        var paramObjs = method.GetParameters();
-        foreach (var param in paramObjs) {
-            string? paramDoc = xmlDoc
-                ?.Elements("param")
-                .FirstOrDefault(p => p.Attribute("name")?.Value == param.Name)
-                ?.Value?.Trim();
+        List<string> paramNames = [];
 
-            writer.WriteLine(
-                $"---@param {param.Name} {GetLuaType(param.ParameterType)} {paramDoc ?? ""}"
-            );
+        // This method is a Lua coroutine, so we'll have to extract parameters
+        // from annotations.
+        if (isAttrDescribed) {
+            var paramAttrs = method.GetCustomAttributes<LuaApiFunctionParamAttribute>();
+
+            foreach (var a in paramAttrs) {
+                writer.WriteLine(
+                    $"---@param {a.Name} {GetLuaType(a.Type)} {a.Description ?? ""}"
+                );
+                paramNames.Add(a.Name);
+            }
         }
+        // This method is a normal Lua method, so its C# signature matches its
+        // Lua signature.
+        else {
+            var paramObjs = method.GetParameters();
+            foreach (var param in paramObjs) {
+                var paramLuaName = (param.Name ?? "arg").ToSnakeCase();
+                string? paramDoc = xmlDoc
+                    ?.Elements("param")
+                    .FirstOrDefault(p => p.Attribute("name")?.Value == param.Name)
+                    ?.Value?.Trim();
 
-        if (method.ReturnType != typeof(void)) {
-            writer.WriteLine($"---@return {GetLuaType(method.ReturnType)}");
-        }
+                writer.WriteLine(
+                    $"---@param {paramLuaName} {GetLuaType(param.ParameterType)} {paramDoc ?? ""}"
+                );
 
-        writer.Write($"function {className}.{name} (");
-
-        for (int i = 0; i < paramObjs.Length; i++) {
-            var param = paramObjs[i];
-
-            writer.Write(param.Name);
-
-            if (i < paramObjs.Length - 1) {
-                writer.Write(", ");
+                paramNames.Add(paramLuaName);
             }
         }
 
-        writer.WriteLine(") end");
+        Type type;
+        if (isAttrDescribed) {
+            var attr = method.GetCustomAttribute<LuaApiFunctionReturnValueAttribute>();
+            type = attr?.Type ?? typeof(void);
+        }
+        else {
+            type = method.ReturnType;
+        }
+
+        if (type != typeof(void)) {
+            writer.WriteLine($"---@return {GetLuaType(method.ReturnType)}");
+        }
+
+        writer.Write($"function {className}.{name} ({string.Join(", ", paramNames)}) end");
     }
 
-    private string GetLuaType (Type paramType) {
+    private static string GetLuaType (Type paramType) {
         bool nullable = false;
 
         if (Nullable.GetUnderlyingType(paramType) is Type underlying) {
@@ -176,26 +196,28 @@ internal class LuaDocGenerator {
             nullable = true;
         }
 
-        if (paramType == typeof(int)) return "number" + (nullable ? "?" : "");
-        if (paramType == typeof(float)) return "number" + (nullable ? "?" : "");
-        if (paramType == typeof(double)) return "number" + (nullable ? "?" : "");
-        if (paramType == typeof(string)) return "string" + (nullable ? "?" : "");
-        if (paramType == typeof(bool)) return "boolean" + (nullable ? "?" : "");
-        if (paramType == typeof(Table)) return "table" + (nullable ? "?" : "");
-        if (paramType == typeof(DynValue)) return "any" + (nullable ? "?" : "");
-        if (paramType == typeof(void)) return "void" + (nullable ? "?" : "");
+        var nullableStr = nullable ? " | nil" : "";
+
+        if (paramType == typeof(int)) return "number" + nullableStr;
+        if (paramType == typeof(float)) return "number" + nullableStr;
+        if (paramType == typeof(double)) return "number" + nullableStr;
+        if (paramType == typeof(string)) return "string" + nullableStr;
+        if (paramType == typeof(bool)) return "boolean" + nullableStr;
+        if (paramType == typeof(Table)) return "table" + nullableStr;
+        if (paramType == typeof(DynValue)) return "any" + nullableStr;
+        if (paramType == typeof(void)) return "void" + nullableStr;
 
         if (paramType.IsArray) {
             var elType = paramType.GetElementType();
-            return (elType is null ? "any[]" : $"{GetLuaType(elType!)}[]") + (nullable ? "?" : "");
+            return (elType is null ? "any[]" : $"{GetLuaType(elType!)}[]") + nullableStr;
         }
 
         var attr = paramType.GetCustomAttribute<LuaApiClassAttribute>();
         if (attr is not null) {
-            return GetLuaClassName(paramType) + (nullable ? "?" : "");
+            return GetLuaClassName(paramType) + nullableStr;
         }
 
-        return "unknown" + (nullable ? "?" : "");
+        return "unknown" + nullableStr;
     }
 
     private XElement? GetSummary (MemberInfo member) {
