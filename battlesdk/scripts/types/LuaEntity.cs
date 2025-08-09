@@ -87,7 +87,7 @@ public class LuaEntity {
         _entity.SetDirection(dir);
     }
 
-    public DynValue Jump (ScriptExecutionContext ctx, CallbackArguments args) {
+    public DynValue jump (ScriptExecutionContext ctx, CallbackArguments args) {
         return ExecuteMove(
             ctx, args, ch => ch.JumpInPlace()
         );
