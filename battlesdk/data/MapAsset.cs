@@ -266,21 +266,19 @@ public class MapAsset : IIdentifiable {
                     }
                 }
                 catch (Exception ex) {
-                    _logger.Error(
+                    _logger.ErrorEx(
                         ex,
                         $"Failed to read entity #{i}. Entity will be ignored."
                     );
-                    ex.PrintFancy();
                 }
             }
         }
         catch (Exception ex) {
-            _logger.Error(
+            _logger.ErrorEx(
                 ex,
                 $"Failed to read entities file for {Path}. The map will work, " +
                 "but it won't have any entities."
             );
-            ex.PrintFancy();
         }
     }
 

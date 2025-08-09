@@ -42,7 +42,7 @@ public class ScriptScreenLayer : IScreenLayer, IInputListener {
             srcStr = asset.GetSource();
         }
         catch (Exception ex) {
-            _logger.Error(ex, "Failed to load script.");
+            _logger.ErrorEx(ex, "Failed to load script.");
             return;
         }
         

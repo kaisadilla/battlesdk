@@ -1,4 +1,5 @@
 ﻿using battlesdk.json;
+using NLog;
 using SDL;
 using StackCleaner;
 using System.Diagnostics;
@@ -325,5 +326,29 @@ public static class TypesUtils {
         if (frames is null || frames.Length < 2) return stack;
 
         return new StackTrace(frames.Reverse());
+    }
+
+    /// <summary>
+    /// Logs an error to this logger, demystifying the exception and printing
+    /// it fancily to the console.
+    /// </summary>
+    /// <param name="logger">The logger to which to log.</param>
+    /// <param name="exception">The exception.</param>
+    /// <param name="msg">A message for the log.</param>
+    public static void ErrorEx (this Logger logger, Exception exception, string msg) {
+        logger.Error(exception, msg);
+        exception.Demystify().PrintFancy();
+    }
+
+    /// <summary>
+    /// Logs a fatal error to this logger, demystifying the exception and printing
+    /// it fancily to the console.
+    /// </summary>
+    /// <param name="logger">The logger to which to log.</param>
+    /// <param name="exception">The exception.</param>
+    /// <param name="msg">A message for the log.</param>
+    public static void FatalEx (this Logger logger, Exception exception, string msg) {
+        logger.Fatal(exception, msg);
+        exception.Demystify().PrintFancy();
     }
 }

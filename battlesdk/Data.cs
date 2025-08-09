@@ -61,8 +61,7 @@ public static class Data {
             return list;
         }
         catch (Exception ex) {
-            _logger.Error(ex, "Failed to raed time_tints.");
-            ex.PrintFancy();
+            _logger.ErrorEx(ex, "Failed to raed time_tints.");
             return null;
         }
     }

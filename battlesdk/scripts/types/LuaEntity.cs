@@ -1,12 +1,14 @@
 ﻿using battlesdk.scripts.types;
-using battlesdk.world;
 using battlesdk.world.entities;
 using MoonSharp.Interpreter;
+using NLog;
 
 namespace battlesdk.scripts;
 
 [LuaApiClass]
 public class LuaEntity {
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
     [MoonSharpHidden]
     public const string CLASSNAME = "Entity";
 
@@ -23,57 +25,57 @@ public class LuaEntity {
         _entity = entity;
     }
 
-    public void move_up (int? times) {
-        ScriptLoop.Enqueue(new MoveScriptEvent(
-            (Character)_entity, new(MoveKind.StepUp, _ignoreCharacters), times ?? 1
-        ));
+    private int GetTimes (CallbackArguments args) {
+        if (args.Count > 0 && args[0].Type == DataType.Number) {
+            return (int)args[0].Number;
+        }
+
+        return 1;
     }
 
-    public void move_down (int? times) {
-        ScriptLoop.Enqueue(new MoveScriptEvent(
-            (Character)_entity, new(MoveKind.StepDown, _ignoreCharacters), times ?? 1
-        ));
+    public DynValue move_up (ScriptExecutionContext ctx, CallbackArguments args) {
+        return ExecuteMove(
+            ctx, args, ch => ch.TryMove(Direction.Up, _ignoreCharacters)
+        );
     }
 
-    public void move_left (int? times) {
-        ScriptLoop.Enqueue(new MoveScriptEvent(
-            (Character)_entity, new(MoveKind.StepLeft, _ignoreCharacters), times ?? 1
-        ));
+    public DynValue move_down (ScriptExecutionContext ctx, CallbackArguments args) {
+        return ExecuteMove(
+            ctx, args, ch => ch.TryMove(Direction.Down, _ignoreCharacters)
+        );
     }
 
-    public void move_right (int? times) {
-        ScriptLoop.Enqueue(new MoveScriptEvent(
-            (Character)_entity, new(MoveKind.StepRight, _ignoreCharacters), times ?? 1
-        ));
+    public DynValue move_left (ScriptExecutionContext ctx, CallbackArguments args) {
+        return ExecuteMove(
+            ctx, args, ch => ch.TryMove(Direction.Left, _ignoreCharacters)
+        );
     }
 
+    public DynValue move_right (ScriptExecutionContext ctx, CallbackArguments args) {
+        return ExecuteMove(
+            ctx, args, ch => ch.TryMove(Direction.Right, _ignoreCharacters)
+        );
+    }
+    
     public void look_up () {
-        ScriptLoop.Enqueue(new MoveScriptEvent(
-            (Character)_entity, new(MoveKind.LookUp, _ignoreCharacters), 1
-        ));
+        _entity.SetDirection(Direction.Up);
     }
-
+    
     public void look_down () {
-        ScriptLoop.Enqueue(new MoveScriptEvent(
-            (Character)_entity, new(MoveKind.LookDown, _ignoreCharacters), 1
-        ));
+        _entity.SetDirection(Direction.Down);
     }
-
+    
     public void look_left () {
-        ScriptLoop.Enqueue(new MoveScriptEvent(
-            (Character)_entity, new(MoveKind.LookLeft, _ignoreCharacters), 1
-        ));
+        _entity.SetDirection(Direction.Left);
     }
-
+    
     public void look_right () {
-        ScriptLoop.Enqueue(new MoveScriptEvent(
-            (Character)_entity, new(MoveKind.LookRight, _ignoreCharacters), 1
-        ));
+        _entity.SetDirection(Direction.Right);
     }
-
+    
     public void look_towards_player () {
         var delta = G.World.Player.Position - _entity.Position;
-
+    
         Direction dir;
         if (Math.Abs(delta.Y) > Math.Abs(delta.X)) {
             dir = delta.Y > 0 ? Direction.Down : Direction.Up;
@@ -82,18 +84,49 @@ public class LuaEntity {
             dir = delta.X > 0 ? Direction.Right : Direction.Left;
         }
 
-        ScriptLoop.Enqueue(new MoveScriptEvent(
-            (Character)_entity, new((MoveKind)(dir + 4), _ignoreCharacters), 1
-        ));
+        _entity.SetDirection(dir);
     }
 
-    public void jump (int? times) {
-        ScriptLoop.Enqueue(new MoveScriptEvent(
-            (Character)_entity, new(MoveKind.Jump, _ignoreCharacters), times ?? 1
-        ));
+    public DynValue Jump (ScriptExecutionContext ctx, CallbackArguments args) {
+        return ExecuteMove(
+            ctx, args, ch => ch.JumpInPlace()
+        );
     }
 
     public void ignore_characters (bool val) {
         _ignoreCharacters = val;
+    }
+
+    private DynValue ExecuteMove (
+        ScriptExecutionContext ctx, CallbackArguments args, Action<Character> callback
+    ) {
+        if (_entity is not Character ch) {
+            _logger.Error("[move_up] Entity is not a character.");
+            return DynValue.Nil;
+        }
+
+        var luaCor = ctx.GetCallingCoroutine();
+        int totalTimes = GetTimes(args);
+        int times = 0;
+        Coroutine.Start(_Cor());
+
+        CoroutineTask _Cor () {
+            while (times < totalTimes) {
+                if (ch.IsMoving) {
+                    yield return null;
+                }
+                else {
+                    callback(ch);
+                    times++;
+                }
+            }
+            while (ch.IsMoving) {
+                yield return null;
+            }
+
+            luaCor.Resume();
+        }
+
+        return DynValue.NewYieldReq([]);
     }
 }

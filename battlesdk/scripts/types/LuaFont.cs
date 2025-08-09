@@ -26,7 +26,7 @@ public class LuaFont : ILuaType {
             return new(sprite);
         }
         catch (Exception ex) {
-            _logger.Error(ex, "Failed to render plain text sprite.");
+            _logger.ErrorEx(ex, "Failed to render plain text sprite.");
             return null;
         }
     }
@@ -37,7 +37,7 @@ public class LuaFont : ILuaType {
             return new(sprite);
         }
         catch (Exception ex) {
-            _logger.Error(ex, "Failed to render shadowed plain text sprite.");
+            _logger.ErrorEx(ex, "Failed to render shadowed plain text sprite.");
             return null;
         }
     }

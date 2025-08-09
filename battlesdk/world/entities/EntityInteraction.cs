@@ -27,6 +27,8 @@ public enum InteractionTrigger {
 }
 
 public abstract class EntityInteraction {
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
     /// <summary>
     /// The event that triggers this interaction.
     /// </summary>
@@ -79,11 +81,10 @@ public abstract class EntityInteraction {
     /// <see cref="Interact(Direction)"/> method has been called, or an input
     /// listener has been pushed manually.
     /// </summary>
-    protected void EnqueueEnd () {
-        ScriptLoop.EnqueueScriptEnd(() => {
-            IsInteracting = false;
-            InputManager.Pop();
-        });
+    protected void End () {
+        _logger.Debug("NPC is no longer interacting.");
+        IsInteracting = false;
+        InputManager.Pop();
     }
 }
 
@@ -121,7 +122,7 @@ public class ScriptEntityInteraction : EntityInteraction {
             srcStr = script.GetSource();
         }
         catch (Exception ex) {
-            _logger.Error(ex, "Failed to load script.");
+            _logger.ErrorEx(ex, "Failed to load script.");
             return;
         }
 
@@ -145,12 +146,10 @@ public class ScriptEntityInteraction : EntityInteraction {
     }
 
     private CoroutineTask CompleteLuaCoroutine (MoonSharp.Interpreter.Coroutine luaCor) {
-        var res = luaCor.Resume();
+        luaCor.Resume();
         while (true) {
             if (luaCor.State == CoroutineState.Dead) {
-                _logger.Debug("NPC is no longer interacting.");
-                IsInteracting = false;
-                InputManager.Pop();
+                End();
                 break;
             }
             else {
@@ -177,10 +176,17 @@ public class MessageEntityInteraction : EntityInteraction {
 
         base.Interact(from);
 
-        foreach (var k in _textKeys) {
-            ScriptLoop.Enqueue(new MessageScriptEvent(Localization.Text(k)));
+        ShowNextTextbox(0);
+    }
+
+    private void ShowNextTextbox (int index) {
+        if (index >= _textKeys.Count) {
+            End();
+            return;
         }
-        EnqueueEnd();
+
+        var tb = Hud.ShowTextbox(Localization.Text(_textKeys[index]));
+        tb.OnComplete += (s, evt) => ShowNextTextbox(index + 1);
     }
 }
 
@@ -260,7 +266,7 @@ public class DoorEntityInteraction : EntityInteraction {
             G.World.TransferTo(world, _targetPos);
         }
 
-        EnqueueEnd();
+        End();
     }
 
     private CoroutineTask DoorAnimation (Direction from) {
@@ -300,7 +306,7 @@ public class DoorEntityInteraction : EntityInteraction {
             G.World.TransferTo(world, _targetPos);
         }
 
-        EnqueueEnd();
+        End();
     }
 
     private void PlayEntrySound () {

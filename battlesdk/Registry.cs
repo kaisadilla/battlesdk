@@ -194,7 +194,7 @@ public static class Registry {
                 baseMeta = Json.Parse<SpriteMetadataDefinition>(txt);
             }
             catch (Exception ex) {
-                _logger.Error(ex, $"Failed to read base metadata file '{baseMetaPath}'");
+                _logger.ErrorEx(ex, $"Failed to read base metadata file '{baseMetaPath}'");
             }
         }
 
@@ -332,8 +332,7 @@ public static class Registry {
     }
 
     private static void LogLoadError (string assetKind, string path, Exception? ex) {
-        _logger.Error(ex, $"Failed to load {assetKind} '{path}'.");
-        ex.PrintFancy();
+        _logger.ErrorEx(ex, $"Failed to load {assetKind} '{path}'.");
     }
 }
 

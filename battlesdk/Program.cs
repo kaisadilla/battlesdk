@@ -7,7 +7,6 @@ using battlesdk.screen;
 using battlesdk.scripts;
 using NLog;
 using SDL;
-using static System.Diagnostics.ExceptionExtensions;
 
 const int TARGET_FPS = 60;
 
@@ -41,8 +40,7 @@ try {
     InputManager.Push(new OverworldScreenLayer(win.Renderer));
 }
 catch (Exception ex) {
-    _logger.Fatal(ex.Demystify(), $"A fatal error occurred during initialization.");
-    ex.Demystify().PrintFancy();
+    _logger.FatalEx(ex, $"A fatal error occurred during initialization.");
 
     Environment.Exit(1);
     return;
@@ -61,7 +59,6 @@ while (win.CloseRequested == false) {
         Music.Update();
         G.World.Update();
         InputManager.Update();
-        ScriptLoop.Update();
         Hud.Update();
         Screen.Update();
 
@@ -77,11 +74,7 @@ while (win.CloseRequested == false) {
         }
     }
     catch (Exception ex) {
-        _logger.Fatal(
-            ex.Demystify(),
-            $"An unrecoverable error ocurred in the program loop."
-        );
-        ex.Demystify().PrintFancy();
+        _logger.FatalEx(ex, $"An unrecoverable error ocurred in the program loop.");
 
         win.Destroy();
 
