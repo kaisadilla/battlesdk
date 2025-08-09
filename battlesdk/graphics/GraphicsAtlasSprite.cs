@@ -15,6 +15,9 @@ public class GraphicsAtlasSprite : IGraphicsSprite {
 
     public SpriteFile Asset { get; }
 
+    public int Width => _atlas.Width;
+    public int Height => _atlas.Height;
+
     public unsafe GraphicsAtlasSprite (
         Renderer renderer, SpritesheetFile asset, string name
     ) {

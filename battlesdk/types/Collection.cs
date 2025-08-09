@@ -75,6 +75,16 @@ public class Collection<T> : IEnumerable<T> where T : IIdentifiable {
         return _ids.TryGetValue(name, out id);
     }
 
+    /// <summary>
+    /// Returns the id associated to the name given. Throws if no such name
+    /// exists.
+    /// </summary>
+    /// <param name="name">The name of the element.</param>
+    /// <returns>The element's id.</returns>
+    public int GetId (string name) {
+        return _ids[name];
+    }
+
     IEnumerator IEnumerable.GetEnumerator () {
         return GetEnumerator();
     }

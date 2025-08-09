@@ -4,6 +4,15 @@ namespace battlesdk.graphics;
 
 public interface IGraphicsSprite {
     /// <summary>
+    /// This sprite's width.
+    /// </summary>
+    int Width { get; }
+    /// <summary>
+    /// This sprite's height.
+    /// </summary>
+    int Height { get; }
+
+    /// <summary>
     /// Draws this sprite at the position given.
     /// </summary>
     /// <param name="position">The position to draw the sprite at.</param>

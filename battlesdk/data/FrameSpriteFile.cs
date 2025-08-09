@@ -75,4 +75,17 @@ public class FrameSpriteFile : SpriteFile {
         TextPadding = def.TextPadding ?? new(0, 0, 0, 0);
         Padding = def.Padding ?? new(0, 0, 0, 0);
     }
+
+    /// <summary>
+    /// Given a vector representing size, adds this frame's padding to the size
+    /// given and returns it.
+    /// </summary>
+    /// <param name="size">The original size to which to apply padding metrics.</param>
+    /// <returns></returns>
+    public IVec2 ApplyPadding (IVec2 size) {
+        return size += new IVec2(
+            Padding.Left + Padding.Right,
+            Padding.Top + Padding.Bottom
+        );
+    }
 }

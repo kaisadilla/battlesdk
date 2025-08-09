@@ -17,10 +17,50 @@ public class LuaHud : ILuaType {
     )]
     public static DynValue message (ScriptExecutionContext ctx, CallbackArguments args) {
         var luaCor = ctx.GetCallingCoroutine();
-        string msg = args[0].String;
+        string text = args[0].String;
 
-        var tb = Hud.ShowTextbox(Localization.Text(msg));
-        tb.OnComplete += (s, evt) => luaCor.Resume("example");
+        var msg = Hud.ShowMessage(Localization.Text(text));
+        msg.OnClose += (s, evt) => luaCor.Resume();
+
+        return DynValue.NewYieldReq([]);
+    }
+
+    [LuaApiCoroutine]
+    [LuaApiFunctionParam(0, "message", typeof(string), "The content of the textbox.")]
+    [LuaApiFunctionParam(
+        1,
+        "choices",
+        typeof(List<string>),
+        "An array of keys for localized strings. Each string represents one choice.")
+    ]
+    [LuaApiFunctionParam(
+        2,
+        "can_be_cancelled",
+        typeof(bool?),
+        "True if the choice can be cancelled."
+    )]
+    [LuaApiFunctionParam(
+        3,
+        "default_choice",
+        typeof(int?),
+        "The default choice if the player cancels the choice. A value of -1 indicates no choice."
+    )]
+    public static DynValue choice_message (ScriptExecutionContext ctx, CallbackArguments args) {
+        var luaCor = ctx.GetCallingCoroutine();
+        string msg = args[0].String;
+        List<string> choices = args[1].ToObject<List<string>>();
+        bool canBeCancelled = args.Count >= 3 ? args[2].Boolean : true;
+        int defaultChoice = args.Count >= 4 ? (int)args[3].Number : -1;
+
+        var choice = Hud.ShowChoiceMessage(
+            Localization.Text(msg), choices, canBeCancelled, defaultChoice
+        );
+        choice.OnClose += (s, evt) => {
+            var c = choice.Choice;
+            if (c != -1) c++;
+            Console.WriteLine(c);
+            luaCor.Resume(c);
+        };
 
         return DynValue.NewYieldReq([]);
     }

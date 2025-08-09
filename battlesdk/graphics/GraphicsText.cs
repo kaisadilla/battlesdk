@@ -55,7 +55,7 @@ public class GraphicsText {
         foreach (var g in _glyphs) {
             IVec2 glyphPos = new(
                 pos.X + g.Position,
-                y + (g.Line * _font.Asset.LineHeight)
+                _font.Asset.GetCorrectY(y + (g.Line * _font.Asset.LineHeight))
             );
             g.Font.DrawChar(glyphPos, g.CharRect, g.Color, true);
         }
@@ -70,7 +70,7 @@ public class GraphicsText {
         foreach (var g in _glyphs) {
             if (g.Line != line) continue;
 
-            IVec2 glyphPos = new(pos.X + g.Position, pos.Y);
+            IVec2 glyphPos = new(pos.X + g.Position, _font.Asset.GetCorrectY(pos.Y));
             g.Font.DrawChar(glyphPos, g.CharRect, g.Color, true);
         }
     }
@@ -85,7 +85,7 @@ public class GraphicsText {
 
             IVec2 glyphPos = new(
                 pos.X + g.Position,
-                y + (g.Line * _font.Asset.LineHeight)
+                _font.Asset.GetCorrectY(y + (g.Line * _font.Asset.LineHeight))
             );
             g.Font.DrawChar(glyphPos, g.CharRect, g.Color, true);
         }

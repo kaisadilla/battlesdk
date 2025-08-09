@@ -4,7 +4,7 @@ using battlesdk.input;
 using NLog;
 
 namespace battlesdk.hud;
-public class Textbox : IInputListener {
+public class TextboxHudElement : IInputListener, IHudElement {
     private const float CHARS_PER_SECOND = 80;
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
@@ -23,6 +23,11 @@ public class Textbox : IInputListener {
     /// </summary>
     private IGraphicsSprite? _arrow;
     private UpDownAnimation? _arrowAnim;
+
+    /// <summary>
+    /// If true, the player can close this textbox.
+    /// </summary>
+    private bool _closeable;
 
     /// <summary>
     /// The position of the textbox.
@@ -58,21 +63,36 @@ public class Textbox : IInputListener {
     public bool BlockOtherInput => true;
 
     /// <summary>
-    /// This event triggers when the textbox is finished and should be closed.
+    /// Equals true when the message contained by this textbox has been shown
+    /// entirely.
     /// </summary>
-    public event EventHandler<EventArgs>? OnComplete;
+    public bool IsMessageShown { get; private set; } = false;
+    public bool IsClosed { get; private set; } = false;
 
-    public unsafe Textbox (
+    /// <summary>
+    /// Triggers as soon as the last character of the message is printed in the
+    /// screen. To track when the textbox should be closed, subscribe to
+    /// <see cref="OnClose"/> instead.
+    /// </summary>
+    public event EventHandler<EventArgs>? OnMessageShown;
+    public event EventHandler<EventArgs>? OnClose;
+
+    public unsafe TextboxHudElement (
         Renderer renderer,
-        int textboxId,
+        int frameId,
         int fontId,
         IVec2 pos,
         IVec2 size,
+        bool closeable,
         string text
     ) {
-        _frame = renderer.GetSprite(textboxId) ?? throw new("Invalid frame");
+        OnMessageShown += (s, evt) => IsMessageShown = true;
+        OnClose += (s, evt) => IsClosed = true;
+
+        _frame = renderer.GetSprite(frameId) ?? throw new("Invalid frame");
         _pos = pos;
         _size = size;
+        _closeable = closeable;
 
         _font = renderer.GetFontOrDefault(fontId);
 
@@ -88,22 +108,21 @@ public class Textbox : IInputListener {
         // the padding of the frame chosen; and an offset used to make line
         // transitions look better. The number chosen for this offset is
         // arbitrary based on personal preference.
-        int xOffset = 3;
         IRect viewport;
 
         if (_frame is GraphicsFrameSprite frameSprite) {
-             viewport = new() {
-                 Top = pos.Y + frameSprite.Asset.TextPadding.Top - xOffset,
-                 Bottom = (pos.Y + size.Y + xOffset) - frameSprite.Asset.TextPadding.Bottom,
-                 Left = pos.X + frameSprite.Asset.TextPadding.Left,
-                 Right = (pos.X + size.X) - frameSprite.Asset.TextPadding.Right,
-             };
+            viewport = new() {
+                Top = pos.Y + frameSprite.Asset.Padding.Top + 2,
+                Bottom = (pos.Y + size.Y - 2) - frameSprite.Asset.Padding.Bottom,
+                Left = pos.X + frameSprite.Asset.Padding.Left + 6,
+                Right = (pos.X + size.X) - frameSprite.Asset.Padding.Right - 6,
+            };
         }
         else {
             viewport = new();
         }
 
-        _txtRenderer = new(renderer, fontId, text, viewport, xOffset);
+        _txtRenderer = new(renderer, fontId, text, viewport, _font.Asset.LineOffset - 1);
 
         _visibleLines = (viewport.Bottom - viewport.Top) / _font.Asset.LineHeight;
 
@@ -131,9 +150,8 @@ public class Textbox : IInputListener {
         if (Controls.GetKeyDown(ActionKey.Primary)) {
             Audio.PlayBeepShort();
 
-            if ((int)_currentFirstLine >= (_txtRenderer.LineCount - _visibleLines)) {
-                InputManager.Pop();
-                OnComplete?.Invoke(this, EventArgs.Empty);
+            if (IsMessageShown) {
+                if (_closeable) Close();
             }
             else {
                 _animState = AnimationState.MovingLine;
@@ -146,11 +164,16 @@ public class Textbox : IInputListener {
     }
 
     public unsafe void Draw () {
+        if (IsClosed) return;
+
         _frame.Draw(_pos, _size);
 
         _txtRenderer.DrawAtViewport((int)_charCount, _currentFirstLine);
 
-        if (_animState == AnimationState.None) {
+        if (
+            _animState == AnimationState.None
+            && (IsMessageShown == false || _closeable)
+        ) {
             _arrow?.Draw(new(
                 (_pos.X + _size.X) - 13,
                 (_pos.Y + _size.Y) - 23 + (_arrowAnim?.Value ?? 0)
@@ -158,19 +181,9 @@ public class Textbox : IInputListener {
         }
     }
 
-    /// <summary>
-    /// Returns a Task that will be completed when this textbox is closed.
-    /// </summary>
-    public Task WaitUntilClose () {
-        var tcs = new TaskCompletionSource();
-
-        OnComplete += _Handler;
-        return tcs.Task;
-
-        void _Handler (object? s, EventArgs evt) {
-            OnComplete -= _Handler;
-            tcs.TrySetResult();
-        }
+    public void Close () {
+        InputManager.Pop();
+        OnClose?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>
@@ -197,6 +210,9 @@ public class Textbox : IInputListener {
         _charCount += CHARS_PER_SECOND * Time.DeltaTime;
 
         for (int i = (int)oldCount; i < (int)_charCount; i++) {
+            if (i >= _txtRenderer.CharCount) {
+                OnMessageShown?.Invoke(this, EventArgs.Empty);
+            }
             if (i >= _txtRenderer.CharCount || _txtRenderer.GetCharLine(i) > lastLine) {
                 _charCount = i;
                 _animState = AnimationState.None;

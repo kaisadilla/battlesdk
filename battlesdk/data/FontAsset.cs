@@ -1,4 +1,5 @@
-﻿using battlesdk.json;
+﻿using battlesdk.data.definitions;
+using battlesdk.json;
 using NLog;
 
 namespace battlesdk.data;
@@ -19,6 +20,21 @@ public class FontAsset : AssetFile {
     /// in pixels, between two consecutive lines rendered in this font.
     /// </summary>
     public int LineHeight { get; private set; } = 16;
+    /// <summary>
+    /// The distance from the top of the line, to the actual top of the topmost
+    /// characters in the font. This is, when rendering a reference character
+    /// (usually uppercase A) at a point P, the vertical gap between that point
+    /// and the actual topmost pixel of the character.
+    /// 
+    /// This property is used to correctly render all fonts at the same place
+    /// regardless of their internal metrics..
+    /// </summary>
+    public int NativeLineOffset { get; private set; } = 0;
+    /// <summary>
+    /// Given a point P, the vertical gap between that point and where the text
+    /// should be actually rendered to look good.
+    /// </summary>
+    public int LineOffset { get; private set; } = 4;
 
     public FontAsset (string name, string path) : base(name, path) {
         DisplayName = name;
@@ -31,7 +47,7 @@ public class FontAsset : AssetFile {
         }
 
         var json = File.ReadAllText(jsonPath);
-        var obj = Json.Parse<MetadataFile>(json);
+        var obj = Json.Parse<FontDefinition>(json);
 
         if (obj is null) {
             _logger.Warn($"Failed to parse metadata file '{jsonPath}'.");
@@ -58,11 +74,31 @@ public class FontAsset : AssetFile {
         else {
             LineHeight = obj.LineHeight.Value;
         }
-    }
-}
 
-file class MetadataFile {
-    public string? DisplayName { get; init; }
-    public int? Size { get; init; }
-    public int? LineHeight { get; init; }
+        if (obj.NativeLineOffset is null) {
+            _logger.Warn($"'{jsonPath}' - Missing field: 'native_line_offset'.");
+        }
+        else {
+            NativeLineOffset = obj.NativeLineOffset.Value;
+        }
+
+        if (obj.LineOffset is null) {
+            _logger.Warn($"'{jsonPath}' - Missing field: 'line_offset'.");
+        }
+        else {
+            LineOffset = obj.LineOffset.Value;
+        }
+    }
+
+    /// <summary>
+    /// Given a vertical position, returns the vertical position where this
+    /// font needs to be rendered to look as intended, assuming a line height
+    /// of <see cref="LineHeight"/> is being respected (i.e. each line is
+    /// rendered one line height below the previous one).
+    /// </summary>
+    /// <param name="y">The reference y position.</param>
+    /// <returns></returns>
+    public int GetCorrectY (int y) {
+        return y - NativeLineOffset + LineOffset;
+    }
 }

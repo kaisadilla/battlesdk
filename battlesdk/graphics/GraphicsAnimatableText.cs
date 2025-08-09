@@ -25,7 +25,7 @@ public class GraphicsAnimatableText : GraphicsText {
 
             IVec2 glyphPos = new(
                 Viewport.Left + g.Position,
-                y + (g.Line * _font.Asset.LineHeight)
+                _font.Asset.GetCorrectY(y + (g.Line * _font.Asset.LineHeight))
             );
 
             // The glyph is fully below the viewport, so it won't be rendered.

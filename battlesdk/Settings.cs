@@ -9,7 +9,8 @@ public static class Settings {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public static int TextFont { get; private set; } = 0;
-    public static int TextBox { get; private set; } = 0;
+    public static int TextboxFrame { get; private set; } = 0;
+    public static int ChoiceFrame { get; private set; } = 0;
 
     public static void Init () {
         if (Registry.Fonts.TryGetId("power_clear", out var textFont) == false) {
@@ -23,7 +24,14 @@ public static class Settings {
             _logger.Warn("Textbox sprite 'ui/frames/dp_textbox_1' is not in the Registry.");
         }
         else {
-            TextBox = tb;
+            TextboxFrame = tb;
+        }
+
+        if (Registry.Sprites.TryGetId("ui/frames/dp_choice", out tb) == false) {
+            _logger.Warn("Textbox sprite 'ui/frames/dp_choice' is not in the Registry.");
+        }
+        else {
+            ChoiceFrame = tb;
         }
     }
 }

@@ -85,6 +85,15 @@ public readonly record struct IRect (int Top, int Left, int Bottom, int Right) {
         };
     }
 
+    public static IRect operator + (IRect a, IRect b) {
+        return new() {
+            Top = a.Top + b.Top,
+            Left = a.Left + b.Left,
+            Bottom = a.Bottom + b.Bottom,
+            Right = a.Right + b.Right,
+        };
+    }
+
     public static IRect operator * (IRect rect, float val) {
         return new() {
             Top = (int)(rect.Top * val),
@@ -131,6 +140,19 @@ public readonly record struct ColorRGBA (int R, int G, int B, int A) {
 
 }
 
+public class IdProvider() {
+    private int _id = 0;
+
+    /// <summary>
+    /// Provides a new id. This object can provide up to ~8 billion ids before
+    /// wrapping back to <see cref="int.MinValue"/>.
+    /// </summary>
+    /// <returns></returns>
+    public int NextId () {
+        return _id++;
+    }
+}
+
 public enum Direction {
     Down,
     Right,
@@ -146,6 +168,13 @@ public enum DirectionMask {
     Up = 0b100,
     Left = 0b1000,
 };
+
+public enum Position {
+    TopLeft,
+    TopRight,
+    BottomLeft,
+    BottomRight,
+}
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ResizeMode {

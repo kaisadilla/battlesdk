@@ -272,7 +272,7 @@ public class GraphicsFont {
 
         SDL3.SDL_DestroySurface(surface);
 
-        return new GraphicsPlainTextSprite(_renderer, tex, null);
+        return new GraphicsPlainTextSprite(_renderer, this, tex, null);
     }
 
     public unsafe IGraphicsSprite RenderShadowedPlainText (string str) {
@@ -297,7 +297,7 @@ public class GraphicsFont {
 
         SDL3.SDL_DestroySurface(surface);
 
-        return new GraphicsPlainTextSprite(_renderer, tex, shadowTex);
+        return new GraphicsPlainTextSprite(_renderer, this, tex, shadowTex);
     }
 
     /// <summary>

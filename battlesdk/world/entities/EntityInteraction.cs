@@ -185,8 +185,8 @@ public class MessageEntityInteraction : EntityInteraction {
             return;
         }
 
-        var tb = Hud.ShowTextbox(Localization.Text(_textKeys[index]));
-        tb.OnComplete += (s, evt) => ShowNextTextbox(index + 1);
+        var tb = Hud.ShowMessage(Localization.Text(_textKeys[index]));
+        tb.OnClose += (s, evt) => ShowNextTextbox(index + 1);
     }
 }
 
