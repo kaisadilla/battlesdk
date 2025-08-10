@@ -35,6 +35,10 @@ public class MessageHudElement : IHudElement {
             += (s, evt) => OnClose?.Invoke(this, EventArgs.Empty);
     }
 
+    public void CedeControl () {
+        Textbox.CedeControl();
+    }
+
     public void Update () {
         Textbox.Update();
     }

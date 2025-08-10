@@ -2,6 +2,8 @@
 
 namespace battlesdk.hud;
 public class ChoiceMessageHudElement : IHudElement {
+    private bool _hasControl = false;
+
     private MessageHudElement _message;
     private ChoiceHudElement? _choice = null;
 
@@ -19,6 +21,8 @@ public class ChoiceMessageHudElement : IHudElement {
         bool canBeCancelled = false,
         int defaultChoice = -1
     ) {
+        OnClose += (s, evt) => IsClosed = true;
+
         _message = new(renderer, textboxId, fontId, false, text);
 
         _message.Textbox.OnMessageShown += (s, evt) => {
@@ -32,9 +36,16 @@ public class ChoiceMessageHudElement : IHudElement {
                 canBeCancelled,
                 defaultChoice
             );
+            if (_hasControl) _choice.CedeControl();
 
             _choice.OnClose += (s, evt) => Close();
         };
+    }
+
+    public void CedeControl () {
+        _hasControl = true;
+
+        _message.CedeControl();
     }
 
     public void Draw () {
@@ -50,6 +61,7 @@ public class ChoiceMessageHudElement : IHudElement {
     }
 
     public void Close () {
+        if (IsClosed) return;
         _message.Close();
         _choice?.Close();
 

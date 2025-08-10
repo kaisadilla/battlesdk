@@ -14,7 +14,10 @@ Game game;
 try {
     game = new();
 
-    var el = Hud.ShowScriptElement(Registry.Scripts.GetId("hud_elements/game_summary"));
+    var el = Hud.ShowScriptElement(
+        Registry.Scripts.GetId("hud/game_summary"),
+        true
+    );
 }
 catch (Exception ex) {
     _logger.FatalEx(ex, $"A fatal error occurred during initialization.");

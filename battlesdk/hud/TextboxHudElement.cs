@@ -10,6 +10,7 @@ public class TextboxHudElement : IInputListener, IHudElement {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private static int _arrowId = -1;
 
+    private bool _hasControl = false;
     /// <summary>
     /// The texture used to draw this textbox's frame.
     /// </summary>
@@ -128,7 +129,10 @@ public class TextboxHudElement : IInputListener, IHudElement {
         _visibleLines = (viewport.Bottom - viewport.Top) / _font.Asset.LineHeight;
 
         _animState = AnimationState.TypingCharacters;
+    }
 
+    public void CedeControl () {
+        _hasControl = true;
         InputManager.Push(this);
     }
 
@@ -183,7 +187,7 @@ public class TextboxHudElement : IInputListener, IHudElement {
     }
 
     public void Close () {
-        InputManager.Pop();
+        if (_hasControl) InputManager.Pop();
         OnClose?.Invoke(this, EventArgs.Empty);
     }
 

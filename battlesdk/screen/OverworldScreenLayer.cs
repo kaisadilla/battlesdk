@@ -14,10 +14,10 @@ public class OverworldScreenLayer : IScreenLayer, IInputListener {
     private Camera _camera;
     private Player _player;
 
-    private float _leftKeyStart = float.MinValue;
-    private float _rightKeyStart = float.MinValue;
-    private float _upKeyStart = float.MinValue;
-    private float _downKeyStart = float.MinValue;
+    private double _leftKeyStart = double.MinValue;
+    private double _rightKeyStart = double.MinValue;
+    private double _upKeyStart = double.MinValue;
+    private double _downKeyStart = double.MinValue;
 
     public string Name => "Overworld screen";
     public bool IsTransparent => false;

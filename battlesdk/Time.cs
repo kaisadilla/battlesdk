@@ -11,7 +11,7 @@ public static class Time {
     /// <summary>
     /// The amount of time, in seconds, since the application started.
     /// </summary>
-    public static float TotalTime { get; private set; } = 0f;
+    public static double TotalTime { get; private set; } = 0f;
     /// <summary>
     /// The frequency of the performance counter. That is, how many units equal
     /// one second.

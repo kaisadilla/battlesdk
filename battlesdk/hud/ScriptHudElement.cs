@@ -15,7 +15,7 @@ public class ScriptHudElement : IHudElement, IInputListener {
     private bool _hasControl = false;
 
     public string Name { get; }
-    public bool IsClosed { get; } = false;
+    public bool IsClosed { get; private set; } = false;
 
     public bool BlockOtherInput { get; private set; } = true;
 
@@ -29,6 +29,8 @@ public class ScriptHudElement : IHudElement, IInputListener {
     public ScriptHudElement (
         Renderer renderer, ScriptAsset script, Dictionary<string, object> parameters
     ) {
+        OnClose += (s, evt) => IsClosed = true;
+
         _renderer = renderer;
 
         Name = $"[Script Hud Element: {script.Name}]";
@@ -70,6 +72,8 @@ public class ScriptHudElement : IHudElement, IInputListener {
     }
 
     public void Close () {
+        if (IsClosed) return;
+
         if (_hasControl) InputManager.Pop();
 
         OnClose?.Invoke(this, EventArgs.Empty);

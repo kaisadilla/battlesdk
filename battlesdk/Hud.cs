@@ -47,6 +47,7 @@ public static class Hud {
 
         _elements[id] = msg;
         msg.OnClose += (s, evt) => _elements.Remove(id);
+        msg.CedeControl();
 
         return msg;
     }
@@ -70,18 +71,22 @@ public static class Hud {
 
         _elements[id] = choice;
         choice.OnClose += (s, evt) => _elements.Remove(id);
+        choice.CedeControl();
 
         return choice;
     }
 
-    public static ScriptHudElement ShowScriptElement (int scriptId) {
+    public static ScriptHudElement ShowScriptElement (int scriptId, bool cedeControl) {
         var id = _elementsIdProvider.NextId();
         var el = new ScriptHudElement(
             _renderer,
             Registry.Scripts[scriptId],
             []
         );
-        el.CedeControl();
+
+        if (cedeControl) {
+            el.CedeControl();
+        }
 
         _elements[id] = el;
         el.OnClose += (s, evt) => _elements.Remove(id);

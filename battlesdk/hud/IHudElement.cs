@@ -9,6 +9,7 @@ public interface IHudElement {
     /// </summary>
     event EventHandler<EventArgs>? OnClose;
     
+    void CedeControl();
     void Update();
     void Draw();
     void Close();

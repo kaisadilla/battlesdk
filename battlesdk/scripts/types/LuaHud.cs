@@ -64,6 +64,15 @@ public class LuaHud : ILuaType {
         return DynValue.NewYieldReq([]);
     }
 
+    public static LuaHudElement script_element (string scriptName) {
+        if (Registry.Scripts.TryGetId(scriptName, out int scriptId) == false) {
+            throw new ScriptRuntimeException("Invalid script name.");
+        }
+
+        var el = Hud.ShowScriptElement(scriptId, false);
+        return new(el);
+    }
+
     /// <summary>
     /// Pauses execution of this script for the amount of time given (in ms).
     /// </summary>

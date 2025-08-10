@@ -13,6 +13,7 @@ public class ChoiceHudElement : IHudElement, IInputListener {
     /// </summary>
     private GraphicsFont _font;
 
+    private bool _hasControl = false;
     private readonly bool _canBeCancelled;
     private readonly int _defaultChoice;
 
@@ -103,7 +104,10 @@ public class ChoiceHudElement : IHudElement, IInputListener {
         else if (anchor == Position.BottomRight) {
             _pos = pos - new IVec2(_size.X, _size.Y);
         }
+    }
 
+    public void CedeControl () {
+        _hasControl = true;
         InputManager.Push(this);
     }
 
@@ -164,7 +168,7 @@ public class ChoiceHudElement : IHudElement, IInputListener {
     public void Close () {
         if (IsClosed) return;
 
-        InputManager.Pop();
+        if (_hasControl) InputManager.Pop();
         OnClose?.Invoke(this, EventArgs.Empty);
     }
 }
