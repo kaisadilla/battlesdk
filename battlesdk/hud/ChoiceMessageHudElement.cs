@@ -24,7 +24,7 @@ public class ChoiceMessageHudElement : IHudElement {
         _message.Textbox.OnMessageShown += (s, evt) => {
             _choice = new(
                 renderer,
-                PlayerSettings.ChoiceFrame,
+                PlayerSettings.BoxFrame,
                 fontId,
                 new(renderer.Width - 3, renderer.Height - 50),
                 Position.BottomRight,

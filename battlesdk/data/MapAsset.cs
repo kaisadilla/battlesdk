@@ -11,6 +11,7 @@ namespace battlesdk.data;
 public class MapAsset : IIdentifiable {
     private const string GROUP_NAME_METADATA = "Metadata";
     private const string LAYER_NAME_Z_WARPS = "ZWarps";
+    private const string PROP_NAME_DISPLAY_NAME = "DisplayName";
     private const string PROP_NAME_BACKGROUND_MUSIC = "BackgroundMusic";
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
@@ -19,6 +20,10 @@ public class MapAsset : IIdentifiable {
     public int Id { get; private set; } = -1;
     public string Path { get; private init; }
 
+    /// <summary>
+    /// The key to this map's display name.
+    /// </summary>
+    public string DisplayName { get; private set; }
     /// <summary>
     /// The width of this map, in tiles.
     /// </summary>
@@ -134,6 +139,9 @@ public class MapAsset : IIdentifiable {
         }
 
         foreach (var prop in map.Properties) {
+            if (prop.name == PROP_NAME_DISPLAY_NAME) {
+                DisplayName = prop.value;
+            }
             if (prop.name == PROP_NAME_BACKGROUND_MUSIC) {
                 if (Registry.Music.TryGetId(prop.value, out int id)) {
                     BackgroundMusic = id;

@@ -46,6 +46,7 @@ public interface IGraphicsSprite {
     void DrawSection (
         SDL_FRect section, IVec2 position, IVec2 size, ResizeMode resizeMode = ResizeMode.Stretch
     );
+
     /// <summary>
     /// Frees all the memory resources used by this sprite, if any. After this
     /// action, this sprite can no longer be used.

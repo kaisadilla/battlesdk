@@ -1,4 +1,5 @@
 ﻿using battlesdk.json;
+using MoonSharp.Interpreter;
 using NLog;
 using SDL;
 using StackCleaner;
@@ -267,10 +268,6 @@ public static class TypesExtension {
         return a + (b - a) * t;
     }
 
-    public static float Lerp (this byte a, float b, float t) {
-        return a + (b - a) * t;
-    }
-
     public static IVec2 OffsetAt (this IVec2 v, Direction dir) {
         return dir switch {
             Direction.Down => v + new IVec2(0, 1),
@@ -393,6 +390,15 @@ public static class TypesExtension {
     public static void FatalEx (this Logger logger, Exception exception, string msg) {
         logger.Fatal(exception, msg);
         exception.Demystify().PrintFancy();
+
+        if (exception is ScriptRuntimeException luaEx) {
+            Console.WriteLine($"Lua error: {luaEx.DecoratedMessage}");
+            Console.WriteLine($"Lua stack trace:");
+
+            foreach (var c in luaEx.CallStack) {
+                Console.WriteLine($" - {c}");
+            }
+        }
     }
 
     /// <summary>

@@ -1,4 +1,5 @@
 ﻿using battlesdk.data;
+using battlesdk.hud;
 using battlesdk.screen;
 using battlesdk.world.entities;
 using MoonSharp.Interpreter;
@@ -63,15 +64,29 @@ public class LuaScriptHost {
         return host;
     }
 
+    public static LuaScriptHost HudElementScript (
+        ScriptAsset asset, ScriptHudElement hudElement
+    ) {
+        var host = new LuaScriptHost();
+
+        var src = asset.GetSource();
+
+        Lua.RegisterGlobals(host._lua);
+        Lua.RegisterHudElementHandler(host._lua, hudElement);
+
+        host._scriptFunc = host._lua.LoadString(src);
+        return host;
+    }
+
     /// <summary>
     /// Runs the main script given in this host as a script coroutine, which 
     /// means that its execution will not end after this call is made. Use
     /// <see cref="OnExecutionComplete"/> to keep track of when this execution's
     /// been completed. Returns an id that uniquely identifies this execution.
     /// </summary>
-    public int Run () {
+    public int RunAsync () {
         if (_scriptFunc is null) return -1;
-        return Run(_scriptFunc);
+        return RunAsync(_scriptFunc);
     }
 
     /// <summary>
@@ -81,7 +96,7 @@ public class LuaScriptHost {
     /// been completed. Returns an id that uniquely identifies this execution.
     /// </summary>
     /// <param name="func">The function to execute.</param>
-    public int Run (DynValue func) {
+    public int RunAsync (DynValue func) {
         var id = _idProvider.NextId();
         var luaCor = _lua.CreateCoroutine(func);
 
@@ -96,9 +111,9 @@ public class LuaScriptHost {
     /// if it uses any asynchronous API functions (those that implement Lua
     /// coroutines).
     /// </summary>
-    public void RunSync () {
+    public void Run () {
         if (_scriptFunc is null) return;
-        RunSync(_scriptFunc);
+        Run(_scriptFunc);
     }
 
     /// <summary>
@@ -106,7 +121,7 @@ public class LuaScriptHost {
     /// ends before this function returns; but the script will crash if it uses
     /// any asynchronous API functions (those that implement Lua coroutines).
     /// </summary>
-    public void RunSync (DynValue func) {
+    public void Run (DynValue func) {
         _lua.Call(func);
     }
 

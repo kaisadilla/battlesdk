@@ -296,9 +296,9 @@ public class OverworldScreenLayer : IScreenLayer, IInputListener {
         var nextTint = Data.Misc.TimeTints[(hour + 1) % 24];
 
         var tint = new ColorRGB() {
-            R = (byte)thisTint.R.Lerp(nextTint.R, progress),
-            G = (byte)thisTint.G.Lerp(nextTint.G, progress),
-            B = (byte)thisTint.B.Lerp(nextTint.B, progress),
+            R = (int)thisTint.R.Lerp(nextTint.R, progress),
+            G = (int)thisTint.G.Lerp(nextTint.G, progress),
+            B = (int)thisTint.B.Lerp(nextTint.B, progress),
         };
 
         SDL3.SDL_SetRenderDrawBlendMode(_renderer.SdlRenderer, CustomBlendModes.Subtract);

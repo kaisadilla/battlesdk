@@ -13,12 +13,17 @@ public class LuaFont : ILuaType {
 
     private GraphicsFont _font;
 
+    /// <summary>
+    /// The height of one line in this font.
+    /// </summary>
+    public int line_height => _font.Asset.LineHeight;
+
     [MoonSharpHidden]
     public LuaFont (GraphicsFont font) {
         _font = font;
     }
 
-    public LuaSprite? render_plain_text (string str) {
+    public LuaPlainTextSprite? render_plain_text (string str) {
         var col = SdlColor(0, 0, 0, 255);
 
         try {
@@ -31,7 +36,7 @@ public class LuaFont : ILuaType {
         }
     }
 
-    public LuaSprite? render_plain_text_shadowed (string str) {
+    public LuaPlainTextSprite? render_plain_text_shadowed (string str) {
         try {
             var sprite = _font.RenderShadowedPlainText(str);
             return new(sprite);

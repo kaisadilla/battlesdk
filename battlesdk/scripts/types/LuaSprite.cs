@@ -10,6 +10,15 @@ public class LuaSprite : ILuaType {
 
     private IGraphicsSprite _sprite;
 
+    /// <summary>
+    /// This sprite's width.
+    /// </summary>
+    public int width => _sprite.Width;
+    /// <summary>
+    /// This sprite's height.
+    /// </summary>
+    public int weight => _sprite.Height;
+
     [MoonSharpHidden]
     public LuaSprite (IGraphicsSprite sprite) {
         _sprite = sprite;

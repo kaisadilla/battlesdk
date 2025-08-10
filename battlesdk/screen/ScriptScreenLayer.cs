@@ -27,7 +27,7 @@ public class ScriptScreenLayer : IScreenLayer, IInputListener {
         Name = $"Script Layer: {script.Name}";
 
         _lua = LuaScriptHost.ScreenScript(script, this);
-        _lua.RunSync();
+        _lua.Run();
         _openFunc = _lua.GetFunction("target", "open");
         _drawFunc = _lua.GetFunction("target", "draw");
         _handleInputFunc = _lua.GetFunction("target", "handle_input");
@@ -36,15 +36,15 @@ public class ScriptScreenLayer : IScreenLayer, IInputListener {
     public void Open () {
         Screen.Push(this);
         InputManager.Push(this);
-        if (_openFunc is not null) _lua.Run(_openFunc);
+        if (_openFunc is not null) _lua.RunAsync(_openFunc);
     }
 
     public unsafe void Draw () {
-        if (_drawFunc is not null) _lua.RunSync(_drawFunc);
+        if (_drawFunc is not null) _lua.Run(_drawFunc);
     }
 
     public unsafe void HandleInput () {
-        if (_handleInputFunc is not null) _lua.Run(_handleInputFunc); // TODO: Not working.
+        if (_handleInputFunc is not null) _lua.RunAsync(_handleInputFunc); // TODO: Not working.
     }
 
     public void OnInputBlocked () {

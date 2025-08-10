@@ -73,6 +73,21 @@ public static class Hud {
 
         return choice;
     }
+
+    public static ScriptHudElement ShowScriptElement (int scriptId) {
+        var id = _elementsIdProvider.NextId();
+        var el = new ScriptHudElement(
+            _renderer,
+            Registry.Scripts[scriptId],
+            []
+        );
+        el.CedeControl();
+
+        _elements[id] = el;
+        el.OnClose += (s, evt) => _elements.Remove(id);
+
+        return el;
+    }
 }
 
 public enum HudState {

@@ -10,7 +10,7 @@ public static class PlayerSettings {
 
     public static int TextFont { get; private set; } = 0;
     public static int TextboxFrame { get; private set; } = 0;
-    public static int ChoiceFrame { get; private set; } = 0;
+    public static int BoxFrame { get; private set; } = 0;
 
     public static void Init () {
         if (Registry.Fonts.TryGetId("power_clear", out var textFont) == false) {
@@ -27,11 +27,11 @@ public static class PlayerSettings {
             TextboxFrame = tb;
         }
 
-        if (Registry.Sprites.TryGetId("ui/frames/dp_choice", out tb) == false) {
-            _logger.Warn("Textbox sprite 'ui/frames/dp_choice' is not in the Registry.");
+        if (Registry.Sprites.TryGetId("ui/frames/dp_box", out tb) == false) {
+            _logger.Warn("Textbox sprite 'ui/frames/dp_box' is not in the Registry.");
         }
         else {
-            ChoiceFrame = tb;
+            BoxFrame = tb;
         }
     }
 }

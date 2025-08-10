@@ -262,7 +262,7 @@ public class GraphicsFont {
     /// like multiple colors or fonts.
     /// </summary>
     /// <param name="str">A string of plain text to render.</param>
-    public unsafe IGraphicsSprite RenderPlainText (string str) {
+    public unsafe GraphicsPlainTextSprite RenderPlainText (string str) {
         int maxBytes = str.Length * 4;
 
         Span<byte> strBuffer = str.Length <= 256
@@ -286,7 +286,7 @@ public class GraphicsFont {
         return new GraphicsPlainTextSprite(_renderer, this, tex, null);
     }
 
-    public unsafe IGraphicsSprite RenderShadowedPlainText (string str) {
+    public unsafe GraphicsPlainTextSprite RenderShadowedPlainText (string str) {
         int maxBytes = str.Length * 4;
 
         Span<byte> strBuffer = str.Length <= 256

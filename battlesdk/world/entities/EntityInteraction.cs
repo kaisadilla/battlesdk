@@ -116,7 +116,7 @@ public class ScriptEntityInteraction : EntityInteraction {
 
         IsInteracting = true;
 
-        var id = _lua.Run();
+        var id = _lua.RunAsync();
         _lua.OnExecutionComplete += _Callback;
 
         void _Callback (object? sender, LuaScriptHost.EventArgs args) {

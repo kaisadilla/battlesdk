@@ -1,4 +1,5 @@
 ﻿global using LuaCoroutine = MoonSharp.Interpreter.Coroutine;
+using battlesdk.hud;
 using battlesdk.screen;
 using battlesdk.scripts.types;
 using battlesdk.world.entities;
@@ -16,6 +17,7 @@ public static class Lua {
 
         UserData.RegisterType<LuaVec2>(InteropAccessMode.Preoptimized, LuaVec2.CLASSNAME);
         UserData.RegisterType<LuaRect>(InteropAccessMode.Preoptimized, LuaRect.CLASSNAME);
+        UserData.RegisterType<LuaColor>(InteropAccessMode.Preoptimized, LuaColor.CLASSNAME);
         UserData.RegisterType<LuaLogger>(InteropAccessMode.Preoptimized, LuaLogger.CLASSNAME);
         UserData.RegisterType<LuaControls>(InteropAccessMode.Preoptimized, LuaControls.CLASSNAME);
         UserData.RegisterType<LuaAudio>(InteropAccessMode.Preoptimized, LuaAudio.CLASSNAME);
@@ -26,6 +28,7 @@ public static class Lua {
         UserData.RegisterType<LuaRenderer>(InteropAccessMode.Preoptimized, LuaRenderer.CLASSNAME);
         UserData.RegisterType<LuaSprite>(InteropAccessMode.Preoptimized, LuaFrameSprite.CLASSNAME);
         UserData.RegisterType<LuaFrameSprite>(InteropAccessMode.Preoptimized, LuaFrameSprite.CLASSNAME);
+        UserData.RegisterType<LuaPlainTextSprite>(InteropAccessMode.Preoptimized, LuaPlainTextSprite.CLASSNAME);
         UserData.RegisterType<LuaFont>(InteropAccessMode.Preoptimized, LuaFont.CLASSNAME);
         UserData.RegisterType<LuaEntity>(InteropAccessMode.Preoptimized, LuaEntity.CLASSNAME);
     }
@@ -47,6 +50,7 @@ public static class Lua {
 
         script.Globals[LuaVec2.CLASSNAME] = UserData.CreateStatic(typeof(LuaVec2));
         script.Globals[LuaRect.CLASSNAME] = UserData.CreateStatic(typeof(LuaRect));
+        script.Globals[LuaColor.CLASSNAME] = UserData.CreateStatic(typeof(LuaColor));
         script.Globals[LuaLogger.CLASSNAME] = UserData.CreateStatic(typeof(LuaLogger));
         script.Globals[LuaControls.CLASSNAME] = UserData.CreateStatic(typeof(LuaControls));
         script.Globals[LuaAudio.CLASSNAME] = UserData.CreateStatic(typeof(LuaAudio));
@@ -76,6 +80,20 @@ public static class Lua {
 
         script.DoString(
             @"function target:open() end
+            function target:draw() end
+            function target:handle_input() end"
+        );
+    }
+
+    public static void RegisterHudElementHandler (Script script, ScriptHudElement element) {
+        Table tbl = new(script);
+        tbl["close"] = (Action)element.Close;
+
+        script.Globals["target"] = tbl;
+
+        script.DoString(
+            @"function target:open() end
+            function target:update() end
             function target:draw() end
             function target:handle_input() end"
         );
