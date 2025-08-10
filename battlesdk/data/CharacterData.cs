@@ -14,11 +14,17 @@ public class CharacterData : EntityData {
 }
 
 public abstract class CharacterMovementData {
+    public bool IgnoreEntities { get; }
+
+    protected CharacterMovementData (CharacterMovementDefinition def) {
+        IgnoreEntities = def.IgnoreEntities ?? false;
+    }
+
     public static CharacterMovementData New (CharacterMovementDefinition def) {
         return def.Type switch {
             CharacterMovementType.Route => new RouteCharacterMovementData(def),
             CharacterMovementType.Random => new RandomCharacterMovementData(def),
-            CharacterMovementType.LookAround => new LookAroundCharacterMovementData(def),
+            CharacterMovementType.LookAround => new look_aroundCharacterMovementData(def),
             _ => throw new InvalidDataException(
                 $"Unknown character movement type: '{def.Type}'"
             ),
@@ -29,7 +35,7 @@ public abstract class CharacterMovementData {
 public class RouteCharacterMovementData : CharacterMovementData {
     public List<MoveKind> Route { get; }
 
-    public RouteCharacterMovementData (CharacterMovementDefinition def) {
+    public RouteCharacterMovementData (CharacterMovementDefinition def) : base(def) {
         if (def.Type != CharacterMovementType.Route) {
             throw new ArgumentException("Invalid definition type.");
         }
@@ -45,15 +51,15 @@ public class RouteCharacterMovementData : CharacterMovementData {
 }
 
 public class RandomCharacterMovementData : CharacterMovementData {
-    public RandomCharacterMovementData (CharacterMovementDefinition def) {
+    public RandomCharacterMovementData (CharacterMovementDefinition def) : base(def) {
         if (def.Type != CharacterMovementType.Random) {
             throw new ArgumentException("Invalid definition type.");
         }
     }
 }
 
-public class LookAroundCharacterMovementData : CharacterMovementData {
-    public LookAroundCharacterMovementData (CharacterMovementDefinition def) {
+public class look_aroundCharacterMovementData : CharacterMovementData {
+    public look_aroundCharacterMovementData (CharacterMovementDefinition def) : base(def) {
         if (def.Type != CharacterMovementType.LookAround) {
             throw new ArgumentException("Invalid definition type.");
         }

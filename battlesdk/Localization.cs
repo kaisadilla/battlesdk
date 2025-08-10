@@ -1,5 +1,6 @@
 ﻿using NLog;
 using System.Collections.Immutable;
+using System.Text;
 using Tomlyn;
 using Tomlyn.Model;
 
@@ -11,6 +12,11 @@ public static class Localization {
     private static ImmutableDictionary<string, string> _text
         = new Dictionary<string, string>().ToImmutableDictionary();
 
+    private static readonly Dictionary<string, Func<string>> _placeholderValues = new() {
+        ["player"] = () => G.PlayerName,
+        ["money"] = () => G.Money.ToString(),
+    };
+
     public static int CurrentLanguageId { get; private set; } = -1;
 
     /// <summary>
@@ -19,9 +25,9 @@ public static class Localization {
     /// </summary>
     /// <param name="key">The key that identifies the localized string.</param>
     public static string Text (string key) {
-        if (_text.TryGetValue(key, out var value)) return value;
+        if (_text.TryGetValue(key, out var value)) return FillPlaceholders(value);
 
-        return key;
+        return FillPlaceholders(key);
     }
 
     /// <summary>
@@ -100,4 +106,90 @@ public static class Localization {
             }
         }
     }
+
+    public static string FillPlaceholders (string template) {
+        var tokens = Tokenize(template);
+        var sb = new StringBuilder();
+
+        foreach (var tok in tokens) {
+            if (tok.IsPlaceholder == false) {
+                sb.Append(tok.Text);
+            }
+            else {
+                if (_placeholderValues.TryGetValue(tok.Text, out var strProvider)) {
+                    sb.Append(strProvider());
+                }
+                else {
+                    _logger.Error($"Invalid placeholder name: {tok.Text}.");
+                    sb.Append(tok.Text);
+                }
+            }
+        }
+
+        return sb.ToString();
+    }
+
+    public static List<TextToken> Tokenize (string template) {
+        var tokens = new List<TextToken>();
+        var sb = new StringBuilder();
+        bool inPlaceholder = false;
+
+        for (int i = 0; i < template.Length; i++) {
+            char c = template[i];
+            if (inPlaceholder) {
+                if (c == '{') {
+                    _logger.Error("Cannot use '{' inside a placeholder value.");
+                    continue;
+                }
+                else if (c == '}') {
+                    if (sb.Length > 0) {
+                        tokens.Add(new(true, sb.ToString()));
+                        sb.Clear();
+                    }
+                    inPlaceholder = false;
+                    continue;
+                }
+            }
+            else {
+                if (c == '{') {
+                    if (i + 1 < template.Length && template[i + 1] == '{') {
+                        sb.Append('{');
+                        i++;
+                    }
+                    else {
+                        if (sb.Length > 0) {
+                            tokens.Add(new(false, sb.ToString()));
+                            sb.Clear();
+                        }
+                        inPlaceholder = true;
+                    }
+                    continue;
+                }
+                else if (c == '}') {
+                    if (i + 1 < template.Length && template[i + 1] == '}') {
+                        sb.Append('}');
+                        i++;
+                    }
+                    else {
+                        _logger.Warn("'}' token at unexpected position.");
+                        sb.Append('}');
+                    }
+                    continue;
+                }
+            }
+
+            sb.Append(c);
+        }
+
+        if (inPlaceholder) {
+            _logger.Error("Unterminated placeholder value.");
+        }
+        else if (sb.Length > 0) {
+            tokens.Add(new(false, sb.ToString()));
+        }
+
+        return tokens;
+    }
 }
+
+public record TextToken (bool IsPlaceholder, string Text);

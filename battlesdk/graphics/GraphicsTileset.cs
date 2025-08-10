@@ -10,8 +10,8 @@ public unsafe class GraphicsTileset {
     public GraphicsTileset (SDL_Renderer* renderer, string path) {
         var surface = SDL3_image.IMG_Load(path);
 
-        Width = surface->w / Constants.TILE_SIZE;
-        Height = surface->h / Constants.TILE_SIZE;
+        Width = surface->w / Settings.TileSize;
+        Height = surface->h / Settings.TileSize;
 
         Texture = SDL3.SDL_CreateTextureFromSurface(renderer, surface);
         if (Texture == null) throw new Exception("No tex.");

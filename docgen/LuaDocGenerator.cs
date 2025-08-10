@@ -25,7 +25,7 @@ internal class LuaDocGenerator {
     }
 
     public void GenerateTypesFile (string folder) {
-        var docPath = Path.Combine(folder, ".api.types.d.lua");
+        var docPath = Path.Combine(folder, "types.d.lua");
 
         using var writer = new StreamWriter(docPath);
 

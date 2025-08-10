@@ -55,6 +55,8 @@ public static class Lua {
         script.Globals[LuaG.CLASSNAME] = UserData.CreateStatic(typeof(LuaG));
         script.Globals[LuaEntity.CLASSNAME] = UserData.CreateStatic(typeof(LuaEntity));
 
+        script.Globals["loc"] = (Func<string, string>)((txt) => Localization.Text(txt));
+
         script.Globals["renderer"] = new LuaRenderer(Screen.MainRenderer);
     }
 

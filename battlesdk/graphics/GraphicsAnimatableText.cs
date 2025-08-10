@@ -35,7 +35,7 @@ public class GraphicsAnimatableText : GraphicsText {
 
 
 
-            g.Font.DrawCharInViewport(glyphPos, Viewport, g.CharRect, g.Color, true);
+            g.Font.DrawCharInViewport(glyphPos, Viewport, g.CharRect, SdlColor(g.Color), true);
         }
     }
 

@@ -30,7 +30,7 @@ public class Camera {
         Width = width;
         Height = height;
 
-        int off = Constants.TILE_SIZE / 2;
+        int off = Settings.TileSize / 2;
 
         _localView = new() {
             Left = -(width / 2) + off,

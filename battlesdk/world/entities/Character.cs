@@ -90,16 +90,16 @@ public abstract class Character : Entity {
 
         if (IsMoving) {
             if (IsJumping) {
-                MoveProgress += Time.DeltaTime / Constants.LEDGE_JUMP_SPEED;
+                MoveProgress += Time.DeltaTime * Settings.LedgeJumpSpeed;
             }
             else if (IsJumpingInPlace) {
                 MoveProgress += Time.DeltaTime / (13f / 60f);
             }
             else if (IsRunning) {
-                MoveProgress += Time.DeltaTime / Constants.RUN_SPEED;
+                MoveProgress += Time.DeltaTime * Settings.RunSpeed;
             }
             else {
-                MoveProgress += Time.DeltaTime / Constants.WALK_SPEED;
+                MoveProgress += Time.DeltaTime * Settings.WalkSpeed;
             }
         }
 
@@ -116,7 +116,11 @@ public abstract class Character : Entity {
     }
 
     public override void OnPrimaryAction (Direction from) {
-        if (IsMoving && MoveProgress < 0.8f) return;
+        if (
+            IsMoving
+            && PreviousPosition != Position
+            && MoveProgress < Constants.MOVE_INTERACTION_THRESHOLD
+        ) return;
 
         base.OnPrimaryAction(from);
     }
@@ -132,17 +136,18 @@ public abstract class Character : Entity {
     /// <summary>
     /// The character executes the move described. If the character is already
     /// moving, the call is ignored.
+    /// Returns true if the move has been executed.
     /// </summary>
     /// <param name="direction">The direction in which to move.</param>
     /// <param name="ignoreCharacters">If true, the move will ignore characters.</param>
-    public virtual void TryMove (Direction direction, bool ignoreCharacters) {
-        if (G.World is null) return;
-        if (IsMoving) return;
+    public virtual bool TryMove (Direction direction, bool ignoreCharacters) {
+        if (G.World is null) return false;
+        if (IsMoving) return false;
 
         var destination = Position.OffsetAt(direction);
 
         if (TriggerMoveIntoInteractions(destination, direction.Opposite())) {
-            return;
+            return false;
         }
 
         bool moveAllowed = IsMoveAllowed(
@@ -155,6 +160,8 @@ public abstract class Character : Entity {
         Move(destination, jumpDir);
 
         if (moveAllowed == false) Collided = true;
+
+        return moveAllowed;
     }
 
     /// <summary>

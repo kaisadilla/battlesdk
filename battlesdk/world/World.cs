@@ -188,7 +188,7 @@ public class World {
 
             var distX = Math.Abs(kv.Value.Position.X - Player.Position.X);
             var distY = Math.Abs(kv.Value.Position.Y - Player.Position.Y);
-            if (distX < Constants.LOAD_DISTANCE_X && distY < Constants.LOAD_DISTANCE_Y) {
+            if (distX < Settings.LoadDistanceX && distY < Settings.LoadDistanceY) {
                 continue;
             }
 
@@ -209,10 +209,10 @@ public class World {
                 continue;
             }
 
-            bool isInside = worldPos.X >= (worldMap.Position.X - Constants.LOAD_DISTANCE_X)
-                && worldPos.X < (worldMap.Position.X + mapData.Width + Constants.LOAD_DISTANCE_X)
-                && worldPos.Y >= (worldMap.Position.Y - Constants.LOAD_DISTANCE_Y)
-                && worldPos.Y < (worldMap.Position.Y + mapData.Height + Constants.LOAD_DISTANCE_Y);
+            bool isInside = worldPos.X >= (worldMap.Position.X - Settings.LoadDistanceX)
+                && worldPos.X < (worldMap.Position.X + mapData.Width + Settings.LoadDistanceX)
+                && worldPos.Y >= (worldMap.Position.Y - Settings.LoadDistanceY)
+                && worldPos.Y < (worldMap.Position.Y + mapData.Height + Settings.LoadDistanceY);
 
             if (isInside == false) {
                 RemoveMap(worldMap.Id);

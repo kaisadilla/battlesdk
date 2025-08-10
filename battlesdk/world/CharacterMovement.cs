@@ -21,10 +21,12 @@ public abstract class CharacterMovement {
     /// If true, the character will ignore collision with other characters,
     /// becoming able to move through them.
     /// </summary>
-    public bool IgnoreCharacters { get; init; } = true;
+    public bool IgnoreEntities { get; init; } = true;
 
-    protected CharacterMovement (Character character) {
+    protected CharacterMovement (Character character, CharacterMovementData data) {
         _character = character;
+
+        IgnoreEntities = data.IgnoreEntities;
     }
 
     public static CharacterMovement New (
@@ -35,7 +37,7 @@ public abstract class CharacterMovement {
                 => new RouteCharacterMovement(character, r),
             RandomCharacterMovementData r
                 => new RandomCharacterMovement(character, r),
-            LookAroundCharacterMovementData r
+            look_aroundCharacterMovementData r
                 => new LookAroundCharacterMovement(character, r),
             _ => throw new NotImplementedException()
         };
@@ -53,13 +55,9 @@ public class RouteCharacterMovement : CharacterMovement {
 
     private int _cursor = 0;
 
-    public RouteCharacterMovement (Character character, List<MoveKind> route) : base(character) {
-        Route = route;
-    }
-
     public RouteCharacterMovement (
         Character character, RouteCharacterMovementData data
-    ) : base(character)
+    ) : base(character, data)
     {
         Route = [.. data.Route];
     }
@@ -67,9 +65,11 @@ public class RouteCharacterMovement : CharacterMovement {
     public override void Update () {
         if (_character.IsMoving) return;
 
-        _character.TryMove((Direction)Route[_cursor], IgnoreCharacters);
-        _cursor++;
-        _cursor %= Route.Count;
+        bool moved = _character.TryMove((Direction)Route[_cursor], IgnoreEntities);
+        if (moved) {
+            _cursor++;
+            _cursor %= Route.Count;
+        }
     }
 }
 
@@ -92,13 +92,9 @@ public class RandomCharacterMovement : CharacterMovement {
 
     private float _moveCd = float.MinValue;
 
-    public RandomCharacterMovement (Character character) : base(character) {
-        _origin = character.Position;
-    }
-
     public RandomCharacterMovement (
         Character character, RandomCharacterMovementData data
-    ) : base(character)
+    ) : base(character, data)
     {
         _origin = character.Position;
     }
@@ -130,7 +126,7 @@ public class RandomCharacterMovement : CharacterMovement {
                 _character.SetDirection(dir);
             }
             else {
-                _character.TryMove(dir, IgnoreCharacters);
+                _character.TryMove(dir, IgnoreEntities);
             }
 
         }
@@ -153,11 +149,9 @@ public class LookAroundCharacterMovement : CharacterMovement {
 
     private float _moveCd = float.MinValue;
 
-    public LookAroundCharacterMovement (Character character) : base(character) {}
-
     public LookAroundCharacterMovement (
-        Character character, LookAroundCharacterMovementData data
-    ) : base(character)
+        Character character, look_aroundCharacterMovementData data
+    ) : base(character, data)
     {}
 
     public override void Update () {

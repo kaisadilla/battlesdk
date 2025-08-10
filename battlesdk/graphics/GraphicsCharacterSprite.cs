@@ -11,8 +11,8 @@ public unsafe class GraphicsCharacterSprite : GraphicsSprite {
         : base(renderer, asset)
     {
         Asset = asset;
-        _offsetX = -((asset.SpriteSize.X - Constants.TILE_SIZE) / 2);
-        _offsetY = -(asset.SpriteSize.Y - Constants.TILE_SIZE);
+        _offsetX = -((asset.SpriteSize.X - Settings.TileSize) / 2);
+        _offsetY = -(asset.SpriteSize.Y - Settings.TileSize);
     }
 
     public override void Draw (IVec2 position) {

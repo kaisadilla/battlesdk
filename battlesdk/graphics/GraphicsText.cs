@@ -57,7 +57,7 @@ public class GraphicsText {
                 pos.X + g.Position,
                 _font.Asset.GetCorrectY(y + (g.Line * _font.Asset.LineHeight))
             );
-            g.Font.DrawChar(glyphPos, g.CharRect, g.Color, true);
+            g.Font.DrawChar(glyphPos, g.CharRect, SdlColor(g.Color), true);
         }
     }
 
@@ -71,7 +71,7 @@ public class GraphicsText {
             if (g.Line != line) continue;
 
             IVec2 glyphPos = new(pos.X + g.Position, _font.Asset.GetCorrectY(pos.Y));
-            g.Font.DrawChar(glyphPos, g.CharRect, g.Color, true);
+            g.Font.DrawChar(glyphPos, g.CharRect, SdlColor(g.Color), true);
         }
     }
 
@@ -87,7 +87,7 @@ public class GraphicsText {
                 pos.X + g.Position,
                 _font.Asset.GetCorrectY(y + (g.Line * _font.Asset.LineHeight))
             );
-            g.Font.DrawChar(glyphPos, g.CharRect, g.Color, true);
+            g.Font.DrawChar(glyphPos, g.CharRect, SdlColor(g.Color), true);
         }
     }
 
@@ -112,7 +112,7 @@ public unsafe struct Glyph {
     /// <summary>
     /// This glyph's color.
     /// </summary>
-    public required SDL_Color Color { get; init; }
+    public required ColorRGBA Color { get; init; }
 
     /// <summary>
     /// The line this character is in.
@@ -161,11 +161,11 @@ file class GlyphGenerator { // TODO: Texture aliases for fonts, rather than indi
     /// <summary>
     /// A stack of colors that have been defined in the text.
     /// </summary>
-    private readonly Stack<SDL_Color> _colors = [];
+    private readonly Stack<ColorRGBA> _colors = [];
     /// <summary>
     /// The shadow's color.
     /// </summary>
-    private SDL_Color _shadowColor = SdlColor(0, 0, 0, Constants.TEXT_SHADOW_ALPHA);
+    private SDL_Color _shadowColor = SdlColor(0, 0, 0, (byte)Settings.DefaultTextShadowColor.A); // TODO: Change.
 
     /// <summary>
     /// Each glyph contained by this text.
@@ -184,8 +184,7 @@ file class GlyphGenerator { // TODO: Texture aliases for fonts, rather than indi
         _width = width;
         _text = text;
 
-        //_colors.Push(SdlColor(48, 80, 200, 255));
-        _colors.Push(SdlColor(85, 85, 93, 255));
+        _colors.Push(Settings.DefaultTextColor);
     }
 
     public void Generate () {
@@ -263,5 +262,5 @@ file class GlyphGenerator { // TODO: Texture aliases for fonts, rather than indi
 file unsafe struct GlyphData {
     public required GraphicsFont Font { get; init; }
     public required SDL_FRect CharRect { get; init; }
-    public required SDL_Color Color { get; init; }
+    public required ColorRGBA Color { get; init; }
 }

@@ -17,11 +17,11 @@ public class GraphicsPlainTextSprite : IGraphicsSprite {
         _renderer = renderer.SdlRenderer;
         _font = font;
         _tex = new(renderer, tex);
-        _tex.SetTint(85, 85, 93);
+        _tex.SetTint(Settings.DefaultTextColor);
 
         if (shadowTex is not null) {
             _shadowTex = new(renderer, shadowTex);
-            _shadowTex.SetTint(0, 0, 0, Constants.TEXT_SHADOW_ALPHA);
+            _shadowTex.SetTint(Settings.DefaultTextShadowColor);
         }
 
         Width = Math.Max(_tex.Width, _shadowTex?.Width ?? 0);

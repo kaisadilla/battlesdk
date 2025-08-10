@@ -179,8 +179,13 @@ public class GraphicsFont {
         };
 
         if (shadow) {
-            SDL3.SDL_SetTextureColorMod(ShadowAtlas, 0, 0, 0);
-            SDL3.SDL_SetTextureAlphaMod(ShadowAtlas, Constants.TEXT_SHADOW_ALPHA);
+            SDL3.SDL_SetTextureColorMod(
+                ShadowAtlas,
+                (byte)Settings.DefaultTextShadowColor.R,
+                (byte)Settings.DefaultTextShadowColor.G,
+                (byte)Settings.DefaultTextShadowColor.B
+            );
+            SDL3.SDL_SetTextureAlphaMod(ShadowAtlas, (byte)Settings.DefaultTextShadowColor.A);
             SDL3.SDL_RenderTexture(_renderer.SdlRenderer, ShadowAtlas, &ch, &dst);
         }
 
@@ -224,7 +229,13 @@ public class GraphicsFont {
 
         if (shadow) {
             SDL3.SDL_SetTextureColorMod(ShadowAtlas, 0, 0, 0);
-            SDL3.SDL_SetTextureAlphaMod(ShadowAtlas, Constants.TEXT_SHADOW_ALPHA);
+            SDL3.SDL_SetTextureColorMod(
+                ShadowAtlas,
+                (byte)Settings.DefaultTextShadowColor.R,
+                (byte)Settings.DefaultTextShadowColor.G,
+                (byte)Settings.DefaultTextShadowColor.B
+            );
+            SDL3.SDL_SetTextureAlphaMod(ShadowAtlas, (byte)Settings.DefaultTextShadowColor.A);
             SDL3.SDL_RenderTexture(_renderer.SdlRenderer, ShadowAtlas, &src, &dst);
         }
 

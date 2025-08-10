@@ -25,8 +25,8 @@ public class MessageHudElement : IHudElement {
             renderer,
             frameId,
             fontId,
-            new(3, Constants.VIEWPORT_HEIGHT - 48),
-            new(Constants.VIEWPORT_WIDTH - 6, 46),
+            new(3, Settings.ViewportHeight - 48),
+            new(Settings.ViewportWidth - 6, 46),
             closeable,
             text
         );

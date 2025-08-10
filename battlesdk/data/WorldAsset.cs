@@ -85,7 +85,7 @@ public class WorldAsset : IIdentifiable {
 
             Maps.Add(new WorldMapData {
                 Id = mapId,
-                Position = new(x / Constants.TILE_SIZE, y / Constants.TILE_SIZE),
+                Position = new(x / Settings.TileSize, y / Settings.TileSize),
             });
         }
     }

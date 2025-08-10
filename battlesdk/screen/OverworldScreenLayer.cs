@@ -163,8 +163,8 @@ public class OverworldScreenLayer : IScreenLayer, IInputListener {
                     if (tile.OnStepUnderTile is not null) {
                         DrawTile(
                             tile.OnStepUnderTile,
-                            _camera.GetScreenX(ch.Position.X * Constants.TILE_SIZE),
-                            _camera.GetScreenY(ch.Position.Y * Constants.TILE_SIZE)
+                            _camera.GetScreenX(ch.Position.X * Settings.TileSize),
+                            _camera.GetScreenY(ch.Position.Y * Settings.TileSize)
                         );
                     }
                 }
@@ -173,8 +173,8 @@ public class OverworldScreenLayer : IScreenLayer, IInputListener {
                     if (tile.OnStepOverTile is not null) {
                         DrawTile(
                             tile.OnStepOverTile,
-                            _camera.GetScreenX(ch.Position.X * Constants.TILE_SIZE),
-                            _camera.GetScreenY(ch.Position.Y * Constants.TILE_SIZE)
+                            _camera.GetScreenX(ch.Position.X * Settings.TileSize),
+                            _camera.GetScreenY(ch.Position.Y * Settings.TileSize)
                         );
                     }
                 }
@@ -187,15 +187,15 @@ public class OverworldScreenLayer : IScreenLayer, IInputListener {
 
     private void DrawLayer (TileLayer layer, int xOffset, int yOffset) {
         for (int y = 0; y < layer.Height; y++) {
-            int yPos = _camera.GetScreenY((y + yOffset) * Constants.TILE_SIZE);
+            int yPos = _camera.GetScreenY((y + yOffset) * Settings.TileSize);
 
-            if (yPos + Constants.TILE_SIZE < 0) continue;
+            if (yPos + Settings.TileSize < 0) continue;
             if (yPos >= _renderer.Height) continue;
 
             for (int x = 0; x < layer.Width; x++) {
-                int xPos = _camera.GetScreenX((x + xOffset) * Constants.TILE_SIZE);
+                int xPos = _camera.GetScreenX((x + xOffset) * Settings.TileSize);
 
-                if (xPos + Constants.TILE_SIZE < 0) continue;
+                if (xPos + Settings.TileSize < 0) continue;
                 if (xPos >= _renderer.Width) continue;
 
                 MapTile? tile = layer[x, y];
@@ -214,17 +214,17 @@ public class OverworldScreenLayer : IScreenLayer, IInputListener {
         var tileId = tile.Properties.GetCurrentTileId();
 
         SDL_FRect src = new() {
-            x = (tileId % ts.Width) * Constants.TILE_SIZE,
-            y = (tileId / ts.Width) * Constants.TILE_SIZE,
-            h = Constants.TILE_SIZE,
-            w = Constants.TILE_SIZE,
+            x = (tileId % ts.Width) * Settings.TileSize,
+            y = (tileId / ts.Width) * Settings.TileSize,
+            h = Settings.TileSize,
+            w = Settings.TileSize,
         };
 
         SDL_FRect dst = new() {
             x = screenX,
             y = screenY,
-            h = Constants.TILE_SIZE,
-            w = Constants.TILE_SIZE,
+            h = Settings.TileSize,
+            w = Settings.TileSize,
         };
 
         unsafe {
@@ -296,9 +296,9 @@ public class OverworldScreenLayer : IScreenLayer, IInputListener {
         var nextTint = Data.Misc.TimeTints[(hour + 1) % 24];
 
         var tint = new ColorRGB() {
-            R = (int)thisTint.R.Lerp(nextTint.R, progress),
-            G = (int)thisTint.G.Lerp(nextTint.G, progress),
-            B = (int)thisTint.B.Lerp(nextTint.B, progress),
+            R = (byte)thisTint.R.Lerp(nextTint.R, progress),
+            G = (byte)thisTint.G.Lerp(nextTint.G, progress),
+            B = (byte)thisTint.B.Lerp(nextTint.B, progress),
         };
 
         SDL3.SDL_SetRenderDrawBlendMode(_renderer.SdlRenderer, CustomBlendModes.Subtract);
@@ -314,9 +314,9 @@ public class OverworldScreenLayer : IScreenLayer, IInputListener {
         SDL3.SDL_SetRenderDrawBlendMode(_renderer.SdlRenderer, CustomBlendModes.Add);
         SDL3.SDL_SetRenderDrawColor(
             _renderer.SdlRenderer,
-            (byte)Math.Max(0, tint.R),
-            (byte)Math.Max(0, tint.G),
-            (byte)Math.Max(0, tint.B),
+            (byte)Math.Max(0, (int)tint.R),
+            (byte)Math.Max(0, (int)tint.G),
+            (byte)Math.Max(0, (int)tint.B),
             255
         );
         SDL3.SDL_RenderFillRect(_renderer.SdlRenderer, null);

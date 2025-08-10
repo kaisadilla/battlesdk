@@ -39,8 +39,8 @@ public static class Hud {
         var id = _elementsIdProvider.NextId();
         var msg = new MessageHudElement(
             _renderer,
-            Settings.TextboxFrame,
-            Settings.TextFont,
+            PlayerSettings.TextboxFrame,
+            PlayerSettings.TextFont,
             true,
             text
         );
@@ -60,8 +60,8 @@ public static class Hud {
         var id = _elementsIdProvider.NextId();
         var choice = new ChoiceMessageHudElement(
             _renderer,
-            Settings.TextboxFrame,
-            Settings.TextFont,
+            PlayerSettings.TextboxFrame,
+            PlayerSettings.TextFont,
             message,
             choices,
             canBeCancelled,

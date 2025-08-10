@@ -98,7 +98,7 @@ public class LuaRenderer : ILuaType {
     /// Returns the default text font of the game.
     /// </summary>
     public LuaFont get_default_font () {
-        var font = _renderer.GetFont(Settings.TextFont);
+        var font = _renderer.GetFont(PlayerSettings.TextFont);
         if (font is null) throw new("No default font exists.");
 
         return new(font);

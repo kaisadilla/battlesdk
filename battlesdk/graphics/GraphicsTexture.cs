@@ -107,6 +107,11 @@ public class GraphicsTexture : IGraphicsSprite {
         SDL3.SDL_SetTextureAlphaMod(_texture, a);
     }
 
+    public virtual unsafe void SetTint (ColorRGBA col) {
+        SDL3.SDL_SetTextureColorMod(_texture, (byte)col.R, (byte)col.G, (byte)col.B);
+        SDL3.SDL_SetTextureAlphaMod(_texture, (byte)col.A);
+    }
+
     public virtual unsafe void ResetTint () {
         SDL3.SDL_SetTextureColorMod(_texture, 0, 0, 0);
         SDL3.SDL_SetTextureAlphaMod(_texture, 255);

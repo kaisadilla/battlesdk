@@ -5,6 +5,7 @@ using StackCleaner;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json.Serialization;
+using Tomlyn.Model;
 
 namespace battlesdk.types;
 
@@ -206,7 +207,7 @@ public readonly unsafe struct Ptr<T> where T : unmanaged {
 }
 
 
-public static class TypesUtils {
+public static class TypesExtension {
     private static readonly StackTraceCleaner _cleaner = new(new() {
         ColorFormatting = StackColorFormatType.ExtendedANSIColor,
         IncludeFileData = true,
@@ -249,13 +250,13 @@ public static class TypesUtils {
 
     public static IVec2 TileToPixelSpace (Vec2 tilePos) {
         return new IVec2(
-            (int)(tilePos.X * Constants.TILE_SIZE),
-            (int)(tilePos.Y * Constants.TILE_SIZE)
+            (int)(tilePos.X * Settings.TileSize),
+            (int)(tilePos.Y * Settings.TileSize)
         );
     }
 
     public static IRect TileToPixelSpace (IRect rect) {
-        return rect * Constants.TILE_SIZE;
+        return rect * Settings.TileSize;
     }
 
     public static float Lerp (this float a, float b, float t) {
@@ -263,6 +264,10 @@ public static class TypesUtils {
     }
 
     public static float Lerp (this int a, float b, float t) {
+        return a + (b - a) * t;
+    }
+
+    public static float Lerp (this byte a, float b, float t) {
         return a + (b - a) * t;
     }
 
@@ -282,6 +287,15 @@ public static class TypesUtils {
             g = g,
             b = b,
             a = a,
+        };
+    }
+
+    public static SDL_Color SdlColor (ColorRGBA col) {
+        return new() {
+            r = (byte)col.R,
+            g = (byte)col.G,
+            b = (byte)col.B,
+            a = (byte)col.A,
         };
     }
 
@@ -379,5 +393,36 @@ public static class TypesUtils {
     public static void FatalEx (this Logger logger, Exception exception, string msg) {
         logger.Fatal(exception, msg);
         exception.Demystify().PrintFancy();
+    }
+
+    /// <summary>
+    /// Transforms a TOML table into a flattened dictionary, where each key is
+    /// the fully qualified name of the original field (e.g. [a.b] c.d becomes
+    /// "a.b.c.d").
+    /// </summary>
+    /// <param name="tbl">The TOML table to flatten.</param>
+    /// <param name="prefix">The prefix for all fields in this table. Leave
+    /// empty to for the root table of a TOML document.</param>
+    public static Dictionary<string, object> Flatten (
+        this TomlTable tbl, string prefix = ""
+    ) {
+        Dictionary<string, object> dict = [];
+
+        foreach (var kv in tbl) {
+            string key = prefix == "" ? kv.Key : prefix + "." + kv.Key;
+
+            if (kv.Value is TomlTable nested) {
+                var nestedDict = nested.Flatten(key);
+
+                foreach (var nestedKv in nestedDict) {
+                    dict[nestedKv.Key] = nestedKv.Value;
+                }
+            }
+            else {
+                dict[key] = kv.Value;
+            }
+        }
+
+        return dict;
     }
 }
