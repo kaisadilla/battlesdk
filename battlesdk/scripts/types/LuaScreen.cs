@@ -22,6 +22,13 @@ public class LuaScreen : ILuaType {
     }
 
     /// <summary>
+    /// Opens the bag.
+    /// </summary>
+    public static void open_bag () {
+        Screen.Bag.Open();
+    }
+
+    /// <summary>
     /// Opens the save game screen.
     /// </summary>
     public static void open_save_game () {

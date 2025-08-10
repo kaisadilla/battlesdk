@@ -1,6 +1,7 @@
 ﻿using NLog;
 using System.Diagnostics.CodeAnalysis;
 using Tomlyn;
+using Tomlyn.Model;
 
 namespace battlesdk;
 
@@ -129,6 +130,24 @@ public static class Settings {
         if (toml.TryGetInt("map.tile_size", out int tileSize)) {
             TileSize = tileSize;
         }
+
+        // [ui]
+        if (toml.TryGetAs<TomlArray>("ui.default_text_color", out var textColor)) {
+            if (textColor.Count < 4 || textColor.IsOf<long>(out var col) == false) {
+                _logger.Error("Field 'ui.default_text_color' must be an array of 4 integers.");
+            }
+            else {
+                DefaultTextColor = new((int)col[0], (int)col[1], (int)col[2], (int)col[3]);
+            }
+        }
+        if (toml.TryGetAs<TomlArray>("ui.default_shadow_color", out textColor)) {
+            if (textColor.Count < 4 || textColor.IsOf<long>(out var col) == false) {
+                _logger.Error("Field 'ui.default_shadow_color' must be an array of 4 integers.");
+            }
+            else {
+                DefaultTextShadowColor = new((int)col[0], (int)col[1], (int)col[2], (int)col[3]);
+            }
+        }
     }
 
     private static bool TryGetAs<T> (
@@ -200,4 +219,14 @@ public static class Settings {
         return false;
     }
 
+    private static bool IsOf<T> (this TomlArray arr, out List<T> typedVals) {
+        typedVals = [];
+
+        foreach (var el in arr) {
+            if (el?.GetType() != typeof(T)) return false;
+            typedVals.Add((T)el);
+        }
+
+        return true;
+    }
 }

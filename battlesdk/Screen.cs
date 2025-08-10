@@ -17,6 +17,7 @@ public static class Screen {
 
     // Note: These fields will be null if you call them before calling Init().
     public static ScriptScreenLayer MainMenu { get; private set; } = null!;
+    public static ScriptScreenLayer Bag { get; private set; } = null!;
     public static ScriptScreenLayer SaveGame { get; private set; } = null!;
 
     /// <summary>
@@ -31,12 +32,17 @@ public static class Screen {
             throw new InitializationException("Missing script: 'screens/main_menu'.");
         }
 
+        if (Registry.Scripts.TryGetElementByName("screens/bag", out var bagScr) == false) {
+            throw new InitializationException("Missing script: 'screens/bag'.");
+        }
+
         if (Registry.Scripts.TryGetElementByName("screens/save_game", out var saveGameScr) == false) {
             throw new InitializationException("Missing script: 'screens/save_game'.");
         }
 
         try {
             MainMenu = new ScriptScreenLayer(MainRenderer, mainMenuScr);
+            Bag = new ScriptScreenLayer(MainRenderer, bagScr);
             SaveGame = new ScriptScreenLayer(MainRenderer, saveGameScr);
         }
         catch (Exception ex) {

@@ -8,6 +8,16 @@ public class LuaG {
     public const string CLASSNAME = "G";
 
     /// <summary>
+    /// The current player's name.
+    /// </summary>
+    public static string name => G.PlayerName;
+
+    /// <summary>
+    /// The amount of time, in seconds, that this game has been played.
+    /// </summary>
+    public static double time_played => G.TimePlayed;
+
+    /// <summary>
     /// The amount of money the player has.
     /// </summary>
     public static int money => G.Money;

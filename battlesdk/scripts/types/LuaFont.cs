@@ -17,6 +17,11 @@ public class LuaFont : ILuaType {
     /// The height of one line in this font.
     /// </summary>
     public int line_height => _font.Asset.LineHeight;
+    /// <summary>
+    /// Given a point P, the vertical gap between that point and where the text
+    /// should be actually rendered to look good.
+    /// </summary>
+    public int line_offset => _font.Asset.LineOffset;
 
     [MoonSharpHidden]
     public LuaFont (GraphicsFont font) {

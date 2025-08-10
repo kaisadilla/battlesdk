@@ -10,6 +10,11 @@ public class LuaVec2 : ILuaType {
     public float x;
     public float y;
 
+    /// <summary>
+    /// The vector (0, 0).
+    /// </summary>
+    public static LuaVec2 zero { get; } = new(0, 0);
+
     public LuaVec2 (float x, float y) {
         this.x = x;
         this.y = y;

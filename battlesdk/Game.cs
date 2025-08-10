@@ -48,7 +48,7 @@ public class Game {
         ProcessInput();
 
         Music.Update();
-        G.World.Update();
+        G.Update();
         InputManager.Update();
         Hud.Update();
         Screen.Update();

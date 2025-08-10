@@ -19,6 +19,7 @@ public static class Lua {
         UserData.RegisterType<LuaRect>(InteropAccessMode.Preoptimized, LuaRect.CLASSNAME);
         UserData.RegisterType<LuaColor>(InteropAccessMode.Preoptimized, LuaColor.CLASSNAME);
         UserData.RegisterType<LuaLogger>(InteropAccessMode.Preoptimized, LuaLogger.CLASSNAME);
+        UserData.RegisterType<LuaFmt>(InteropAccessMode.Preoptimized, LuaFmt.CLASSNAME);
         UserData.RegisterType<LuaControls>(InteropAccessMode.Preoptimized, LuaControls.CLASSNAME);
         UserData.RegisterType<LuaAudio>(InteropAccessMode.Preoptimized, LuaAudio.CLASSNAME);
         UserData.RegisterType<LuaHud>(InteropAccessMode.Preoptimized, LuaHud.CLASSNAME);
@@ -53,6 +54,7 @@ public static class Lua {
         script.Globals[LuaRect.CLASSNAME] = UserData.CreateStatic(typeof(LuaRect));
         script.Globals[LuaColor.CLASSNAME] = UserData.CreateStatic(typeof(LuaColor));
         script.Globals[LuaLogger.CLASSNAME] = UserData.CreateStatic(typeof(LuaLogger));
+        script.Globals[LuaFmt.CLASSNAME] = UserData.CreateStatic(typeof(LuaFmt));
         script.Globals[LuaControls.CLASSNAME] = UserData.CreateStatic(typeof(LuaControls));
         script.Globals[LuaAudio.CLASSNAME] = UserData.CreateStatic(typeof(LuaAudio));
         script.Globals[LuaHud.CLASSNAME] = UserData.CreateStatic(typeof(LuaHud));

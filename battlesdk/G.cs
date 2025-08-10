@@ -11,6 +11,10 @@ public static class G {
     /// </summary>
     public static string PlayerName { get; private set; } = "Dawn";
     /// <summary>
+    /// The amount of time, in seconds, that this game has been played.
+    /// </summary>
+    public static double TimePlayed { get; private set; } = 0f;
+    /// <summary>
     /// The amount of money the player has.
     /// </summary>
     public static int Money { get; private set; } = 3000;
@@ -22,6 +26,12 @@ public static class G {
     public static void LoadGame () {
         World.TransferTo(Registry.Worlds[0], new(9, 16));
         _logger.Info("Loaded game.");
+    }
+
+    public static void Update () {
+        TimePlayed += Time.DeltaTime;
+
+        World.Update();
     }
 
     public static void RemoveMoney (int amount) {
