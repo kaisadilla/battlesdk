@@ -77,6 +77,11 @@ public static class Settings {
     public static int MaxMoney { get; private set; } = 999_999_999;
 
     /// <summary>
+    /// The maximum amount of each item the player may have.
+    /// </summary>
+    public static int MaxItem { get; private set; } = 9_999;
+
+    /// <summary>
     /// The normal color of text.
     /// </summary>
     public static ColorRGBA DefaultTextColor { get; private set; } = new(85, 85, 93, 255);
@@ -124,6 +129,9 @@ public static class Settings {
         }
         if (toml.TryGetInt("player.money.max", out int maxMoney)) {
             MaxMoney = maxMoney;
+        }
+        if (toml.TryGetInt("player.item.max", out int maxItem)) {
+            MaxItem = maxItem;
         }
 
         // [map]

@@ -13,6 +13,7 @@ public class MapAsset : IIdentifiable {
     private const string LAYER_NAME_Z_WARPS = "ZWarps";
     private const string PROP_NAME_DISPLAY_NAME = "DisplayName";
     private const string PROP_NAME_BACKGROUND_MUSIC = "BackgroundMusic";
+    private const string PROP_NAME_IS_OUTDOOR = "IsOutdoor";
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -45,6 +46,7 @@ public class MapAsset : IIdentifiable {
     /// The id of this map's background music.
     /// </summary>
     public int BackgroundMusic { get; private set; } = -1;
+    public bool IsOutdoor { get; private set; } = false;
 
     public List<WarpData> Warps { get; } = [];
     public List<NpcData> Npcs { get; } = [];
@@ -151,6 +153,14 @@ public class MapAsset : IIdentifiable {
                         $"Music track '{prop.value}' in map '{Name}' does not exist. " +
                         "The map will be loaded, but no music will play."
                     );
+                }
+            }
+            if (prop.name == PROP_NAME_IS_OUTDOOR) {
+                try {
+                    IsOutdoor = bool.Parse(prop.value);
+                }
+                catch (Exception ex) {
+                    _logger.Error($"Invalid value in property '{PROP_NAME_IS_OUTDOOR}'.");
                 }
             }
         }

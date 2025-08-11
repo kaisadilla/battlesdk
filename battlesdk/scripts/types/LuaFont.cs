@@ -28,11 +28,11 @@ public class LuaFont : ILuaType {
         _font = font;
     }
 
-    public LuaPlainTextSprite? render_plain_text (string str) {
+    public LuaPlainTextSprite? render_plain_text (string str, int max_width = -1) {
         var col = SdlColor(0, 0, 0, 255);
 
         try {
-            var sprite = _font.RenderPlainText(str);
+            var sprite = _font.RenderPlainText(str, max_width);
             return new(sprite);
         }
         catch (Exception ex) {
@@ -41,9 +41,11 @@ public class LuaFont : ILuaType {
         }
     }
 
-    public LuaPlainTextSprite? render_plain_text_shadowed (string str) {
+    public LuaPlainTextSprite? render_plain_text_shadowed (
+        string str, int max_width = -1
+    ) {
         try {
-            var sprite = _font.RenderShadowedPlainText(str);
+            var sprite = _font.RenderShadowedPlainText(str, max_width);
             return new(sprite);
         }
         catch (Exception ex) {

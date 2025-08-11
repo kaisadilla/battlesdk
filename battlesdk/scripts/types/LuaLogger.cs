@@ -54,7 +54,7 @@ public class LuaLogger {
         List<string> fields = [];
 
         foreach (var pair in tbl.Pairs) {
-            fields.Add($"{pair.Key} = {pair.Value}");
+            fields.Add($"{pair.Key} = {DynValueToStr(pair.Value)}");
         }
 
         return $"(table: {string.Join(", ", fields)})";
@@ -64,7 +64,7 @@ public class LuaLogger {
         List<string> values = [];
 
         foreach (var el in tuple) {
-            values.Add(el.ToString());
+            values.Add(DynValueToStr(el));
         }
 
         return $"({string.Join(", ", values)})";

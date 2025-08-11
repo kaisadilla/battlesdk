@@ -262,7 +262,11 @@ public class GraphicsFont {
     /// like multiple colors or fonts.
     /// </summary>
     /// <param name="str">A string of plain text to render.</param>
-    public unsafe GraphicsPlainTextSprite RenderPlainText (string str) {
+    /// <param name="width">The maximum width of the text, or -1 for if there's
+    /// no maximum width.</param>
+    public unsafe GraphicsPlainTextSprite RenderPlainText (
+        string str, int width = -1
+    ) {
         int maxBytes = str.Length * 4;
 
         Span<byte> strBuffer = str.Length <= 256
@@ -273,7 +277,14 @@ public class GraphicsFont {
         SDL_Surface* surface;
 
         fixed (byte* ptr = strBuffer) {
-            surface = SDL3_ttf.TTF_RenderText_Solid(Font, ptr, (nuint)len, WHITE);
+            if (width == -1) {
+                surface = SDL3_ttf.TTF_RenderText_Solid(Font, ptr, (nuint)len, WHITE);
+            }
+            else {
+                surface = SDL3_ttf.TTF_RenderText_Solid_Wrapped(
+                    Font, ptr, (nuint)len, WHITE, width
+                );
+            }
         }
 
         SDL_Texture* tex = SDL3.SDL_CreateTextureFromSurface(_renderer.SdlRenderer, surface);
@@ -286,7 +297,15 @@ public class GraphicsFont {
         return new GraphicsPlainTextSprite(_renderer, this, tex, null);
     }
 
-    public unsafe GraphicsPlainTextSprite RenderShadowedPlainText (string str) {
+    /// <summary>
+    /// Creates a sprite containing a string of plain, shadowed text.
+    /// </summary>
+    /// <param name="str">A string of plain text to render.</param>
+    /// <param name="width">The maximum width of the text, or -1 for if there's
+    /// no maximum width.</param>
+    public unsafe GraphicsPlainTextSprite RenderShadowedPlainText (
+        string str, int width = -1
+    ) {
         int maxBytes = str.Length * 4;
 
         Span<byte> strBuffer = str.Length <= 256
@@ -297,7 +316,14 @@ public class GraphicsFont {
         SDL_Surface* surface;
 
         fixed (byte* ptr = strBuffer) {
-            surface = SDL3_ttf.TTF_RenderText_Solid(Font, ptr, (nuint)len, WHITE);
+            if (width == -1) {
+                surface = SDL3_ttf.TTF_RenderText_Solid(Font, ptr, (nuint)len, WHITE);
+            }
+            else {
+                surface = SDL3_ttf.TTF_RenderText_Solid_Wrapped(
+                    Font, ptr, (nuint)len, WHITE, width
+                );
+            }
         }
 
         SDL_Texture* tex = CreateCharTexture(surface);
@@ -347,7 +373,7 @@ public class GraphicsFont {
             compatSurface->format,
             SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING,
             rawTex->w,
-            Asset.LineHeight
+            ((rawTex->h + Asset.LineHeight - 1) / Asset.LineHeight) * Asset.LineHeight // nearest multiple of the line height.
         );
 
         nint pixels = 0; // The address of the pixels in the streaming texture.

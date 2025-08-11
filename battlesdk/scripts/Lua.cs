@@ -14,10 +14,13 @@ public static class Lua {
 
     public static void Init () {
         RegisterEnumTable<ActionKey>("ActionKey");
+        RegisterEnumTable<Direction>("Direction");
+        RegisterEnumTable<Position>("Position");
 
         UserData.RegisterType<LuaVec2>(InteropAccessMode.Preoptimized, LuaVec2.CLASSNAME);
         UserData.RegisterType<LuaRect>(InteropAccessMode.Preoptimized, LuaRect.CLASSNAME);
         UserData.RegisterType<LuaColor>(InteropAccessMode.Preoptimized, LuaColor.CLASSNAME);
+        UserData.RegisterType<LuaInventoryItem>(InteropAccessMode.Preoptimized, LuaInventoryItem.CLASSNAME);
         UserData.RegisterType<LuaLogger>(InteropAccessMode.Preoptimized, LuaLogger.CLASSNAME);
         UserData.RegisterType<LuaFmt>(InteropAccessMode.Preoptimized, LuaFmt.CLASSNAME);
         UserData.RegisterType<LuaControls>(InteropAccessMode.Preoptimized, LuaControls.CLASSNAME);
@@ -33,6 +36,7 @@ public static class Lua {
         UserData.RegisterType<LuaFont>(InteropAccessMode.Preoptimized, LuaFont.CLASSNAME);
         UserData.RegisterType<LuaHudElement>(InteropAccessMode.Preoptimized, LuaHudElement.CLASSNAME);
         UserData.RegisterType<LuaEntity>(InteropAccessMode.Preoptimized, LuaEntity.CLASSNAME);
+        UserData.RegisterType<LuaInventory>(InteropAccessMode.Preoptimized, LuaInventory.CLASSNAME);
     }
 
     public static void RegisterGlobals (Script script) {
@@ -53,6 +57,7 @@ public static class Lua {
         script.Globals[LuaVec2.CLASSNAME] = UserData.CreateStatic(typeof(LuaVec2));
         script.Globals[LuaRect.CLASSNAME] = UserData.CreateStatic(typeof(LuaRect));
         script.Globals[LuaColor.CLASSNAME] = UserData.CreateStatic(typeof(LuaColor));
+        script.Globals[LuaInventoryItem.CLASSNAME] = UserData.CreateStatic(typeof(LuaInventoryItem));
         script.Globals[LuaLogger.CLASSNAME] = UserData.CreateStatic(typeof(LuaLogger));
         script.Globals[LuaFmt.CLASSNAME] = UserData.CreateStatic(typeof(LuaFmt));
         script.Globals[LuaControls.CLASSNAME] = UserData.CreateStatic(typeof(LuaControls));

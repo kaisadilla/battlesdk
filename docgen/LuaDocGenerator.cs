@@ -164,7 +164,7 @@ internal class LuaDocGenerator {
                 string? paramDoc = xmlDoc
                     ?.Elements("param")
                     .FirstOrDefault(p => p.Attribute("name")?.Value == param.Name)
-                    ?.Value?.Trim();
+                    ?.Value?.Trim().Replace('\n', ' ');
 
                 writer.WriteLine(
                     $"---@param {paramLuaName} {GetLuaType(param.ParameterType)} {paramDoc ?? ""}"

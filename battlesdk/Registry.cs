@@ -34,10 +34,15 @@ public static class Registry {
     public static Collection<ScriptAsset> Scripts { get; } = new();
     public static Collection<AssetFile> Sounds { get; } = new();
 
+    public static BagData Bag { get; private set; } = null!;
+    public static Dictionary<string, ItemCategoryData> ItemCategories { get; } = [];
+    public static ItemCategoryData DefaultItemCategory { get; private set; } = null!;
+    public static Dictionary<string, ItemData> Items { get; } = [];
+
     public static int FlagsTilesetIndex { get; private set; } = -1;
 
     /// <summary>
-    /// The index of overworld characters' shadow in <see cref="MiscSprites"/>,
+    /// The index of overworld characters' shadow in <see cref="Sprites"/>,
     /// or -1 if no such asset exists.
     /// </summary>
     public static int CharSpriteShadow { get; private set; } = -1; // TODO: Remove. The registry doesn't cache anything.
@@ -84,6 +89,8 @@ public static class Registry {
         LoadTilesets();
         LoadMaps(); // Maps require the tilesets they use to be loaded.
         LoadWorlds(); // Worlds require the maps they include to be loaded.
+
+        LoadData();
 
         foreach (var map in Maps) {
             map.Bind();
@@ -163,10 +170,10 @@ public static class Registry {
                 var el = new LanguageAsset(name, Path.GetFullPath(f));
                 Languages.Register(el);
 
-                LogLoadSuccess(AssetType.Language.ToString(), f);
+                LogLoadSuccess("language", f);
             }
             catch (Exception ex) {
-                LogLoadError(AssetType.Language.ToString(), f, ex);
+                LogLoadError("language", f, ex);
             }
         }
     }
@@ -247,6 +254,77 @@ public static class Registry {
             Sounds,
             (name, path) => new AssetFile(name, path)
         );
+    }
+
+    private static void LoadData () {
+        LoadBagData();
+        LoadItemCategoryData();
+        LoadItems();
+    }
+
+    private static void LoadBagData () {
+        _logger.Info("Loading 'data/bag.json'.");
+
+        var path = Path.Combine(ResFolderPath, "data", "bag.json");
+        ThrowIfFileNotExists(path);
+
+        var txt = File.ReadAllText(path);
+        var def = Json.Parse<BagDefinition>(txt)
+            ?? throw new InitializationException($"Failed to parse file '{path}'.");
+
+        Bag = new(def);
+    }
+
+    /// <summary>
+    /// Requires BagData to be loaded.
+    /// </summary>
+    private static void LoadItemCategoryData () {
+        _logger.Info("Loading 'data/item_categories.json'.");
+
+        var path = Path.Combine(ResFolderPath, "data", "item_categories.json");
+        ThrowIfFileNotExists(path);
+
+        var txt = File.ReadAllText(path);
+        var defDictionary = Json.Parse<Dictionary<string, ItemCategoryDefinition>>(txt)
+            ?? throw new InitializationException($"Failed to parse file '{path}'.");
+
+        foreach (var def in defDictionary) {
+            try {
+                var cat = new ItemCategoryData(def.Key, def.Value);
+                ItemCategories[def.Key] = cat;
+
+                if (cat.IsDefault) {
+                    DefaultItemCategory = cat;
+                }
+            }
+            catch (Exception ex) {
+                _logger.ErrorEx(ex, $"Couldn't build item category '{def.Key}'.");
+            }
+        }
+
+        DefaultItemCategory ??= ItemCategories.First().Value;
+    }
+
+    private static void LoadItems () {
+        _logger.Info("Loading 'data/items.json'.");
+
+        var path = Path.Combine(ResFolderPath, "data", "items.json");
+        ThrowIfFileNotExists(path);
+
+        var txt = File.ReadAllText(path);
+        var defDict = Json.Parse<Dictionary<string, ItemDefinition>>(txt)
+            ?? throw new InitializationException($"Failed to parse file '{path}'.");
+
+        foreach (var def in defDict) {
+            try {
+                Items[def.Key] = new(def.Key, def.Value);
+            }
+            catch (Exception ex) {
+                _logger.ErrorEx(ex, $"Couldn't build item '{def.Key}'.");
+            }
+        }
+
+        _logger.Info($"{Items.Count} items loaded.");
     }
 
     private static IEnumerable<string> EnumerateAssetFiles (
@@ -333,6 +411,18 @@ public static class Registry {
 
     private static void LogLoadError (string assetKind, string path, Exception? ex) {
         _logger.ErrorEx(ex, $"Failed to load {assetKind} '{path}'.");
+    }
+
+    /// <summary>
+    /// Throws an <see cref="InitializationException" /> if the file given doesn't
+    /// exist.
+    /// </summary>
+    /// <param name="path">The path to the file that must exist.</param>
+    /// <exception cref="InitializationException"></exception>
+    private static void ThrowIfFileNotExists (string path) {
+        if (File.Exists(path) == false) {
+            throw new InitializationException($"Missing file: '{path}'.");
+        }
     }
 }
 

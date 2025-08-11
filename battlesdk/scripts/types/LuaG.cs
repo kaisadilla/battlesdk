@@ -22,6 +22,8 @@ public class LuaG {
     /// </summary>
     public static int money => G.Money;
 
+    public static LuaInventory inventory => new(G.Inventory);
+
     public static bool dex_unlocked => G.DexUnlocked;
 
     /// <summary>

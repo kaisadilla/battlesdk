@@ -182,7 +182,13 @@ public class OverworldScreenLayer : IScreenLayer, IInputListener {
             }
         }
 
-        ApplyTimeTint();
+        // Apply day / night tint, only if the player is in an outdoors map.
+        if (
+            G.World.TryGetMapAt(G.World.Player.Position, out var currentMap)
+            && currentMap.Data.IsOutdoor
+        ) {
+            ApplyTimeTint();
+        }
     }
 
     private void DrawLayer (TileLayer layer, int xOffset, int yOffset) {

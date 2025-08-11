@@ -1,4 +1,5 @@
-﻿using battlesdk.world;
+﻿using battlesdk.game;
+using battlesdk.world;
 using NLog;
 
 namespace battlesdk;
@@ -19,11 +20,33 @@ public static class G {
     /// </summary>
     public static int Money { get; private set; } = 3000;
     /// <summary>
+    /// The player's inventory.
+    /// </summary>
+    public static Inventory Inventory { get; private set; } = new();
+    /// <summary>
     /// If true, the player has access to a dex.
     /// </summary>
     public static bool DexUnlocked { get; private set; } = true;
 
     public static void LoadGame () {
+        Inventory = Inventory.Load();
+
+        Inventory.AddAmount("poke_ball", 22);
+        Inventory.AddAmount("great_ball", 15);
+        Inventory.AddAmount("ultra_ball", 7);
+        Inventory.AddAmount("master_ball", 1);
+        Inventory.AddAmount("net_ball", 11);
+        Inventory.AddAmount("dive_ball", 8);
+        Inventory.AddAmount("nest_ball", 6);
+        Inventory.AddAmount("repeat_ball", 23);
+        Inventory.AddAmount("timer_ball", 999);
+        Inventory.AddAmount("luxury_ball", 14);
+        Inventory.AddAmount("premier_ball", 7);
+        Inventory.AddAmount("dusk_ball", 3);
+        Inventory.AddAmount("heal_ball", 5);
+        Inventory.AddAmount("quick_ball", 5);
+        Inventory.AddAmount("cherish_ball", 12);
+
         World.TransferTo(Registry.Worlds[0], new(9, 16));
         _logger.Info("Loaded game.");
     }

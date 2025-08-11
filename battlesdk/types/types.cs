@@ -391,13 +391,17 @@ public static class TypesExtension {
         logger.Fatal(exception, msg);
         exception.Demystify().PrintFancy();
 
-        if (exception is ScriptRuntimeException luaEx) {
-            Console.WriteLine($"Lua error: {luaEx.DecoratedMessage}");
-            Console.WriteLine($"Lua stack trace:");
+        var inner = exception;
+        while (inner is not null) {
+            if (inner is ScriptRuntimeException luaEx) {
+                Console.WriteLine($"Lua error: {luaEx.DecoratedMessage}");
+                Console.WriteLine($"Lua stack trace:");
 
-            foreach (var c in luaEx.CallStack) {
-                Console.WriteLine($" - {c}");
+                foreach (var c in luaEx.CallStack) {
+                    Console.WriteLine($" - {c}");
+                }
             }
+            inner = inner.InnerException;
         }
     }
 
