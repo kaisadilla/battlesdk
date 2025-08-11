@@ -19,6 +19,8 @@ public class Warp : Entity {
     public WarpType WarpType { get; }
     public int? EntrySound { get; }
 
+    private int _transitionScript = -1;
+
     public Warp (int mapId, int entityId, GameMap map, WarpData data)
         : base(mapId, entityId, map, data)
     {
@@ -26,6 +28,10 @@ public class Warp : Entity {
         EntrySound = data.EntrySound;
 
         _interaction = new DoorEntityInteraction(this, data);
+
+        if (Registry.Scripts.TryGetId("transitions/fade", out int transId)) {
+            _transitionScript = transId;
+        }
     }
 
     /// <summary>
@@ -45,7 +51,7 @@ public class Warp : Entity {
         InputManager.PushBlock();
 
         yield return new WaitForSeconds(0.75f);
-        Screen.FadeFromBlack(0.5f);
+        Screen.PlayScriptTransition(_transitionScript, 0.5f, true);
 
         if (EntrySound is not null) {
             Audio.Play(EntrySound.Value);
@@ -78,7 +84,7 @@ public class Warp : Entity {
 
         yield return new WaitForSeconds(0.75f);
 
-        Screen.FadeFromBlack(0.5f);
+        Screen.PlayScriptTransition(_transitionScript, 0.5f, true);
         yield return new WaitForSeconds(0.5f);
 
         G.World.Player.IsInvisible = false;

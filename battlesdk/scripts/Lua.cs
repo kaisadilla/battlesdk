@@ -102,6 +102,16 @@ public static class Lua {
         );
     }
 
+    public static void RegisterTransitionHandler (Script script, ScriptTransition transition) {
+        Table tbl = new(script);
+
+        script.Globals["target"] = tbl;
+
+        script.DoString(
+            @"function target:update() end"
+        );
+    }
+
     public static void RegisterEnumTable<T> (string tableName) where T : Enum {
         var type = typeof(T);
 

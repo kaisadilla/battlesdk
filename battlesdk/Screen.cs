@@ -1,7 +1,6 @@
 ﻿using battlesdk.graphics;
 using battlesdk.screen;
 using NLog;
-using SDL;
 
 namespace battlesdk;
 public static class Screen {
@@ -11,9 +10,19 @@ public static class Screen {
     private static readonly Stack<IScreenLayer> _layers = [];
     private static readonly List<IScreenLayer> _renderedLayers = [];
 
-    private static int _fadeDirection = 0;
-    private static float _fadeDuration = 0f;
-    private static float _fadeProgress = 0f;
+    /// <summary>
+    /// While true, the screen is black.
+    /// </summary>
+    private static bool _blackScreen = false;
+    private static int _transitionDirection = 0;
+    private static float _transitionDuration = 0f;
+    private static float _transitionProgress = 0f;
+    /// <summary>
+    /// Maps script ids to transitions.
+    /// </summary>
+    private static Dictionary<int, ScriptTransition> _scriptTransitions = [];
+    private static ITransition? _currentTransition = null;
+    private static ITransition _backupTransition = null!;
 
     // Note: These fields will be null if you call them before calling Init().
     public static ScriptScreenLayer MainMenu { get; private set; } = null!;
@@ -23,7 +32,7 @@ public static class Screen {
     /// <summary>
     /// The renderer that works on the game's main window.
     /// </summary>
-    public static Renderer? MainRenderer { get; private set; } = null;
+    public static Renderer MainRenderer { get; private set; } = null!;
 
     public static void Init (Renderer renderer) {
         MainRenderer = renderer;
@@ -48,6 +57,8 @@ public static class Screen {
         catch (Exception ex) {
             throw new InitializationException("Failed to load screen layer.", ex);
         }
+
+        _backupTransition = new FadeTransition(MainRenderer);
     }
 
     public static void Push (IScreenLayer layer) {
@@ -61,10 +72,12 @@ public static class Screen {
     }
 
     public static void Update () {
-        UpdateFade();
+        UpdateTransition();
     }
 
     public static void Draw () {
+        if (_blackScreen) return;
+
         _renderedLayers.Clear();
         foreach (var layer in _layers) {
             _renderedLayers.Add(layer);
@@ -77,50 +90,70 @@ public static class Screen {
             _renderedLayers[i].Draw();
         }
 
-        if (MainRenderer is not null) {
-            ApplyFadeToBlack(MainRenderer);
-        }
+        ApplyTransition();
     }
 
-    private static unsafe void ApplyFadeToBlack (Renderer renderer) {
-        if (_fadeProgress == 0) return;
+    private static unsafe void ApplyTransition () {
+        if (_transitionProgress == 0) return;
 
-        SDL3.SDL_SetRenderDrawBlendMode(renderer.SdlRenderer, SDL_BlendMode.SDL_BLENDMODE_BLEND);
-
-        SDL3.SDL_SetRenderDrawColor(
-            renderer.SdlRenderer, 0, 0, 0, (byte)(255 * _fadeProgress)
-        );
-        SDL3.SDL_RenderFillRect(renderer.SdlRenderer, null);
+        _currentTransition?.Draw(_transitionProgress);
     }
 
-    private static void UpdateFade () {
-        if (_fadeDirection == 0) return;
-        if (_fadeDirection == 1) {
-            _fadeProgress += (1 / _fadeDuration) * Time.DeltaTime;
+    private static void UpdateTransition () {
+        if (_transitionDirection == 0) return;
+        if (_transitionDirection == 1) {
+            _transitionProgress += (1 / _transitionDuration) * Time.DeltaTime;
 
-            if (_fadeProgress >= 1) {
-                _fadeProgress = 1;
-                _fadeDirection = 0;
+            if (_transitionProgress >= 1) {
+                _blackScreen = true;
+                _transitionProgress = 1;
+                _transitionDirection = 0;
             }
         }
-        else if (_fadeDirection == -1) {
-            _fadeProgress -= (1 / _fadeDuration) * Time.DeltaTime;
+        else if (_transitionDirection == -1) {
+            _transitionProgress -= (1 / _transitionDuration) * Time.DeltaTime;
 
-            if (_fadeProgress <= 0) {
-                _fadeProgress = 0;
-                _fadeDirection = 0;
+            if (_transitionProgress <= 0) {
+                _transitionProgress = 0;
+                _transitionDirection = 0;
             }
         }
     }
 
-    public static void FadeToBlack (float seconds) {
-        _fadeDirection = 1;
-        _fadeDuration = seconds;
-    }
+    public static void PlayScriptTransition (int scriptId, float seconds, bool reverse) {
+        if (MainRenderer is null) return; // TODO: !!!
 
-    public static void FadeFromBlack (float seconds) {
-        _fadeDirection = -1;
-        _fadeDuration = seconds;
+        ITransition trans;
+        // If the scriptId is less than zero, that script id can't exist, so we
+        // use the backup script. This covers the convention of using -1 to
+        // indicate no element.
+        if (scriptId < 0) {
+            trans = _backupTransition;
+        }
+        else {
+            // If we have a transition cached with that id, use it.
+            if (_scriptTransitions.TryGetValue(scriptId, out var scriptTrans)) {
+                trans = scriptTrans;
+            }
+            // If we don't, and the script exists, create it.
+            else if (Registry.Scripts.TryGetElement(scriptId, out var script)) {
+                scriptTrans = new(
+                    MainRenderer,
+                    Registry.Scripts[scriptId]
+                );
+                _scriptTransitions[scriptId] = scriptTrans;
+                trans = scriptTrans;
+            }
+            // If we don't and the script doesn't exist, use the backup.
+            else {
+                trans = _backupTransition;
+            }
+        }
+
+        _currentTransition = trans;
+        _transitionDirection = reverse ? -1 : 1;
+        _transitionDuration = seconds;
+        _blackScreen = false;
     }
 }
 

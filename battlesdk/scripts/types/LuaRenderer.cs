@@ -104,6 +104,26 @@ public class LuaRenderer : ILuaType {
         return new(font);
     }
 
+    /// <summary>
+    /// Paints the entire screen on the color given.
+    /// </summary>
+    /// <param name="color">The color to use.</param>
+    public void paint_screen (LuaColor color) {
+        IVec2 size = new(width, height);
+
+        _renderer.DrawRectangle(IVec2.Zero, size, color.ToNative());
+    }
+
+    /// <summary>
+    /// Draws a rectangle with the parameters given.
+    /// </summary>
+    /// <param name="pos">The position of the top-left corner.</param>
+    /// <param name="size">The rectangle's size.</param>
+    /// <param name="color">The rectangle's color.</param>
+    public void draw_rectangle (LuaVec2 pos, LuaVec2 size, LuaColor color) {
+        _renderer.DrawRectangle(pos.ToIVec2(), size.ToIVec2(), color.ToNative());
+    }
+
     public override string ToString () {
         return $"<renderer>";
     }

@@ -5,7 +5,7 @@ using battlesdk.world.entities;
 using MoonSharp.Interpreter;
 using NLog;
 
-namespace battlesdk.scripts.types;
+namespace battlesdk.scripts;
 public class LuaScriptHost {
     public class EventArgs (int id) : System.EventArgs {
         /// <summary>
@@ -78,6 +78,20 @@ public class LuaScriptHost {
         return host;
     }
 
+    public static LuaScriptHost TransitionScript (
+        ScriptAsset asset, ScriptTransition transition
+    ) {
+        var host = new LuaScriptHost();
+
+        var src = asset.GetSource();
+
+        Lua.RegisterGlobals(host._lua);
+        Lua.RegisterTransitionHandler(host._lua, transition);
+
+        host._scriptFunc = host._lua.LoadString(src);
+        return host;
+    }
+
     /// <summary>
     /// Runs the main script given in this host as a script coroutine, which 
     /// means that its execution will not end after this call is made. Use
@@ -121,8 +135,8 @@ public class LuaScriptHost {
     /// ends before this function returns; but the script will crash if it uses
     /// any asynchronous API functions (those that implement Lua coroutines).
     /// </summary>
-    public void Run (DynValue func) {
-        _lua.Call(func);
+    public void Run (DynValue func, params DynValue[] args) {
+        _lua.Call(func, args);
     }
 
     public DynValue GetFunction (string table, string name) {

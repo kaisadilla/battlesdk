@@ -1,7 +1,7 @@
 ﻿using battlesdk.data;
 using battlesdk.graphics;
 using battlesdk.input;
-using battlesdk.scripts.types;
+using battlesdk.scripts;
 using MoonSharp.Interpreter;
 using NLog;
 

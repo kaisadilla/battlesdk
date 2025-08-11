@@ -1,5 +1,5 @@
 ﻿using battlesdk.data;
-using battlesdk.scripts.types;
+using battlesdk.scripts;
 using MoonSharp.Interpreter;
 using NLog;
 
@@ -179,11 +179,17 @@ public class DoorEntityInteraction : EntityInteraction {
     private int _mapId;
     private IVec2 _targetPos;
 
+    private int _transitionScript = -1;
+
     public DoorEntityInteraction (Entity entity, WarpData data) : base(entity) {
         Trigger = InteractionTrigger.PlayerTouchesEntity; // TODO: Not hardcoded.
         _worldId = data.WorldId;
         _mapId = data.MapId;
         _targetPos = data.TargetPosition;
+
+        if (Registry.Scripts.TryGetId("transitions/fade", out int transId)) {
+            _transitionScript = transId;
+        }
 
         if (data.TargetEntity is not null) {
             MapAsset map;
@@ -233,7 +239,7 @@ public class DoorEntityInteraction : EntityInteraction {
         PlayEntrySound();
         G.World.Player.SetRunning(false);
         G.World.Player.Move(G.World.Player.Position.OffsetAt(from.Opposite()));
-        Screen.FadeToBlack(0.5f);
+        Screen.PlayScriptTransition(_transitionScript, 0.5f, false);
         yield return new WaitForSeconds(0.2f);
 
         G.World.Player.IsInvisible = true;
@@ -269,7 +275,7 @@ public class DoorEntityInteraction : EntityInteraction {
         G.World.Player.IsInvisible = true;
         yield return new WaitForSeconds(0.2f);
 
-        Screen.FadeToBlack(0.5f);
+        Screen.PlayScriptTransition(_transitionScript, 0.5f, false);
         if (_target.Sprite is SpritesheetFile) {
             for (int i = 2; i >= 0; i--) {
                 _target.SetSpriteIndex(i);

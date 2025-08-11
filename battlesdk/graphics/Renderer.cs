@@ -30,6 +30,10 @@ public unsafe class Renderer {
     /// </summary>
     public int Height { get; private set; }
     /// <summary>
+    /// The viewport's logical size (assuming scale = 1).
+    /// </summary>
+    public IVec2 Size { get; private set; }
+    /// <summary>
     /// The scale of the viewport. The width and height of the window, as well
     /// as everything drawn into it, will be scaled by this value.
     /// </summary>
@@ -41,6 +45,7 @@ public unsafe class Renderer {
 
         Width = width;
         Height = height;
+        Size = new(width, height);
         Scale = scale;
 
         EnableScale();
@@ -172,6 +177,24 @@ public unsafe class Renderer {
             id,
             asset => new(SdlRenderer, asset.TexturePath)
         );
+    }
+
+    public void DrawRectangle (IVec2 pos, IVec2 size, ColorRGBA color) {
+        SDL3.SDL_SetRenderDrawBlendMode(
+            SdlRenderer,
+            SDL_BlendMode.SDL_BLENDMODE_BLEND
+        );
+        SDL3.SDL_SetRenderDrawColor(
+            SdlRenderer,
+            (byte)color.R,
+            (byte)color.G,
+            (byte)color.B,
+            (byte)color.A
+        );
+
+        var rect = SdlFRect(pos.X, pos.Y, size.X, size.Y);
+
+        SDL3.SDL_RenderFillRect(SdlRenderer, &rect);
     }
 
     private static TGraphics? GetGraphicTexture<TGraphics, TAsset> (
