@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "docgen": {
+      "commandName": "Project",
+      "commandLineArgs": "--xmldoc \"E:\\repos\\battlesdk\\battlesdk\\doc.xml\"\r\n-o \"E:\\repos\\battlesdk\\battlesdk\\res\\scripts\""
+    }
+  }
+}

@@ -39,6 +39,8 @@ internal class LuaDocGenerator {
         }
 
         // TODO: DescribeEnum, describe globals
+
+        Console.WriteLine($"File created at: '{docPath}'.");
     }
 
     private void DescribeClass (StreamWriter writer, Type type) {
