@@ -1,6 +1,6 @@
 ﻿namespace battlesdk.scripts.types;
 
-using battlesdk.graphics;
+using battlesdk.graphics.resources;
 using MoonSharp.Interpreter;
 
 [LuaApiClass]
@@ -22,6 +22,8 @@ public class LuaFrameSprite : ILuaType {
     }
 
     public override string ToString () {
-        return $"<frame {_frame.Asset.Name}>";
+        return $"[Frame {_frame.Asset.Name}]";
     }
+
+    public string str () => ToString();
 }

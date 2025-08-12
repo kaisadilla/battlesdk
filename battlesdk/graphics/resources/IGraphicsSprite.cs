@@ -1,6 +1,6 @@
 ﻿using SDL;
 
-namespace battlesdk.graphics;
+namespace battlesdk.graphics.resources;
 
 public interface IGraphicsSprite {
     /// <summary>

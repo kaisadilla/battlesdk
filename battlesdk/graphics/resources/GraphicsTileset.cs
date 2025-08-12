@@ -1,6 +1,6 @@
 ﻿using SDL;
 
-namespace battlesdk.graphics;
+namespace battlesdk.graphics.resources;
 public unsafe class GraphicsTileset {
     public SDL_Texture* Texture { get; private init; }
 

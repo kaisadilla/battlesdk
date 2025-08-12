@@ -2,7 +2,7 @@
 using SDL;
 using System.Runtime.CompilerServices;
 
-namespace battlesdk.graphics;
+namespace battlesdk.graphics.resources;
 public class GraphicsTexture : IGraphicsSprite {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 

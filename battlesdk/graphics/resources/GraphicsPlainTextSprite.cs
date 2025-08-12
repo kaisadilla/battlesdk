@@ -1,7 +1,7 @@
 ﻿using battlesdk.data;
 using SDL;
 
-namespace battlesdk.graphics;
+namespace battlesdk.graphics.resources;
 public class GraphicsPlainTextSprite : IGraphicsSprite {
     private unsafe SDL_Renderer* _renderer;
     private unsafe GraphicsFont _font;

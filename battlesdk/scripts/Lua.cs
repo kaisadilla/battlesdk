@@ -34,6 +34,7 @@ public static class Lua {
         UserData.RegisterType<LuaFrameSprite>(InteropAccessMode.Preoptimized, LuaFrameSprite.CLASSNAME);
         UserData.RegisterType<LuaPlainTextSprite>(InteropAccessMode.Preoptimized, LuaPlainTextSprite.CLASSNAME);
         UserData.RegisterType<LuaFont>(InteropAccessMode.Preoptimized, LuaFont.CLASSNAME);
+        UserData.RegisterType<LuaTextbox>(InteropAccessMode.Preoptimized, LuaTextbox.CLASSNAME);
         UserData.RegisterType<LuaHudElement>(InteropAccessMode.Preoptimized, LuaHudElement.CLASSNAME);
         UserData.RegisterType<LuaEntity>(InteropAccessMode.Preoptimized, LuaEntity.CLASSNAME);
         UserData.RegisterType<LuaInventory>(InteropAccessMode.Preoptimized, LuaInventory.CLASSNAME);

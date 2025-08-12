@@ -1,6 +1,6 @@
 ﻿using battlesdk.data;
 
-namespace battlesdk.graphics;
+namespace battlesdk.graphics.resources;
 public unsafe class GraphicsCharacterSprite : GraphicsSprite {
     public override CharacterSpriteFile Asset { get; }
 

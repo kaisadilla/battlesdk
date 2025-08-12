@@ -38,11 +38,6 @@ public class LuaRect : ILuaType {
     }
 
     [MoonSharpHidden]
-    public override string ToString () {
-        return ToRect().ToString();
-    }
-
-    [MoonSharpHidden]
     public IRect ToIRect () {
         return new((int)top, (int)left, (int)bottom, (int)right);
     }
@@ -51,4 +46,10 @@ public class LuaRect : ILuaType {
     public Rect ToRect () {
         return new(top, left, bottom, right);
     }
+
+    public override string ToString () {
+        return ToRect().ToString();
+    }
+
+    public string str () => ToString();
 }

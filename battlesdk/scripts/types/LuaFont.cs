@@ -1,6 +1,6 @@
 ﻿namespace battlesdk.scripts.types;
 
-using battlesdk.graphics;
+using battlesdk.graphics.resources;
 using MoonSharp.Interpreter;
 using NLog;
 
@@ -57,4 +57,6 @@ public class LuaFont : ILuaType {
     public override string ToString () {
         return $"<font '{_font.Asset.Name}'>";
     }
+
+    public string str () => ToString();
 }

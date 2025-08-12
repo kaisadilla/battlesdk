@@ -25,12 +25,13 @@ public class LuaInventoryItem : ILuaType {
     }
 
     [MoonSharpHidden]
+    public InventoryItem ToNative () {
+        return new(item_id, amount);
+    }
+
     public override string ToString () {
         return ToNative().ToString();
     }
 
-    [MoonSharpHidden]
-    public InventoryItem ToNative () {
-        return new(item_id, amount);
-    }
+    public string str () => ToString();
 }

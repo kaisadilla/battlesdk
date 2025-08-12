@@ -2,7 +2,7 @@
 using NLog;
 using SDL;
 
-namespace battlesdk.graphics;
+namespace battlesdk.graphics.resources;
 public class GraphicsAtlasSprite : IGraphicsSprite {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -24,7 +24,7 @@ public class GraphicsAtlasSprite : IGraphicsSprite {
         _renderer = renderer.SdlRenderer;
         Asset = asset;
 
-        var atlas = renderer.GetSprite(asset.Id)
+        var atlas = renderer.GetSpriteOrNull(asset.Id)
             ?? throw new("Couldn't find spritesheet atlas.");
 
         if (atlas is GraphicsTexture gt) {
@@ -38,8 +38,8 @@ public class GraphicsAtlasSprite : IGraphicsSprite {
         if (index == -1) throw new("Invalid sheet sprite name.");
 
         var spritesPerRow = _atlas.Width / asset.SpriteSize.X;
-        var x = (index % spritesPerRow) * asset.SpriteSize.X;
-        var y = (index / spritesPerRow) * asset.SpriteSize.Y;
+        var x = index % spritesPerRow * asset.SpriteSize.X;
+        var y = index / spritesPerRow * asset.SpriteSize.Y;
 
         _src = SdlFRect(x, y, asset.SpriteSize.X, asset.SpriteSize.Y);
     }

@@ -11,11 +11,22 @@ public class Collection<T> : IEnumerable<T> where T : IIdentifiable {
     /// </summary>
     public int Count => _elements.Count;
 
+
     /// <summary>
     /// Returns the element at the given index.
     /// </summary>
+    /// <param name="index">The index of the element</param>
     /// <returns></returns>
-    public T this[int index] => _elements[index];
+    /// <exception cref="RegistryException" />
+    public T this[int index] {
+        get {
+            if (index >= _elements.Count) {
+                throw Exceptions.InvalidRegistryIndex(this, index);
+            }
+
+            return _elements[index];
+        }
+    }
     /// <summary>
     /// Returns the element with the given name.
     /// </summary>

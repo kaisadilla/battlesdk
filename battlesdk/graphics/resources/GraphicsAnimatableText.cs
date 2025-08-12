@@ -1,5 +1,5 @@
-﻿namespace battlesdk.graphics;
-public class GraphicsAnimatableText : GraphicsText {
+﻿namespace battlesdk.graphics.resources;
+public class GraphicsAnimatableText : GraphicsRichText {
     public IRect Viewport { get; }
     public int Padding { get; }
 
@@ -16,7 +16,7 @@ public class GraphicsAnimatableText : GraphicsText {
     }
 
     public unsafe void DrawAtViewport (int amount, float offset) {
-        int y = Viewport.Top + Padding - ((int)(_font.Asset.LineHeight * offset));
+        int y = Viewport.Top + Padding - (int)(_font.Asset.LineHeight * offset);
 
         for (int i = 0; i < _glyphs.Count; i++) {
             if (i == amount) break;
@@ -25,7 +25,7 @@ public class GraphicsAnimatableText : GraphicsText {
 
             IVec2 glyphPos = new(
                 Viewport.Left + g.Position,
-                _font.Asset.GetCorrectY(y + (g.Line * _font.Asset.LineHeight))
+                _font.Asset.GetCorrectY(y + g.Line * _font.Asset.LineHeight)
             );
 
             // The glyph is fully below the viewport, so it won't be rendered.

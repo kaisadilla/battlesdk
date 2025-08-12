@@ -5,7 +5,7 @@ public class MessageHudElement : IHudElement {
     /// <summary>
     /// The textbox controlled by this message.
     /// </summary>
-    public TextboxHudElement Textbox { get; }
+    public AnimatedTextboxHudElement Textbox { get; }
 
     public bool IsClosed { get; private set; } = false;
 

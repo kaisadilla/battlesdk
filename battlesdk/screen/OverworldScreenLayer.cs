@@ -242,7 +242,7 @@ public class OverworldScreenLayer : IScreenLayer, IInputListener {
         if (entity.Sprite is null) return;
         if (entity.IsInvisible) return;
 
-        var sprite = _renderer.GetSprite(entity.Sprite.Id);
+        var sprite = _renderer.GetSpriteOrNull(entity.Sprite.Id);
         if (sprite is null) return;
 
         sprite.DrawSubsprite(_camera.GetScreenPos(TileToPixelSpace(entity.Subposition)), entity.SpriteIndex);
@@ -272,12 +272,12 @@ public class OverworldScreenLayer : IScreenLayer, IInputListener {
         }
         
         if (Registry.CharSpriteShadow != -1) {
-            _renderer.GetSprite(Registry.CharSpriteShadow)?.Draw(
+            _renderer.GetSpriteOrNull(Registry.CharSpriteShadow)?.Draw(
                 _camera.GetScreenPos(TileToPixelSpace(character.Subposition)) + new IVec2(0, 8)
             );
         }
         
-        var charSprite = _renderer.GetSprite(character.Sprite.Id);
+        var charSprite = _renderer.GetSpriteOrNull(character.Sprite.Id);
         if (charSprite is null) return;
 
         charSprite.DrawSubsprite(

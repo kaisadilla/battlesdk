@@ -1,6 +1,6 @@
 ﻿namespace battlesdk.scripts.types;
 
-using battlesdk.graphics;
+using battlesdk.graphics.resources;
 using MoonSharp.Interpreter;
 
 [LuaApiClass]

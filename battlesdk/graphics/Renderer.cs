@@ -1,4 +1,5 @@
 ﻿using battlesdk.data;
+using battlesdk.graphics.resources;
 using NLog;
 using SDL;
 
@@ -116,7 +117,7 @@ public unsafe class Renderer {
         return GetFont(id) ?? GetFont(0) ?? throw new("No font available.");
     }
 
-    public IGraphicsSprite? GetSprite (int id) {
+    public IGraphicsSprite? GetSpriteOrNull (int id) { // TODO: Rename.
         if (_sprites.TryGetValue(id, out var sprite)) {
             return sprite;
         }
@@ -124,11 +125,25 @@ public unsafe class Renderer {
         if (Registry.Sprites.TryGetElement(id, out var asset) == false) {
             return null;
         }
-
         else {
             _sprites[id] = GraphicsSprite.New(this, asset);
         }
         
+        return _sprites[id];
+    }
+
+    /// <summary>
+    /// Returns a renderable sprite with the id given.
+    /// </summary>
+    /// <param name="id">The sprite's id in the registry.</param>
+    /// <exception cref="RegistryException" />
+    public IGraphicsSprite GetSprite (int id) {
+        if (_sprites.TryGetValue(id, out var sprite)) {
+            return sprite;
+        }
+
+        _sprites[id] = GraphicsSprite.New(this, Registry.Sprites[id]);
+
         return _sprites[id];
     }
 
@@ -138,7 +153,7 @@ public unsafe class Renderer {
     /// </summary>
     /// <param name="id">An id of a sprite that is expected to be a frame.</param>
     public GraphicsFrameSprite? GetFrame (int id) {
-        var sprite = GetSprite(id);
+        var sprite = GetSpriteOrNull(id);
 
         if (sprite is null) return null;
 

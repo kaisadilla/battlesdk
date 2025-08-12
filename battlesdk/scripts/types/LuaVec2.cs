@@ -20,13 +20,13 @@ public class LuaVec2 : ILuaType {
         this.y = y;
     }
 
-    public static LuaVec2 @new (int x, int y) {
-        return new(x, y);
+    public LuaVec2 (IVec2 v) {
+        x = v.X;
+        y = v.Y;
     }
 
-    [MoonSharpHidden]
-    public override string ToString () {
-        return ToVec2().ToString();
+    public static LuaVec2 @new (int x, int y) {
+        return new(x, y);
     }
 
     [MoonSharpHidden]
@@ -50,4 +50,11 @@ public class LuaVec2 : ILuaType {
     public static LuaVec2 operator * (LuaVec2 vec, int mult) {
         return new(vec.x * mult, vec.y * mult);
     }
+
+    [MoonSharpHidden]
+    public override string ToString () {
+        return ToVec2().ToString();
+    }
+
+    public string str () => ToString();
 }

@@ -1,9 +1,12 @@
 ﻿using MoonSharp.Interpreter;
+using NLog;
 
 namespace battlesdk.scripts.types;
 
 [LuaApiClass]
 public class LuaHud : ILuaType {
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
     [MoonSharpHidden]
     public const string CLASSNAME = "Hud";
 
@@ -93,4 +96,10 @@ public class LuaHud : ILuaType {
             luaCor.Resume();
         }
     }
+
+    public override string ToString () {
+        return "[hud]";
+    }
+
+    public string str () => ToString();
 }

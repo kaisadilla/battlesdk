@@ -24,12 +24,13 @@ public class LuaColor : ILuaType {
     }
 
     [MoonSharpHidden]
+    public ColorRGBA ToNative () {
+        return new(r, g, b, a);
+    }
+
     public override string ToString () {
         return ToNative().ToString();
     }
 
-    [MoonSharpHidden]
-    public ColorRGBA ToNative () {
-        return new(r, g, b, a);
-    }
+    public string str () => ToString();
 }

@@ -1,5 +1,6 @@
 ﻿
 using battlesdk.graphics;
+using battlesdk.graphics.resources;
 using battlesdk.input;
 
 namespace battlesdk.hud;
@@ -65,7 +66,7 @@ public class ChoiceHudElement : IHudElement, IInputListener {
     ) {
         OnClose += (s, evt) => IsClosed = true;
 
-        _frame = renderer.GetSprite(frameId) ?? throw new("Failed to get frame.");
+        _frame = renderer.GetSpriteOrNull(frameId) ?? throw new("Failed to get frame.");
         _font = renderer.GetFontOrDefault(fontId);
         _canBeCancelled = canBeCancelled;
         _defaultChoice = defaultChoice;
@@ -80,7 +81,7 @@ public class ChoiceHudElement : IHudElement, IInputListener {
             _choices.Add(sprite);
         }
 
-        _arrow = renderer.GetSprite(Registry.Sprites.GetId("ui/choice_arrow"))
+        _arrow = renderer.GetSpriteOrNull(Registry.Sprites.GetId("ui/choice_arrow"))
             ?? throw new("Failed to get arrow sprite.");
 
         _size = new(width, height);
@@ -129,7 +130,7 @@ public class ChoiceHudElement : IHudElement, IInputListener {
 
         _arrow.Draw(new(
             _pos.X + _padding.Left - 8,
-            _pos.Y + _padding.Top + 2 + (_cursor * _font.Asset.LineHeight)
+            _pos.Y + _padding.Top + 3 + (_cursor * _font.Asset.LineHeight)
         ));
     }
 

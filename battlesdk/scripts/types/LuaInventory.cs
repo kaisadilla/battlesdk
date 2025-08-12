@@ -45,6 +45,8 @@ public class LuaInventory : ILuaType {
     }
 
     public override string ToString () {
-        return $"<inventory>";
+        return $"[Inventory]";
     }
+
+    public string str () => ToString();
 }

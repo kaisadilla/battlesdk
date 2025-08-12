@@ -1,9 +1,9 @@
 ﻿using NLog;
 using SDL;
 
-namespace battlesdk.graphics;
+namespace battlesdk.graphics.resources;
 
-public class GraphicsText {
+public class GraphicsRichText {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     protected unsafe SDL_Renderer* _renderer;
@@ -31,7 +31,7 @@ public class GraphicsText {
     /// </summary>
     public int LineCount { get; }
 
-    public unsafe GraphicsText (
+    public unsafe GraphicsRichText (
         Renderer renderer, int fontId, string text, int width
     ) {
         _renderer = renderer.SdlRenderer;
@@ -55,7 +55,7 @@ public class GraphicsText {
         foreach (var g in _glyphs) {
             IVec2 glyphPos = new(
                 pos.X + g.Position,
-                _font.Asset.GetCorrectY(y + (g.Line * _font.Asset.LineHeight))
+                _font.Asset.GetCorrectY(y + g.Line * _font.Asset.LineHeight)
             );
             g.Font.DrawChar(glyphPos, g.CharRect, SdlColor(g.Color), true);
         }
@@ -85,7 +85,7 @@ public class GraphicsText {
 
             IVec2 glyphPos = new(
                 pos.X + g.Position,
-                _font.Asset.GetCorrectY(y + (g.Line * _font.Asset.LineHeight))
+                _font.Asset.GetCorrectY(y + g.Line * _font.Asset.LineHeight)
             );
             g.Font.DrawChar(glyphPos, g.CharRect, SdlColor(g.Color), true);
         }

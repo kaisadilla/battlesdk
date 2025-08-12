@@ -3,7 +3,7 @@ using NLog;
 using SDL;
 using System.Text;
 
-namespace battlesdk.graphics;
+namespace battlesdk.graphics.resources;
 
 public class GraphicsFont {
     private static readonly SDL_Color WHITE = SdlColor(255, 255, 255, 255);
@@ -373,7 +373,7 @@ public class GraphicsFont {
             compatSurface->format,
             SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING,
             rawTex->w,
-            ((rawTex->h + Asset.LineHeight - 1) / Asset.LineHeight) * Asset.LineHeight // nearest multiple of the line height.
+            (rawTex->h + Asset.LineHeight - 1) / Asset.LineHeight * Asset.LineHeight // nearest multiple of the line height.
         );
 
         nint pixels = 0; // The address of the pixels in the streaming texture.
@@ -394,7 +394,7 @@ public class GraphicsFont {
             for (int y = 0; y < streamingTex->h; y++) {
                 for (int x = 0; x < streamingTex->w; x++) {
                     // The address of this pixel in the texture.
-                    byte* dstPix = dstPixels + (y * pitch) + (x * 4);
+                    byte* dstPix = dstPixels + y * pitch + x * 4;
 
                     // The address of the pixel in the surface that we'll copy.
                     byte* reference = null;
@@ -402,7 +402,7 @@ public class GraphicsFont {
                     // If this pixel's y is inside the surface, check this
                     // pixel's position in the surface.
                     if (y < compatSurface->h) {
-                        byte* srcPix = srcPixels + (y * srcPitch) + (x * 4);
+                        byte* srcPix = srcPixels + y * srcPitch + x * 4;
 
                         if (srcPix[3] != 0) reference = srcPix;
                     }
@@ -410,17 +410,17 @@ public class GraphicsFont {
                     // If reference is still empty, check the pixel in the
                     // surface to the left.
                     if (reference is null && x > 0 && y < compatSurface->h) {
-                        byte* left = srcPixels + (y * srcPitch) + ((x - 1) * 4);
+                        byte* left = srcPixels + y * srcPitch + (x - 1) * 4;
                         if (left[3] != 0) reference = left;
                     }
                     // If still empty, check the pixel above.
                     if (reference is null && y > 0 && y <= compatSurface->h) {
-                        byte* top = srcPixels + ((y - 1) * srcPitch) + (x * 4);
+                        byte* top = srcPixels + (y - 1) * srcPitch + x * 4;
                         if (top[3] != 0) reference = top;
                     }
                     // If still empty, check the pixel above to the left.
                     if (reference is null && x > 0 && y > 0 && y <= compatSurface->h) {
-                        byte* topLeft = srcPixels + ((y - 1) * srcPitch) + ((x - 1) * 4);
+                        byte* topLeft = srcPixels + (y - 1) * srcPitch + (x - 1) * 4;
                         if (topLeft[3] != 0) reference = topLeft;
                     }
 

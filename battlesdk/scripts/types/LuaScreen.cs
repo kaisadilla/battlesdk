@@ -55,6 +55,8 @@ public class LuaScreen : ILuaType {
     }
 
     public override string ToString () {
-        return $"<Screen>";
+        return $"[Screen]";
     }
+
+    public string str () => ToString();
 }

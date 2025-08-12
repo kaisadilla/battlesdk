@@ -1,7 +1,7 @@
 ﻿using battlesdk.data;
 using SDL;
 
-namespace battlesdk.graphics;
+namespace battlesdk.graphics.resources;
 public class GraphicsFrameSprite : GraphicsSprite {
     public new FrameSpriteFile Asset => (FrameSpriteFile)base.Asset;
 

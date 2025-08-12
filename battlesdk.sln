@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "docgen", "docgen\docgen.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "battlesdk.tests", "battlesdk.tests\battlesdk.tests.csproj", "{C659FA55-F8B4-4BEB-BC23-71E54E55B1DC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "battlesdk.desktop", "battlesdk.desktop\battlesdk.desktop.csproj", "{6839DF5E-3CFA-4F9E-ACE0-8222C946DA15}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +34,10 @@ Global
 		{C659FA55-F8B4-4BEB-BC23-71E54E55B1DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C659FA55-F8B4-4BEB-BC23-71E54E55B1DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C659FA55-F8B4-4BEB-BC23-71E54E55B1DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6839DF5E-3CFA-4F9E-ACE0-8222C946DA15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6839DF5E-3CFA-4F9E-ACE0-8222C946DA15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6839DF5E-3CFA-4F9E-ACE0-8222C946DA15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6839DF5E-3CFA-4F9E-ACE0-8222C946DA15}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -17,11 +17,17 @@ public class LuaHudElement : ILuaType {
         _element = element;
     }
 
+    public void draw () {
+        _element.Draw();
+    }
+
     public void close () {
         _element.Close();
     }
 
     public override string ToString () {
-        return $"<hud element>";
+        return $"[HudElement]";
     }
+
+    public string str () => ToString();
 }

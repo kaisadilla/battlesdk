@@ -1,10 +1,11 @@
 ﻿using battlesdk.animations;
 using battlesdk.graphics;
+using battlesdk.graphics.resources;
 using battlesdk.input;
 using NLog;
 
 namespace battlesdk.hud;
-public class TextboxHudElement : IInputListener, IHudElement {
+public class AnimatedTextboxHudElement : IInputListener, IHudElement {
     private const float CHARS_PER_SECOND = 80;
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
@@ -79,7 +80,7 @@ public class TextboxHudElement : IInputListener, IHudElement {
     public event EventHandler<EventArgs>? OnMessageShown;
     public event EventHandler<EventArgs>? OnClose;
 
-    public unsafe TextboxHudElement (
+    public unsafe AnimatedTextboxHudElement (
         Renderer renderer,
         int frameId,
         int fontId,
@@ -91,7 +92,7 @@ public class TextboxHudElement : IInputListener, IHudElement {
         OnMessageShown += (s, evt) => IsMessageShown = true;
         OnClose += (s, evt) => IsClosed = true;
 
-        _frame = renderer.GetSprite(frameId) ?? throw new("Invalid frame");
+        _frame = renderer.GetSpriteOrNull(frameId) ?? throw new("Invalid frame");
         _pos = pos;
         _size = size;
         _closeable = closeable;
@@ -102,7 +103,7 @@ public class TextboxHudElement : IInputListener, IHudElement {
             _logger.Error("Failed to load 'ui/pause_arrow' texture.");
         }
         if (_arrowId != -1) {
-            _arrow = renderer.GetSprite(_arrowId);
+            _arrow = renderer.GetSpriteOrNull(_arrowId);
             _arrowAnim = new(0, 2, 0.6f);
         }
 

@@ -2,7 +2,7 @@
 using NLog;
 using SDL;
 
-namespace battlesdk.graphics;
+namespace battlesdk.graphics.resources;
 public class GraphicsSprite : GraphicsTexture {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 

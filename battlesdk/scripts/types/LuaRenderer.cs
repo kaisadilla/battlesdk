@@ -1,10 +1,14 @@
 ﻿using battlesdk.graphics;
+using battlesdk.graphics.elements;
 using MoonSharp.Interpreter;
+using NLog;
 
 namespace battlesdk.scripts.types;
 
 [LuaApiClass]
 public class LuaRenderer : ILuaType {
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
     [MoonSharpHidden]
     public const string CLASSNAME = "Renderer";
 
@@ -52,7 +56,7 @@ public class LuaRenderer : ILuaType {
             return new(sheetSprite);
         }
 
-        var sprite = _renderer.GetSprite(id);
+        var sprite = _renderer.GetSpriteOrNull(id);
         if (sprite is null) return null;
 
         return new(sprite);
@@ -104,6 +108,34 @@ public class LuaRenderer : ILuaType {
         return new(font);
     }
 
+    public LuaTextbox? get_textbox (
+        string frame,
+        string font,
+        LuaVec2 pos,
+        LuaVec2 size,
+        string text
+    ) {
+        if (Registry.Sprites.TryGetId(frame, out int frameId) == false) {
+            _logger.Error($"Sprite does not exist: '{frame}'.");
+            return null;
+        }
+        if (Registry.Fonts.TryGetId(font, out int fontId) == false) {
+            _logger.Error($"Font does not exist: '{font}'.");
+            return null;
+        }
+
+        return new(
+            new Textbox(
+                _renderer,
+                frameId,
+                fontId,
+                pos.ToIVec2(),
+                size.ToIVec2(),
+                text
+            )
+        );
+    }
+
     /// <summary>
     /// Paints the entire screen on the color given.
     /// </summary>
@@ -125,6 +157,8 @@ public class LuaRenderer : ILuaType {
     }
 
     public override string ToString () {
-        return $"<renderer>";
+        return $"[Renderer]";
     }
+
+    public string str () => ToString();
 }
