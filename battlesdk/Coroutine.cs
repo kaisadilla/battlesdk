@@ -44,6 +44,7 @@ public class Coroutine {
         var cor = new Coroutine(routine);
 
         CoroutineRuntime.Add(cor);
+        cor.Update();
 
         return cor;
     }

@@ -1,4 +1,5 @@
 ﻿using battlesdk.data;
+using battlesdk.world.entities.interaction;
 
 namespace battlesdk.world.entities;
 
@@ -39,6 +40,8 @@ public class Warp : Entity {
     /// position this warp is in.
     /// </summary>
     public void OnPlayerArrive () {
+        InputManager.PushBlock();
+
         if (WarpType == WarpType.Door) {
             Coroutine.Start(ExitFromDoor());
         }
@@ -48,8 +51,6 @@ public class Warp : Entity {
     }
 
     private CoroutineTask ExitFromDoor () {
-        InputManager.PushBlock();
-
         yield return new WaitForSeconds(0.75f);
         Screen.PlayScriptTransition(_transitionScript, 0.5f, true);
 
@@ -80,8 +81,6 @@ public class Warp : Entity {
     }
 
     private CoroutineTask ExitFromHall () {
-        InputManager.PushBlock();
-
         yield return new WaitForSeconds(0.75f);
 
         Screen.PlayScriptTransition(_transitionScript, 0.5f, true);

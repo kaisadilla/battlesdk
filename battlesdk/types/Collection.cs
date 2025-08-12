@@ -92,8 +92,13 @@ public class Collection<T> : IEnumerable<T> where T : IIdentifiable {
     /// </summary>
     /// <param name="name">The name of the element.</param>
     /// <returns>The element's id.</returns>
+    /// <exception cref="RegistryException" />
     public int GetId (string name) {
-        return _ids[name];
+        if (_ids.TryGetValue(name, out int id) == false) {
+            throw Exceptions.InvalidRegistryName(this, name);
+        }
+        
+        return id;
     }
 
     IEnumerator IEnumerable.GetEnumerator () {
@@ -102,6 +107,12 @@ public class Collection<T> : IEnumerable<T> where T : IIdentifiable {
 
     public IEnumerator<T> GetEnumerator () {
         return _elements.GetEnumerator();
+    }
+
+    public IEnumerable<string> EnumerateKeys () {
+        foreach (var k in _ids.Keys) {
+            yield return k;
+        }
     }
 }
 

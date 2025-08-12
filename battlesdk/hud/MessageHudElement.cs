@@ -9,6 +9,8 @@ public class MessageHudElement : IHudElement, IInputListener {
     /// </summary>
     public AnimatableTextbox Textbox { get; }
 
+    private bool _hasControl = false;
+
     public bool IsClosed { get; private set; } = false;
 
     public string Name => "Textbox Hud Element";
@@ -34,12 +36,16 @@ public class MessageHudElement : IHudElement, IInputListener {
             new(Settings.ViewportWidth - 6, 46),
             text
         );
-
-        InputManager.Push(this);
     }
 
     public void CedeControl () {
-        // TODO: Remove
+        InputManager.Push(this);
+        _hasControl = true;
+    }
+
+    public void SeizeControl () {
+        _hasControl = false;
+        InputManager.Pop();
     }
 
     public void Update () {
@@ -53,7 +59,10 @@ public class MessageHudElement : IHudElement, IInputListener {
     public void Close () {
         if (IsClosed) return;
 
-        InputManager.Pop();
+        if (_hasControl) {
+            SeizeControl();
+        }
+
         OnClose?.Invoke(this, EventArgs.Empty);
     }
 

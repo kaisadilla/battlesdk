@@ -124,16 +124,40 @@ public class LuaRenderer : ILuaType {
             return null;
         }
 
-        return new(
-            new Textbox(
-                _renderer,
-                frameId,
-                fontId,
-                pos.ToIVec2(),
-                size.ToIVec2(),
-                text
-            )
-        );
+        return new(new Textbox(
+            _renderer,
+            frameId,
+            fontId,
+            pos.ToIVec2(),
+            size.ToIVec2(),
+            text
+        ));
+    }
+
+    public LuaChoiceBox? get_choice_box (
+        string frame,
+        string font, 
+        LuaVec2 pos,
+        Position anchor,
+        List<string> choices
+    ) {
+        if (Registry.Sprites.TryGetId(frame, out int frameId) == false) {
+            _logger.Error($"Sprite does not exist: '{frame}'.");
+            return null;
+        }
+        if (Registry.Fonts.TryGetId(font, out int fontId) == false) {
+            _logger.Error($"Font does not exist: '{font}'.");
+            return null;
+        }
+
+        return new(new(
+            _renderer,
+            frameId,
+            fontId,
+            pos.ToIVec2(),
+            anchor,
+            choices
+        ));
     }
 
     /// <summary>

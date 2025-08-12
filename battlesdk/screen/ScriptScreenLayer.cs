@@ -22,6 +22,8 @@ public class ScriptScreenLayer : IScreenLayer, IInputListener {
     private DynValue? _drawFunc;
     private DynValue? _handleInputFunc;
 
+    private bool _isClosed = true;
+
     public ScriptScreenLayer (Renderer renderer, ScriptAsset script) {
         _renderer = renderer;
         Name = $"Script Layer: {script.Name}";
@@ -34,6 +36,7 @@ public class ScriptScreenLayer : IScreenLayer, IInputListener {
     }
 
     public void Open () {
+        _isClosed = false;
         Screen.Push(this);
         InputManager.Push(this);
         if (_openFunc is not null) _lua.RunAsync(_openFunc);
@@ -52,6 +55,9 @@ public class ScriptScreenLayer : IScreenLayer, IInputListener {
     }
 
     public void Close () {
+        if (_isClosed) return;
+
+        _isClosed = true;
         Screen.Pop();
         InputManager.Pop();
     }

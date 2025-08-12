@@ -18,4 +18,12 @@ public static class Exceptions {
             $"contains {col.Count} elements."
         );
     }
+    public static RegistryException InvalidRegistryName<T> (
+        Collection<T> col, string name
+    ) where T : IIdentifiable {
+        return new RegistryException(
+            $"No item with name '{name}' exists in this collection. Available" +
+            $"names are:\n{string.Join('\n', col.EnumerateKeys().Select(k => $" - '{k}'"))}"
+        );
+    }
 }

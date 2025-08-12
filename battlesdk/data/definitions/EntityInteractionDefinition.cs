@@ -1,4 +1,4 @@
-﻿using battlesdk.world.entities;
+﻿using battlesdk.world.entities.interaction;
 
 namespace battlesdk.data.definitions;
 

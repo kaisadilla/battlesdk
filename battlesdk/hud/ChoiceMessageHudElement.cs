@@ -1,14 +1,23 @@
 ﻿using battlesdk.graphics;
+using battlesdk.graphics.elements;
+using battlesdk.input;
 
 namespace battlesdk.hud;
-public class ChoiceMessageHudElement : IHudElement {
+public class ChoiceMessageHudElement : IHudElement, IInputListener {
     private bool _hasControl = false;
 
     private MessageHudElement _message;
-    private ChoiceHudElement? _choice = null;
+    private ChoiceBox _choice;
+
+    private bool _canBeCancelled;
+    private int _defaultChoice;
 
     public bool IsClosed { get; private set; } = false;
-    public int Choice => _choice?.Choice ?? -1;
+    public int Choice { get; private set; } = -1;
+
+    public string Name => "Choice message hud element";
+
+    public bool BlockOtherInput => true;
 
     public event EventHandler<EventArgs>? OnClose;
 
@@ -23,48 +32,79 @@ public class ChoiceMessageHudElement : IHudElement {
     ) {
         OnClose += (s, evt) => IsClosed = true;
 
+        _canBeCancelled = canBeCancelled;
+        _defaultChoice = defaultChoice;
+
         _message = new(renderer, textboxId, fontId, text);
-
-        _message.Textbox.OnMessageShown += (s, evt) => {
-            _choice = new(
-                renderer,
-                PlayerSettings.BoxFrame,
-                fontId,
-                new(renderer.Width - 3, renderer.Height - 50),
-                Position.BottomRight,
-                choices,
-                canBeCancelled,
-                defaultChoice
-            );
-            if (_hasControl) _choice.CedeControl();
-
-            _choice.OnClose += (s, evt) => Close();
-        };
+        _choice = new(
+            renderer,
+            PlayerSettings.BoxFrame,
+            fontId,
+            new(renderer.Width - 3, renderer.Height - 50),
+            Position.BottomRight,
+            choices
+        );
     }
 
     public void CedeControl () {
         _hasControl = true;
-
-        _message.CedeControl();
+        InputManager.Push(this);
     }
 
     public void Draw () {
         _message.Draw();
 
-        _choice?.Draw();
+        if (_message.Textbox.IsMessageShown) {
+            _choice.Draw();
+        }
     }
 
     public void Update () {
         _message.Update();
-
-        _choice?.Update();
     }
 
     public void Close () {
         if (IsClosed) return;
+
         _message.Close();
-        _choice?.Close();
+
+        if (_hasControl) {
+            InputManager.Pop();
+        }
 
         OnClose?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void HandleInput () {
+        // While the message is printing its text, forward input to it.
+        if (_message.Textbox.IsMessageShown == false) {
+            _message.HandleInput();
+            return;
+        }
+
+        if (Controls.GetKeyDown(ActionKey.Up)) {
+            Audio.PlayBeepShort();
+            _choice.MoveUp();
+        }
+        else if (Controls.GetKeyDown(ActionKey.Down)) {
+            Audio.PlayBeepShort();
+            _choice.MoveDown();
+        }
+        else if (Controls.GetKeyDown(ActionKey.Primary)) {
+            Audio.PlayBeepShort();
+            Choice = _choice.CurrentChoice;
+            Close();
+        }
+        else if (Controls.GetKeyDown(ActionKey.Secondary)) {
+            if (_canBeCancelled) {
+                Audio.PlayBeepShort();
+                Choice = _defaultChoice;
+                Close();
+            }
+        }
+    }
+
+    public void OnInputBlocked () {
+
     }
 }

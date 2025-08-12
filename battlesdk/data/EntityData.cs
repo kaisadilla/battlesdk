@@ -1,5 +1,5 @@
 ﻿using battlesdk.data.definitions;
-using battlesdk.world.entities;
+using battlesdk.world.entities.interaction;
 
 namespace battlesdk.data;
 
