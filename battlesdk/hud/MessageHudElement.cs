@@ -1,15 +1,18 @@
 ﻿using battlesdk.graphics;
+using battlesdk.graphics.elements;
+using battlesdk.input;
 
 namespace battlesdk.hud;
-public class MessageHudElement : IHudElement {
+public class MessageHudElement : IHudElement, IInputListener {
     /// <summary>
     /// The textbox controlled by this message.
     /// </summary>
-    public AnimatedTextboxHudElement Textbox { get; }
+    public AnimatableTextbox Textbox { get; }
 
     public bool IsClosed { get; private set; } = false;
 
-    public bool IsCloseRequested = false;
+    public string Name => "Textbox Hud Element";
+    public bool BlockOtherInput => true;
 
     /// <summary>
     /// Triggers when the textbox is requesting to be closed. This usually
@@ -19,24 +22,24 @@ public class MessageHudElement : IHudElement {
     public event EventHandler<EventArgs>? OnClose;
 
     public MessageHudElement (
-        Renderer renderer, int frameId, int fontId, bool closeable, string text
+        Renderer renderer, int frameId, int fontId, string text
     ) {
+        OnClose += (s, evt) => IsClosed = true;
+
         Textbox = new(
             renderer,
             frameId,
             fontId,
             new(3, Settings.ViewportHeight - 48),
             new(Settings.ViewportWidth - 6, 46),
-            closeable,
             text
         );
 
-        Textbox.OnClose
-            += (s, evt) => OnClose?.Invoke(this, EventArgs.Empty);
+        InputManager.Push(this);
     }
 
     public void CedeControl () {
-        Textbox.CedeControl();
+        // TODO: Remove
     }
 
     public void Update () {
@@ -48,6 +51,26 @@ public class MessageHudElement : IHudElement {
     }
 
     public void Close () {
-        Textbox.Close();
+        if (IsClosed) return;
+
+        InputManager.Pop();
+        OnClose?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void HandleInput () {
+        if (Controls.GetKeyDown(ActionKey.Primary) || Controls.GetKeyDown(ActionKey.Secondary)) {
+            if (Textbox.IsMessageShown) {
+                Audio.PlayBeepShort();
+                Close();
+            }
+            else {
+                var advanced = Textbox.Next();
+                if (advanced) Audio.PlayBeepShort();
+            }
+        }
+    }
+
+    public void OnInputBlocked () {
+
     }
 }

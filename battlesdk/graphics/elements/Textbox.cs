@@ -22,7 +22,9 @@ public class Textbox {
     /// The size of the textbox.
     /// </summary>
     private IVec2 _size;
-
+    /// <summary>
+    /// The position of the text in the screen.
+    /// </summary>
     private IVec2 _textPos;
 
     /// <summary>
@@ -31,7 +33,7 @@ public class Textbox {
     private int _visibleLines;
 
     /// <summary>
-    /// The text's renderer.
+    /// The text renderer.
     /// </summary>
     private GraphicsRichText _text;
 

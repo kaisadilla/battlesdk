@@ -23,7 +23,7 @@ public class ChoiceMessageHudElement : IHudElement {
     ) {
         OnClose += (s, evt) => IsClosed = true;
 
-        _message = new(renderer, textboxId, fontId, false, text);
+        _message = new(renderer, textboxId, fontId, text);
 
         _message.Textbox.OnMessageShown += (s, evt) => {
             _choice = new(

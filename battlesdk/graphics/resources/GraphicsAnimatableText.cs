@@ -33,8 +33,6 @@ public class GraphicsAnimatableText : GraphicsRichText {
             // The glyph is fully above the viewport, so it won't be rendered.
             if (glyphPos.Y + g.CharRect.h < Viewport.Top) continue;
 
-
-
             g.Font.DrawCharInViewport(glyphPos, Viewport, g.CharRect, SdlColor(g.Color), true);
         }
     }

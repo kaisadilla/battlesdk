@@ -41,7 +41,6 @@ public static class Hud {
             _renderer,
             PlayerSettings.TextboxFrame,
             PlayerSettings.TextFont,
-            true,
             text
         );
 
