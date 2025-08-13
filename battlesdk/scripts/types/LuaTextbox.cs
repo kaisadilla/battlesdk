@@ -26,6 +26,10 @@ public class LuaTextbox : ILuaType {
         _element.Draw();
     }
 
+    public void set_anchor (int anchor) {
+        _element.SetAnchor((AnchorPoint)anchor);
+    }
+
 
     public override string ToString () {
         return $"[Textbox]";

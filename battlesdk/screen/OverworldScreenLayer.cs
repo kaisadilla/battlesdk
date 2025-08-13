@@ -328,5 +328,9 @@ public class OverworldScreenLayer : IScreenLayer, IInputListener {
         SDL3.SDL_RenderFillRect(_renderer.SdlRenderer, null);
 
         SDL3.SDL_SetRenderDrawBlendMode(_renderer.SdlRenderer, SDL_BlendMode.SDL_BLENDMODE_NONE);
+
+        //SDL3.SDL_SetRenderDrawBlendMode(_renderer.SdlRenderer, SDL_BlendMode.SDL_BLENDMODE_BLEND);
+        //SDL3.SDL_SetRenderDrawColor(_renderer.SdlRenderer, 0, 0, 0, 73);
+        //SDL3.SDL_RenderFillRect(_renderer.SdlRenderer, null);
     }
 }

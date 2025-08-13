@@ -41,7 +41,7 @@ public class ChoiceMessageHudElement : IHudElement, IInputListener {
             PlayerSettings.BoxFrame,
             fontId,
             new(renderer.Width - 3, renderer.Height - 50),
-            Position.BottomRight,
+            AnchorPoint.BottomRight,
             choices
         );
     }

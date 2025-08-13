@@ -37,12 +37,12 @@ public class LuaSprite : ILuaType {
     /// </summary>
     /// <param name="pos">The position at which to draw the sprite.</param>
     /// <param name="anchor">The anchor to use.</param>
-    public void draw (LuaVec2 pos, Position anchor) {
+    public void draw (LuaVec2 pos, AnchorPoint anchor) {
         var ipos = pos.ToIVec2();
-        if (anchor == Position.TopRight || anchor == Position.BottomRight) {
+        if (anchor == AnchorPoint.TopRight || anchor == AnchorPoint.BottomRight) {
             ipos -= new IVec2(width, 0);
         }
-        if (anchor == Position.BottomLeft || anchor == Position.BottomRight) {
+        if (anchor == AnchorPoint.BottomLeft || anchor == AnchorPoint.BottomRight) {
             ipos -= new IVec2(0, height);
         }
 

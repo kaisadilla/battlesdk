@@ -22,6 +22,10 @@ public class LuaChoiceBox : ILuaType {
         _element = choiceBox;
     }
 
+    ~LuaChoiceBox () {
+        _element.Dispose();
+    }
+
     public void draw () {
         _element.Draw();
     }

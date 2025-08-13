@@ -15,6 +15,14 @@ public class LuaPlainTextSprite : LuaSprite {
         _sprite = sprite;
     }
 
+    ~LuaPlainTextSprite () {
+        _sprite.Destroy();
+    }
+
+    public void set_anchor (int anchor) {
+        _sprite.SetAnchor((AnchorPoint)anchor);
+    }
+
     public void set_color (LuaColor color) {
         _sprite.SetColor(color.ToNative());
     }
@@ -26,4 +34,5 @@ public class LuaPlainTextSprite : LuaSprite {
     public override string ToString () {
         return $"<plain text sprite>";
     }
+
 }

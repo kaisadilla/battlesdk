@@ -138,7 +138,7 @@ public class LuaRenderer : ILuaType {
         string frame,
         string font, 
         LuaVec2 pos,
-        Position anchor,
+        int anchor,
         List<string> choices
     ) {
         if (Registry.Sprites.TryGetId(frame, out int frameId) == false) {
@@ -155,7 +155,7 @@ public class LuaRenderer : ILuaType {
             frameId,
             fontId,
             pos.ToIVec2(),
-            anchor,
+            (AnchorPoint)anchor,
             choices
         ));
     }

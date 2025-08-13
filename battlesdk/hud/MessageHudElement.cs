@@ -64,6 +64,7 @@ public class MessageHudElement : IHudElement, IInputListener {
         }
 
         OnClose?.Invoke(this, EventArgs.Empty);
+        Textbox.Destroy();
     }
 
     public void HandleInput () {

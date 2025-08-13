@@ -171,7 +171,7 @@ public enum DirectionMask {
     Left = 0b1000,
 };
 
-public enum Position {
+public enum AnchorPoint {
     TopLeft,
     TopRight,
     BottomLeft,
@@ -275,6 +275,16 @@ public static class TypesExtension {
             Direction.Up => v + new IVec2(0, -1),
             Direction.Left => v + new IVec2(-1, 0),
             _ => v,
+        };
+    }
+
+    public static IVec2 Anchored (this IVec2 vec, IVec2 size, AnchorPoint anchor) {
+        return anchor switch {
+            AnchorPoint.TopLeft => vec,
+            AnchorPoint.TopRight => vec - new IVec2(size.X, 0),
+            AnchorPoint.BottomLeft => vec - new IVec2(0, size.Y),
+            AnchorPoint.BottomRight => vec - new IVec2(size.X, size.Y),
+            _ => vec
         };
     }
 

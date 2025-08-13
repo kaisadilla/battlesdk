@@ -1,7 +1,10 @@
 ﻿using battlesdk.graphics.resources;
+using NLog;
 
 namespace battlesdk.graphics.elements;
-public class ChoiceBox {
+public class ChoiceBox : IDisposable {
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
     /// <summary>
     /// The texture used to draw this panel's frame.
     /// </summary>
@@ -51,7 +54,7 @@ public class ChoiceBox {
         int frameId,
         int fontId,
         IVec2 pos,
-        Position anchor,
+        AnchorPoint anchor,
         List<string> choices
     ) {
         _frame = renderer.GetSprite(frameId);
@@ -78,16 +81,16 @@ public class ChoiceBox {
             );
         }
 
-        if (anchor == types.Position.TopLeft) {
+        if (anchor == types.AnchorPoint.TopLeft) {
             _pos = pos;
         }
-        else if (anchor == types.Position.TopRight) {
+        else if (anchor == types.AnchorPoint.TopRight) {
             _pos = pos - new IVec2(_size.X, 0);
         }
-        else if (anchor == types.Position.BottomLeft) {
+        else if (anchor == types.AnchorPoint.BottomLeft) {
             _pos = pos - new IVec2(0, _size.Y);
         }
-        else if (anchor == types.Position.BottomRight) {
+        else if (anchor == types.AnchorPoint.BottomRight) {
             _pos = pos - new IVec2(_size.X, _size.Y);
         }
     }
@@ -116,5 +119,13 @@ public class ChoiceBox {
     public void MoveDown () {
         _cursor++;
         _cursor %= _choices.Count;
+    }
+
+    public void Dispose () {
+        _logger.Debug($"Destroyed {nameof(ChoiceBox)}.");
+        foreach (var c in _choices) {
+            c.Destroy();
+        }
+        GC.SuppressFinalize(this);
     }
 }

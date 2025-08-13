@@ -153,6 +153,11 @@ public class AnimatableTextbox {
         return true;
     }
 
+    public void Destroy () {
+        _logger.Debug($"Destroyed {nameof(AnimatableTextbox)}.");
+        _arrow?.Destroy();
+    }
+
     /// <summary>
     /// Plays one frame of the animation to move the textbox to the line given.
     /// </summary>

@@ -43,6 +43,10 @@ public class LuaVec2 : ILuaType {
         return new(a.x + b.x, a.y + b.y);
     }
 
+    public static LuaVec2 operator - (LuaVec2 a, LuaVec2 b) {
+        return new(a.x - b.x, a.y - b.y);
+    }
+
     public static LuaVec2 operator * (int mult, LuaVec2 vec) {
         return new(vec.x * mult, vec.y * mult);
     }

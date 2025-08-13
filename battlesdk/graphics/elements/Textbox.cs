@@ -26,6 +26,7 @@ public class Textbox {
     /// The position of the text in the screen.
     /// </summary>
     private IVec2 _textPos;
+    private AnchorPoint _anchor;
 
     /// <summary>
     /// The amount of lines that fit in the textbox.
@@ -75,7 +76,11 @@ public class Textbox {
     }
 
     public unsafe void Draw () {
-        _frame.Draw(_pos, _size);
-        _text.Draw(_textPos);
+        _frame.Draw(_pos.Anchored(_size, _anchor), _size);
+        _text.Draw(_textPos.Anchored(_size, _anchor));
+    }
+
+    public void SetAnchor (AnchorPoint anchor) {
+        _anchor = anchor;
     }
 }
