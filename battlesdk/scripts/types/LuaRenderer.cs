@@ -1,5 +1,6 @@
 ﻿using battlesdk.graphics;
 using battlesdk.graphics.elements;
+using battlesdk.hud;
 using MoonSharp.Interpreter;
 using NLog;
 
@@ -166,6 +167,40 @@ public class LuaRenderer : ILuaType {
         }
 
         return new(new(_renderer, script, new()));
+    }
+
+    /// <summary>
+    /// Gets a message hud element that isn't controlled by the Hud.
+    /// </summary>
+    /// <param name="frame">The name of the frame to use.</param>
+    /// <param name="font">The name of the font to use.</param>
+    /// <param name="text">The text contained in the message box.</param>
+    public LuaMessageHudElement? get_message_hud_element (
+        string frame, string font, string text
+    ) {
+        if (Registry.Sprites.TryGetId(frame, out int frameId) == false) {
+            _logger.Error($"Sprite does not exist: '{frame}'.");
+            return null;
+        }
+        if (Registry.Fonts.TryGetId(font, out int fontId) == false) {
+            _logger.Error($"Font does not exist: '{font}'.");
+            return null;
+        }
+
+        return new(new(_renderer, frameId, fontId, text));
+    }
+
+    public LuaScriptHudElement? get_script_hud_element (
+        string script_name, LuaObject? args = null
+    ) {
+        if (Registry.Scripts.TryGetElementByName(script_name, out var script) == false) {
+            throw new ScriptRuntimeException("Invalid script name.");
+        }
+
+        var el = new ScriptHudElement(_renderer, script);
+        el.Open(args ?? new());
+
+        return new(el);
     }
 
     /// <summary>

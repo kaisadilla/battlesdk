@@ -117,7 +117,6 @@ public class AnimatableTextbox {
         _animState = AnimationState.TypingCharacters;
     }
 
-    // TODO: Replace with coroutines.
     public void Update () {
         if (_animState == AnimationState.MovingLine) {
             AnimMoveLine((int)_currentFirstLine + 1);
@@ -155,7 +154,6 @@ public class AnimatableTextbox {
 
     public void Destroy () {
         _logger.Debug($"Destroyed {nameof(AnimatableTextbox)}.");
-        _arrow?.Destroy();
     }
 
     /// <summary>

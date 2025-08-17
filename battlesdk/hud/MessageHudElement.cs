@@ -38,12 +38,16 @@ public class MessageHudElement : IHudElement, IInputListener {
         );
     }
 
-    public void CedeControl () {
+    public void TakeControl () {
+        if (_hasControl) return;
+
         InputManager.Push(this);
         _hasControl = true;
     }
 
-    public void SeizeControl () {
+    public void ReleaseControl () {
+        if (_hasControl == false) return;
+
         _hasControl = false;
         InputManager.Pop();
     }
@@ -59,9 +63,7 @@ public class MessageHudElement : IHudElement, IInputListener {
     public void Close () {
         if (IsClosed) return;
 
-        if (_hasControl) {
-            SeizeControl();
-        }
+        ReleaseControl();
 
         OnClose?.Invoke(this, EventArgs.Empty);
         Textbox.Destroy();

@@ -27,8 +27,8 @@ public class ScriptGraphicElement {
         _lua.Run();
 
         _openFn = _lua.GetFunction("target", "open");
-        _drawFn = _lua.GetFunction("draw", "open");
-        _updateFn = _lua.GetFunction("update", "open");
+        _drawFn = _lua.GetFunction("target", "draw");
+        _updateFn = _lua.GetFunction("target", "update");
 
         foreach (var name in _lua.GetDefinedFunctions("target")) {
             _funcs[name] = _lua.GetFunction("target", name);

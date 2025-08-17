@@ -30,7 +30,7 @@ public class ScriptHudElement : IHudElement, IInputListener {
     public DynValue Result { get; private set; } = DynValue.Nil;
 
     public ScriptHudElement (
-        Renderer renderer, ScriptAsset script, LuaObject args
+        Renderer renderer, ScriptAsset script
     ) {
         OnClose += (s, evt) => IsClosed = true;
 
@@ -45,8 +45,9 @@ public class ScriptHudElement : IHudElement, IInputListener {
         _updateFn = _lua.GetFunction("target", "update");
         _drawFn = _lua.GetFunction("target", "draw");
         _handleInputFn = _lua.GetFunction("target", "handle_input");
+    }
 
-        CedeControl();
+    public void Open (LuaObject args) {
         if (_openFn?.Type == DataType.Function) {
             _lua.RunAsync(_openFn, args);
         }
@@ -74,7 +75,7 @@ public class ScriptHudElement : IHudElement, IInputListener {
         Result = result;
     }
 
-    public void CedeControl () {
+    public void TakeControl () {
         _hasControl = true;
         InputManager.Push(this);
     }

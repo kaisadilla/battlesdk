@@ -10,6 +10,8 @@ public class LuaScriptHudElement : LuaHudElement {
 
     private ScriptHudElement _element;
 
+    public DynValue Result { get => _element.Result; }
+
     [MoonSharpHidden]
     public LuaScriptHudElement (ScriptHudElement element) : base(element) {
         _element = element;

@@ -45,6 +45,7 @@ public static class Lua {
         UserData.RegisterType<LuaChoiceBox>(InteropAccessMode.Preoptimized, LuaChoiceBox.CLASSNAME);
         UserData.RegisterType<LuaScriptGraphicElement>(InteropAccessMode.Preoptimized, LuaScriptGraphicElement.CLASSNAME);
         UserData.RegisterType<LuaHudElement>(InteropAccessMode.Preoptimized, LuaHudElement.CLASSNAME);
+        UserData.RegisterType<LuaMessageHudElement>(InteropAccessMode.Preoptimized, LuaMessageHudElement.CLASSNAME);
         UserData.RegisterType<LuaScriptHudElement>(InteropAccessMode.Preoptimized, LuaScriptHudElement.CLASSNAME);
         UserData.RegisterType<LuaEntity>(InteropAccessMode.Preoptimized, LuaEntity.CLASSNAME);
         UserData.RegisterType<LuaInventory>(InteropAccessMode.Preoptimized, LuaInventory.CLASSNAME);

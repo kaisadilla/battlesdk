@@ -21,6 +21,14 @@ public class LuaHudElement : ILuaType {
         _element.Draw();
     }
 
+    public void update () {
+        _element.Update();
+    }
+
+    public void handle_input () {
+        _element.HandleInput();
+    }
+
     public void close () {
         _element.Close();
     }

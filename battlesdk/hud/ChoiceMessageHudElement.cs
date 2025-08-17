@@ -46,7 +46,7 @@ public class ChoiceMessageHudElement : IHudElement, IInputListener {
         );
     }
 
-    public void CedeControl () {
+    public void TakeControl () {
         _hasControl = true;
         InputManager.Push(this);
     }

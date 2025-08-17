@@ -47,7 +47,7 @@ public static class Hud {
 
         _elements[id] = msg;
         msg.OnClose += (s, evt) => _elements.Remove(id);
-        msg.CedeControl();
+        msg.TakeControl();
 
         return msg;
     }
@@ -71,17 +71,19 @@ public static class Hud {
 
         _elements[id] = choice;
         choice.OnClose += (s, evt) => _elements.Remove(id);
-        choice.CedeControl();
+        choice.TakeControl();
 
         return choice;
     }
 
     public static ScriptHudElement ShowScriptElement (int scriptId, LuaObject args) {
         var id = _elementsIdProvider.NextId();
-        var el = new ScriptHudElement(_renderer, Registry.Scripts[scriptId], args);
+        var el = new ScriptHudElement(_renderer, Registry.Scripts[scriptId]);
 
         _elements[id] = el;
         el.OnClose += (s, evt) => _elements.Remove(id);
+        el.TakeControl();
+        el.Open(args);
 
         return el;
     }
