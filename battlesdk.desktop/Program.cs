@@ -1,5 +1,5 @@
 ﻿global using battlesdk.types;
-global using static battlesdk.types.TypesExtension;
+global using static battlesdk.types.TypesExt;
 
 using battlesdk;
 using NLog;

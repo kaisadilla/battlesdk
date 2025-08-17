@@ -67,13 +67,34 @@ public class LuaHud : ILuaType {
         return DynValue.NewYieldReq([]);
     }
 
-    public static LuaHudElement script_element (string scriptName) {
+    /// <summary>
+    /// Displays a hud element defined by the script given.
+    /// </summary>
+    [LuaApiCoroutine]
+    [LuaApiFunctionParam(
+        0, "script_name", typeof(string),
+        "The name of the script in the registry for the hud element."
+    )]
+    [LuaApiFunctionParam(
+        1, "args", typeof(LuaObject),
+        "The arguments that will be passed to the script's 'open' function."
+    )]
+    public static DynValue script_element (ScriptExecutionContext ctx, CallbackArguments args) {
+        var luaCor = ctx.GetCallingCoroutine();
+        string scriptName = args[0].String;
+        LuaObject scriptArgs = args[1].ToObject<LuaObject>();
+
         if (Registry.Scripts.TryGetId(scriptName, out int scriptId) == false) {
             throw new ScriptRuntimeException("Invalid script name.");
         }
 
-        var el = Hud.ShowScriptElement(scriptId, false);
-        return new(el);
+        var el = Hud.ShowScriptElement(scriptId, scriptArgs);
+
+        el.OnClose += (s, evt) => {
+            luaCor.Resume(el.Result);
+        };
+
+        return DynValue.NewYieldReq([]);
     }
 
     /// <summary>

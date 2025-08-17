@@ -1,4 +1,4 @@
-﻿global using static battlesdk.types.TypesExtension;
+﻿global using static battlesdk.types.TypesExt;
 using docgen;
 using System.CommandLine;
 

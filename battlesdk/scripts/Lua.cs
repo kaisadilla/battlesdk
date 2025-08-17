@@ -1,4 +1,5 @@
 ﻿global using LuaCoroutine = MoonSharp.Interpreter.Coroutine;
+using battlesdk.graphics.elements;
 using battlesdk.hud;
 using battlesdk.screen;
 using battlesdk.scripts.types;
@@ -18,17 +19,22 @@ public static class Lua {
         RegisterEnumTable<Direction>("Direction");
         RegisterEnumTable<AnchorPoint>("AnchorPoint");
 
-        UserData.RegisterType<LuaVec2>(InteropAccessMode.Preoptimized, LuaVec2.CLASSNAME);
-        UserData.RegisterType<LuaRect>(InteropAccessMode.Preoptimized, LuaRect.CLASSNAME);
-        UserData.RegisterType<LuaColor>(InteropAccessMode.Preoptimized, LuaColor.CLASSNAME);
-        UserData.RegisterType<LuaInventoryItem>(InteropAccessMode.Preoptimized, LuaInventoryItem.CLASSNAME);
         UserData.RegisterType<LuaLogger>(InteropAccessMode.Preoptimized, LuaLogger.CLASSNAME);
         UserData.RegisterType<LuaFmt>(InteropAccessMode.Preoptimized, LuaFmt.CLASSNAME);
         UserData.RegisterType<LuaControls>(InteropAccessMode.Preoptimized, LuaControls.CLASSNAME);
         UserData.RegisterType<LuaAudio>(InteropAccessMode.Preoptimized, LuaAudio.CLASSNAME);
         UserData.RegisterType<LuaHud>(InteropAccessMode.Preoptimized, LuaHud.CLASSNAME);
         UserData.RegisterType<LuaScreen>(InteropAccessMode.Preoptimized, LuaScreen.CLASSNAME);
+        UserData.RegisterType<LuaData>(InteropAccessMode.Preoptimized, LuaData.CLASSNAME);
         UserData.RegisterType<LuaG>(InteropAccessMode.Preoptimized, LuaG.CLASSNAME);
+
+        UserData.RegisterType<LuaVec2>(InteropAccessMode.Preoptimized, LuaVec2.CLASSNAME);
+        UserData.RegisterType<LuaRect>(InteropAccessMode.Preoptimized, LuaRect.CLASSNAME);
+        UserData.RegisterType<LuaColor>(InteropAccessMode.Preoptimized, LuaColor.CLASSNAME);
+        UserData.RegisterType<LuaObject>(new LuaObject.Descriptor());
+        UserData.RegisterType<LuaList>(InteropAccessMode.Preoptimized, LuaList.CLASSNAME);
+        UserData.RegisterType<LuaInventoryItem>(InteropAccessMode.Preoptimized, LuaInventoryItem.CLASSNAME);
+        UserData.RegisterType<LuaItem>(InteropAccessMode.Preoptimized, LuaItem.CLASSNAME);
 
         UserData.RegisterType<LuaRenderer>(InteropAccessMode.Preoptimized, LuaRenderer.CLASSNAME);
         UserData.RegisterType<LuaSprite>(InteropAccessMode.Preoptimized, LuaFrameSprite.CLASSNAME);
@@ -37,7 +43,9 @@ public static class Lua {
         UserData.RegisterType<LuaFont>(InteropAccessMode.Preoptimized, LuaFont.CLASSNAME);
         UserData.RegisterType<LuaTextbox>(InteropAccessMode.Preoptimized, LuaTextbox.CLASSNAME);
         UserData.RegisterType<LuaChoiceBox>(InteropAccessMode.Preoptimized, LuaChoiceBox.CLASSNAME);
+        UserData.RegisterType<LuaScriptGraphicElement>(InteropAccessMode.Preoptimized, LuaScriptGraphicElement.CLASSNAME);
         UserData.RegisterType<LuaHudElement>(InteropAccessMode.Preoptimized, LuaHudElement.CLASSNAME);
+        UserData.RegisterType<LuaScriptHudElement>(InteropAccessMode.Preoptimized, LuaScriptHudElement.CLASSNAME);
         UserData.RegisterType<LuaEntity>(InteropAccessMode.Preoptimized, LuaEntity.CLASSNAME);
         UserData.RegisterType<LuaInventory>(InteropAccessMode.Preoptimized, LuaInventory.CLASSNAME);
     }
@@ -57,18 +65,22 @@ public static class Lua {
             script.Globals[e.TableName] = tbl;
         }
 
-        script.Globals[LuaVec2.CLASSNAME] = UserData.CreateStatic(typeof(LuaVec2));
-        script.Globals[LuaRect.CLASSNAME] = UserData.CreateStatic(typeof(LuaRect));
-        script.Globals[LuaColor.CLASSNAME] = UserData.CreateStatic(typeof(LuaColor));
-        script.Globals[LuaInventoryItem.CLASSNAME] = UserData.CreateStatic(typeof(LuaInventoryItem));
-        script.Globals[LuaLogger.CLASSNAME] = UserData.CreateStatic(typeof(LuaLogger));
+        script.Globals[LuaVec2.CLASSNAME] = UserData.CreateStatic<LuaVec2>();
+        script.Globals[LuaRect.CLASSNAME] = UserData.CreateStatic<LuaRect>();
+        script.Globals[LuaColor.CLASSNAME] = UserData.CreateStatic<LuaColor>();
+        script.Globals[LuaObject.CLASSNAME] = UserData.CreateStatic<LuaObject>();
+        script.Globals[LuaList.CLASSNAME] = UserData.CreateStatic<LuaList>();
+        script.Globals[LuaInventoryItem.CLASSNAME] = UserData.CreateStatic<LuaInventoryItem>();
+        script.Globals[LuaLogger.CLASSNAME] = UserData.CreateStatic<LuaLogger>();
         script.Globals[LuaFmt.CLASSNAME] = UserData.CreateStatic<LuaFmt>();
-        script.Globals[LuaControls.CLASSNAME] = UserData.CreateStatic(typeof(LuaControls));
-        script.Globals[LuaAudio.CLASSNAME] = UserData.CreateStatic(typeof(LuaAudio));
-        script.Globals[LuaHud.CLASSNAME] = UserData.CreateStatic(typeof(LuaHud));
-        script.Globals[LuaScreen.CLASSNAME] = UserData.CreateStatic(typeof(LuaScreen));
-        script.Globals[LuaG.CLASSNAME] = UserData.CreateStatic(typeof(LuaG));
-        script.Globals[LuaEntity.CLASSNAME] = UserData.CreateStatic(typeof(LuaEntity));
+        script.Globals[LuaControls.CLASSNAME] = UserData.CreateStatic<LuaControls>();
+        script.Globals[LuaAudio.CLASSNAME] = UserData.CreateStatic<LuaAudio>();
+        script.Globals[LuaHud.CLASSNAME] = UserData.CreateStatic<LuaHud>();
+        script.Globals[LuaScreen.CLASSNAME] = UserData.CreateStatic<LuaScreen>();
+        script.Globals[LuaData.CLASSNAME] = UserData.CreateStatic<LuaData>();
+        script.Globals[LuaG.CLASSNAME] = UserData.CreateStatic<LuaG>();
+        script.Globals[LuaEntity.CLASSNAME] = UserData.CreateStatic<LuaEntity>();
+        script.Globals[LuaScriptGraphicElement.CLASSNAME] = UserData.CreateStatic<LuaScriptGraphicElement>();
 
         script.Globals["loc"] = (Func<string, string>)((txt) => Localization.Text(txt));
 
@@ -80,6 +92,12 @@ public static class Lua {
                 "res/scripts/?/?.lua",
             ],
         };
+
+        foreach (var s in Registry.Scripts) {
+            if (s.Name.StartsWith("global/") == false) continue;
+
+            script.DoString(s.GetSource());
+        }
     }
 
     public static void RegisterEntityInteraction (Script script, Entity target) {
@@ -106,6 +124,7 @@ public static class Lua {
     public static void RegisterHudElementHandler (Script script, ScriptHudElement element) {
         Table tbl = new(script);
         tbl["close"] = (Action)element.Close;
+        tbl["set_result"] = (Action<DynValue>)element.SetResult;
 
         script.Globals["target"] = tbl;
 
@@ -114,6 +133,18 @@ public static class Lua {
             function target:update() end
             function target:draw() end
             function target:handle_input() end"
+        );
+    }
+
+    public static void RegisterGraphicElementHandler (Script script, ScriptGraphicElement element) {
+        Table tbl = new(script);
+
+        script.Globals["target"] = tbl;
+
+        script.DoString(
+            @"function target:open() end
+            function target:update() end
+            function target:draw() end"
         );
     }
 

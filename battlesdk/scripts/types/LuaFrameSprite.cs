@@ -9,6 +9,7 @@ public class LuaFrameSprite : ILuaType {
     public const string CLASSNAME = "FrameSprite";
 
     private GraphicsFrameSprite _frame;
+    private AnchorPoint _anchor = AnchorPoint.TopLeft;
 
     public LuaRect padding => new(_frame.Asset.Padding);
 
@@ -18,7 +19,14 @@ public class LuaFrameSprite : ILuaType {
     }
 
     public void draw (LuaVec2 pos, LuaVec2 size) {
-        _frame.Draw(pos.ToIVec2(), size.ToIVec2());
+        _frame.Draw(
+            pos.ToIVec2().Anchored(size.ToIVec2(), _anchor),
+            size.ToIVec2()
+        );
+    }
+
+    public void set_anchor (int anchor) {
+        _anchor = (AnchorPoint)anchor;
     }
 
     public override string ToString () {

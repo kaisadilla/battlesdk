@@ -1,6 +1,8 @@
 ﻿using battlesdk.data;
+using battlesdk.graphics.elements;
 using battlesdk.hud;
 using battlesdk.screen;
+using battlesdk.scripts.types;
 using battlesdk.world.entities;
 using MoonSharp.Interpreter;
 using NLog;
@@ -78,6 +80,20 @@ public class LuaScriptHost {
         return host;
     }
 
+    public static LuaScriptHost GraphicElementScript (
+        ScriptAsset asset, ScriptGraphicElement graphicElement
+    ) {
+        var host = new LuaScriptHost();
+
+        var src = asset.GetSource();
+
+        Lua.RegisterGlobals(host._lua);
+        Lua.RegisterGraphicElementHandler(host._lua, graphicElement);
+
+        host._scriptFunc = host._lua.LoadString(src);
+        return host;
+    }
+
     public static LuaScriptHost TransitionScript (
         ScriptAsset asset, ScriptTransition transition
     ) {
@@ -110,11 +126,11 @@ public class LuaScriptHost {
     /// been completed. Returns an id that uniquely identifies this execution.
     /// </summary>
     /// <param name="func">The function to execute.</param>
-    public int RunAsync (DynValue func) {
+    public int RunAsync (DynValue func, LuaObject? args = null) {
         var id = _idProvider.NextId();
         var luaCor = _lua.CreateCoroutine(func);
 
-        Coroutine.Start(CompleteLuaCoroutine(luaCor.Coroutine, id));
+        Coroutine.Start(CompleteLuaCoroutine(luaCor.Coroutine, id, args));
 
         return id;
     }
@@ -135,16 +151,60 @@ public class LuaScriptHost {
     /// ends before this function returns; but the script will crash if it uses
     /// any asynchronous API functions (those that implement Lua coroutines).
     /// </summary>
-    public void Run (DynValue func, params DynValue[] args) {
-        _lua.Call(func, args);
+    public void Run (DynValue func, DynValue? args = null) {
+        if (args is not null) {
+            _lua.Call(func, args);
+        }
+        else {
+            _lua.Call(func);
+        }
+    }
+
+    public DynValue Run (DynValue func, LuaObject? args) {
+        if (args is not null) {
+            return _lua.Call(func, args);
+        }
+        else {
+            return _lua.Call(func);
+        }
     }
 
     public DynValue GetFunction (string table, string name) {
         return _lua.Globals.Get(table).Table.Get(name);
     }
 
-    private CoroutineTask CompleteLuaCoroutine (LuaCoroutine luaCor, int id) {
-        luaCor.Resume();
+    /// <summary>
+    /// Returns a list containing the names of all functions that currently
+    /// exist in the table with the name given.
+    /// </summary>
+    /// <param name="table">The name of a table in the global space.</param>
+    /// <returns></returns>
+    public List<string> GetDefinedFunctions (string table) {
+        List<string> names = [];
+
+        var tbl = _lua.Globals.Get(table);
+
+        if (tbl.Type != DataType.Table) return names;
+
+        foreach (var pair in tbl.Table.Pairs) {
+            if (pair.Key.Type != DataType.String) continue;
+            if (pair.Value.Type != DataType.Function) continue;
+
+            names.Add(pair.Key.String);
+        }
+
+        return names;
+    }
+
+    private CoroutineTask CompleteLuaCoroutine (
+        LuaCoroutine luaCor, int id, LuaObject? args
+    ) {
+        if (args is not null) {
+            luaCor.Resume(args);
+        }
+        else {
+            luaCor.Resume();
+        }
 
         while (luaCor.State != CoroutineState.Dead) {
             yield return null;

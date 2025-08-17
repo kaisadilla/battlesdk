@@ -37,7 +37,7 @@ public class LuaLogger {
             DataType.Void => "<void>",
             DataType.Boolean => val.Boolean.ToString(),
             DataType.Number => val.Number.ToString(),
-            DataType.String => val.String,
+            DataType.String => "\"" + val.String + "\"",
             DataType.Function => "<function>",
             DataType.Table => TableToStr(val.Table),
             DataType.Tuple => TupleToStr(val.Tuple),

@@ -25,46 +25,53 @@
     <PackageReference Include="Tomlyn" Version="0.19.0" />
   </ItemGroup>
 
-<ItemGroup>
+  <ItemGroup>
     <!-- copy entire res folder to output dir -->
     <Content Include="res\**">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-</ItemGroup>
+  </ItemGroup>
 
-<Target Name="CleanOutputResFolder" AfterTargets="Build">
+  <Target Name="CleanOutputResFolder" AfterTargets="Build">
     <PropertyGroup>
-        <SourceResDir>$(ProjectDir)res\</SourceResDir>
-        <OutputResDir>$(OutputPath)res\</OutputResDir>
+      <SourceResDir>$(ProjectDir)res\</SourceResDir>
+      <OutputResDir>$(OutputPath)res\</OutputResDir>
     </PropertyGroup>
 
     <ItemGroup>
-        <!-- Files in output but not in source -->
-        <ExtraOutputFiles Remove="@(Content->'%(RecursiveDir)%(Filename)%(Extension)')" />
-        <ExtraOutputFiles Include="$(OutputResDir)**\*.*" Condition="!Exists('$(SourceResDir)%(RecursiveDir)%(Filename)%(Extension)')" />
+      <!-- Files in output but not in source -->
+      <ExtraOutputFiles Remove="@(Content->'%(RecursiveDir)%(Filename)%(Extension)')" />
+      <ExtraOutputFiles Include="$(OutputResDir)**\*.*" Condition="!Exists('$(SourceResDir)%(RecursiveDir)%(Filename)%(Extension)')" />
     </ItemGroup>
 
     <Delete Files="@(ExtraOutputFiles)" />
-</Target>
+  </Target>
 
-<ItemGroup>
-  <Compile Remove="audio\**" />
-  <EmbeddedResource Remove="audio\**" />
-  <None Remove="audio\**" />
-</ItemGroup>
+  <ItemGroup>
+    <Compile Remove="audio\**" />
+    <EmbeddedResource Remove="audio\**" />
+    <None Remove="audio\**" />
+  </ItemGroup>
 
-<ItemGroup>
-  <Folder Include="map\" />
-  <Folder Include="res\worlds\" />
-</ItemGroup>
+  <ItemGroup>
+    <Folder Include="map\" />
+    <Folder Include="res\worlds\" />
+  </ItemGroup>
 
-<ItemGroup>
-  <None Update="nlog.config">
-    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-  </None>
-  <None Update="SDL3.dll">
-    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-  </None>
-</ItemGroup>
+  <ItemGroup>
+    <None Update="nlog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SDL3.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="battlesdk.types" />
+    <Using Include="battlesdk.types.TypesExt">
+      <Static>True</Static>
+    </Using>
+  </ItemGroup>
 
 </Project>

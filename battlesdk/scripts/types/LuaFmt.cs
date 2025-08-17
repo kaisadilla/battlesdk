@@ -7,6 +7,10 @@ public class LuaFmt {
     [MoonSharpHidden]
     public const string CLASSNAME = "Fmt";
 
+    public static string pad_left (DynValue val, char padding, int total_width) {
+        return val.ToString().PadLeft(total_width, padding);
+    }
+
     /// <summary>
     /// Formats time as HH:mm.
     /// </summary>

@@ -39,6 +39,13 @@ public class LuaScreen : ILuaType {
     }
 
     /// <summary>
+    /// Opens the shop screen, if it exists.
+    /// </summary>
+    public static void open_shop () {
+        Screen.Shop?.Open();
+    }
+
+    /// <summary>
     /// Plays a transition on screen as described.
     /// </summary>
     /// <param name="script_name">The name of the transition's script.</param>

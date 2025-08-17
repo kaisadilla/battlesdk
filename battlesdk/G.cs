@@ -31,12 +31,13 @@ public static class G {
     public static void LoadGame () {
         Inventory = Inventory.Load();
 
+        // TODO: Remove
         Inventory.AddAmount("poke_ball", 22);
         Inventory.AddAmount("great_ball", 15);
         Inventory.AddAmount("ultra_ball", 7);
         Inventory.AddAmount("master_ball", 1);
         Inventory.AddAmount("net_ball", 11);
-        Inventory.AddAmount("dive_ball", 8);
+        //Inventory.AddAmount("dive_ball", 8);
         Inventory.AddAmount("nest_ball", 6);
         Inventory.AddAmount("repeat_ball", 23);
         Inventory.AddAmount("timer_ball", 999);

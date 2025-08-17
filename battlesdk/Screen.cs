@@ -28,6 +28,7 @@ public static class Screen {
     public static ScriptScreenLayer MainMenu { get; private set; } = null!;
     public static ScriptScreenLayer Bag { get; private set; } = null!;
     public static ScriptScreenLayer SaveGame { get; private set; } = null!;
+    public static ScriptScreenLayer? Shop { get; private set; } = null!;
 
     /// <summary>
     /// The renderer that works on the game's main window.
@@ -53,6 +54,10 @@ public static class Screen {
             MainMenu = new ScriptScreenLayer(MainRenderer, mainMenuScr);
             Bag = new ScriptScreenLayer(MainRenderer, bagScr);
             SaveGame = new ScriptScreenLayer(MainRenderer, saveGameScr);
+
+            if (Registry.Scripts.TryGetElementByName("screens/shop", out var shopScr)) {
+                Shop = new ScriptScreenLayer(MainRenderer, shopScr);
+            }
         }
         catch (Exception ex) {
             throw new InitializationException("Failed to load screen layer.", ex);

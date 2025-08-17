@@ -160,6 +160,14 @@ public class LuaRenderer : ILuaType {
         ));
     }
 
+    public LuaScriptGraphicElement? get_script_element (string script_name) {
+        if (Registry.Scripts.TryGetElementByName(script_name, out var script) == false) {
+            throw new ScriptRuntimeException("Invalid script name.");
+        }
+
+        return new(new(_renderer, script, new()));
+    }
+
     /// <summary>
     /// Paints the entire screen on the color given.
     /// </summary>

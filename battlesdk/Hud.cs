@@ -1,5 +1,6 @@
 ﻿using battlesdk.graphics;
 using battlesdk.hud;
+using battlesdk.scripts.types;
 using NLog;
 
 namespace battlesdk;
@@ -75,17 +76,9 @@ public static class Hud {
         return choice;
     }
 
-    public static ScriptHudElement ShowScriptElement (int scriptId, bool cedeControl) {
+    public static ScriptHudElement ShowScriptElement (int scriptId, LuaObject args) {
         var id = _elementsIdProvider.NextId();
-        var el = new ScriptHudElement(
-            _renderer,
-            Registry.Scripts[scriptId],
-            []
-        );
-
-        if (cedeControl) {
-            el.CedeControl();
-        }
+        var el = new ScriptHudElement(_renderer, Registry.Scripts[scriptId], args);
 
         _elements[id] = el;
         el.OnClose += (s, evt) => _elements.Remove(id);

@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace battlesdk.json;
 public static class Json {
-    private static JsonSerializerOptions _options = new() {
+    private static readonly JsonSerializerOptions _options = new() {
         PropertyNameCaseInsensitive = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         Converters = {

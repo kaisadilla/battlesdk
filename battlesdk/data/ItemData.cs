@@ -7,6 +7,7 @@ public class ItemData {
 
     public string Id { get; }
     public ItemCategoryData Category { get; }
+    public float Price { get; }
 
     public ItemData (string id, ItemDefinition def) {
         Id = id;
@@ -21,5 +22,11 @@ public class ItemData {
         else {
             Category = cat;
         }
+
+        Price = def.Price;
+    }
+
+    public override string ToString () {
+        return $"[Item '{Id}' - Cat: {Category.Id}, Price: {Price}]";
     }
 }

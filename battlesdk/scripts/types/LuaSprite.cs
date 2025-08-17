@@ -9,6 +9,7 @@ public class LuaSprite : ILuaType {
     public const string CLASSNAME = "Sprite";
 
     private IGraphicsSprite _sprite;
+    private AnchorPoint _anchor = AnchorPoint.TopLeft;
 
     /// <summary>
     /// This sprite's width.
@@ -55,7 +56,11 @@ public class LuaSprite : ILuaType {
     /// <param name="pos">The position at which to draw the sprite.</param>
     /// <param name="size">The size in the screen of the drawn sprite.</param>
     public void draw (LuaVec2 pos, LuaVec2 size) {
-        _sprite.Draw(pos.ToIVec2(), size.ToIVec2());
+        _sprite.Draw(pos.ToIVec2().Anchored(size.ToIVec2(), _anchor), size.ToIVec2());
+    }
+
+    public void set_anchor (int anchor) {
+        _anchor = (AnchorPoint)anchor;
     }
 
     public override string ToString () {

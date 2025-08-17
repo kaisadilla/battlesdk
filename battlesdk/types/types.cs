@@ -207,8 +207,7 @@ public readonly unsafe struct Ptr<T> where T : unmanaged {
     }
 }
 
-
-public static class TypesExtension {
+public static class TypesExt {
     private static readonly StackTraceCleaner _cleaner = new(new() {
         ColorFormatting = StackColorFormatType.ExtendedANSIColor,
         IncludeFileData = true,

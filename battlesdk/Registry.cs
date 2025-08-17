@@ -5,7 +5,6 @@ using NLog;
 
 namespace battlesdk;
 
-
 public static class Registry {
     private delegate T BuildAsset<T> (string name, string fullPath);
 

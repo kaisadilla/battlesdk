@@ -2,6 +2,7 @@
 using battlesdk.graphics;
 using battlesdk.input;
 using battlesdk.scripts;
+using battlesdk.scripts.types;
 using MoonSharp.Interpreter;
 using NLog;
 
@@ -26,8 +27,10 @@ public class ScriptHudElement : IHudElement, IInputListener {
     private DynValue? _drawFn;
     private DynValue? _handleInputFn;
 
+    public DynValue Result { get; private set; } = DynValue.Nil;
+
     public ScriptHudElement (
-        Renderer renderer, ScriptAsset script, Dictionary<string, object> parameters
+        Renderer renderer, ScriptAsset script, LuaObject args
     ) {
         OnClose += (s, evt) => IsClosed = true;
 
@@ -43,8 +46,9 @@ public class ScriptHudElement : IHudElement, IInputListener {
         _drawFn = _lua.GetFunction("target", "draw");
         _handleInputFn = _lua.GetFunction("target", "handle_input");
 
+        CedeControl();
         if (_openFn?.Type == DataType.Function) {
-            _lua.RunAsync(_openFn);
+            _lua.RunAsync(_openFn, args);
         }
     }
 
@@ -62,8 +66,12 @@ public class ScriptHudElement : IHudElement, IInputListener {
 
     public void HandleInput () {
         if (_handleInputFn?.Type == DataType.Function) {
-            _lua.Run(_handleInputFn);
+            _lua.RunAsync(_handleInputFn);
         }
+    }
+
+    public void SetResult (DynValue result) {
+        Result = result;
     }
 
     public void CedeControl () {
