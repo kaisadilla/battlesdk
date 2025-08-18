@@ -85,7 +85,6 @@ public unsafe class Renderer {
         SDL3.SDL_RenderClear(SdlRenderer);
 
         Screen.Draw();
-        Hud.Draw();
 
         DisableScale();
         Debug.Draw(SdlRenderer);

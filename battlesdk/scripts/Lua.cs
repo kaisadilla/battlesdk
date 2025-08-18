@@ -14,12 +14,15 @@ public static class Lua {
 
     private static readonly List<LuaEnum> _enums = [];
 
+    private delegate string LocCallback (string key, params object[] args);
+
     public static void Init () {
         RegisterEnumTable<ActionKey>("ActionKey");
         RegisterEnumTable<Direction>("Direction");
         RegisterEnumTable<AnchorPoint>("AnchorPoint");
 
         UserData.RegisterType<LuaLogger>(InteropAccessMode.Preoptimized, LuaLogger.CLASSNAME);
+        UserData.RegisterType<LuaScript>(InteropAccessMode.Preoptimized, LuaScript.CLASSNAME);
         UserData.RegisterType<LuaFmt>(InteropAccessMode.Preoptimized, LuaFmt.CLASSNAME);
         UserData.RegisterType<LuaControls>(InteropAccessMode.Preoptimized, LuaControls.CLASSNAME);
         UserData.RegisterType<LuaAudio>(InteropAccessMode.Preoptimized, LuaAudio.CLASSNAME);
@@ -73,6 +76,7 @@ public static class Lua {
         script.Globals[LuaList.CLASSNAME] = UserData.CreateStatic<LuaList>();
         script.Globals[LuaInventoryItem.CLASSNAME] = UserData.CreateStatic<LuaInventoryItem>();
         script.Globals[LuaLogger.CLASSNAME] = UserData.CreateStatic<LuaLogger>();
+        script.Globals[LuaScript.CLASSNAME] = UserData.CreateStatic<LuaScript>();
         script.Globals[LuaFmt.CLASSNAME] = UserData.CreateStatic<LuaFmt>();
         script.Globals[LuaControls.CLASSNAME] = UserData.CreateStatic<LuaControls>();
         script.Globals[LuaAudio.CLASSNAME] = UserData.CreateStatic<LuaAudio>();
@@ -83,7 +87,7 @@ public static class Lua {
         script.Globals[LuaEntity.CLASSNAME] = UserData.CreateStatic<LuaEntity>();
         script.Globals[LuaScriptGraphicElement.CLASSNAME] = UserData.CreateStatic<LuaScriptGraphicElement>();
 
-        script.Globals["loc"] = (Func<string, string>)((txt) => Localization.Text(txt));
+        script.Globals["loc"] = (LocCallback)Localization.Text;
 
         script.Globals["renderer"] = new LuaRenderer(Screen.MainRenderer);
 

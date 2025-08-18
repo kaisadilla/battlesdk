@@ -64,7 +64,7 @@ public class ChoiceBox : IDisposable {
         int height = 0;
 
         foreach (var c in choices) {
-            var sprite = _font.RenderShadowedPlainText(Localization.Text(c));
+            var sprite = _font.RenderShadowedPlainText(c);
             width = Math.Max(width, sprite.Width);
             height += _font.Asset.LineHeight;
             _choices.Add(sprite);

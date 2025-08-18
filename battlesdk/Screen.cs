@@ -95,6 +95,7 @@ public static class Screen {
             _renderedLayers[i].Draw();
         }
 
+        Hud.Draw();
         ApplyTransition();
     }
 

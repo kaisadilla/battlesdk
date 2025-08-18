@@ -22,7 +22,7 @@ public class LuaHud : ILuaType {
         var luaCor = ctx.GetCallingCoroutine();
         string text = args[0].String;
 
-        var msg = Hud.ShowMessage(Localization.Text(text));
+        var msg = Hud.ShowMessage(text);
         msg.OnClose += (s, evt) => luaCor.Resume();
 
         return DynValue.NewYieldReq([]);
@@ -56,7 +56,7 @@ public class LuaHud : ILuaType {
         int defaultChoice = args.Count >= 4 ? (int)(args[3].Number - 1) : -1; // Lua index to C# index.
 
         var choice = Hud.ShowChoiceMessage(
-            Localization.Text(msg), choices, canBeCancelled, defaultChoice
+            msg, choices, canBeCancelled, defaultChoice
         );
         choice.OnClose += (s, evt) => {
             var c = choice.Choice;
@@ -119,7 +119,7 @@ public class LuaHud : ILuaType {
     }
 
     public override string ToString () {
-        return "[hud]";
+        return "[Hud]";
     }
 
     public string str () => ToString();

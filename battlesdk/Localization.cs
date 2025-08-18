@@ -24,10 +24,11 @@ public static class Localization {
     /// language of the game. If such key doesn't exist, returns the key itself.
     /// </summary>
     /// <param name="key">The key that identifies the localized string.</param>
-    public static string Text (string key) {
-        if (_text.TryGetValue(key, out var value)) return FillPlaceholders(value);
+    /// <param name="args">A list of arguments to fill '%' placeholders.</param>
+    public static string Text (string key, params object[] args) {
+        if (_text.TryGetValue(key, out var value)) return FillPlaceholders(value, args);
 
-        return FillPlaceholders(key);
+        return FillPlaceholders(key, args);
     }
 
     /// <summary>
@@ -107,7 +108,7 @@ public static class Localization {
         }
     }
 
-    public static string FillPlaceholders (string template) {
+    public static string FillPlaceholders (string template, params object[] args) {
         var tokens = Tokenize(template);
         var sb = new StringBuilder();
 
@@ -116,7 +117,16 @@ public static class Localization {
                 sb.Append(tok.Text);
             }
             else {
-                if (_placeholderValues.TryGetValue(tok.Text, out var strProvider)) {
+                if (tok.Text[0] == '%' && int.TryParse(tok.Text[1..], out int argIndex)) {
+                    if (argIndex < args.Length) {
+                        sb.Append(args[argIndex]);
+                    }
+                    else {
+                        _logger.Error($"Value placeholder index {argIndex} is out of bouds.");
+                        sb.Append(tok.Text);
+                    }
+                }
+                else if (_placeholderValues.TryGetValue(tok.Text, out var strProvider)) {
                     sb.Append(strProvider());
                 }
                 else {

@@ -10,7 +10,7 @@ public class LuaScriptHudElement : LuaHudElement {
 
     private ScriptHudElement _element;
 
-    public DynValue Result { get => _element.Result; }
+    public DynValue Result { get => _element.Result; } // TODO: document as lowercase. Uppercase used to avoid collision with set_result.
 
     [MoonSharpHidden]
     public LuaScriptHudElement (ScriptHudElement element) : base(element) {
