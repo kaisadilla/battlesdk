@@ -24,6 +24,7 @@ public static class Lua {
         UserData.RegisterType<LuaLogger>(InteropAccessMode.Preoptimized, LuaLogger.CLASSNAME);
         UserData.RegisterType<LuaScript>(InteropAccessMode.Preoptimized, LuaScript.CLASSNAME);
         UserData.RegisterType<LuaFmt>(InteropAccessMode.Preoptimized, LuaFmt.CLASSNAME);
+        UserData.RegisterType<LuaSettings>(InteropAccessMode.Preoptimized, LuaSettings.CLASSNAME);
         UserData.RegisterType<LuaControls>(InteropAccessMode.Preoptimized, LuaControls.CLASSNAME);
         UserData.RegisterType<LuaAudio>(InteropAccessMode.Preoptimized, LuaAudio.CLASSNAME);
         UserData.RegisterType<LuaHud>(InteropAccessMode.Preoptimized, LuaHud.CLASSNAME);
@@ -46,7 +47,9 @@ public static class Lua {
         UserData.RegisterType<LuaPlainTextSprite>(InteropAccessMode.Default, LuaPlainTextSprite.CLASSNAME);
         UserData.RegisterType<LuaFont>(InteropAccessMode.Preoptimized, LuaFont.CLASSNAME);
         UserData.RegisterType<LuaTextbox>(InteropAccessMode.Preoptimized, LuaTextbox.CLASSNAME);
+        UserData.RegisterType<LuaAnimatableTextbox>(InteropAccessMode.Preoptimized, LuaAnimatableTextbox.CLASSNAME);
         UserData.RegisterType<LuaChoiceBox>(InteropAccessMode.Preoptimized, LuaChoiceBox.CLASSNAME);
+        UserData.RegisterType<LuaScrollbar>(InteropAccessMode.Preoptimized, LuaScrollbar.CLASSNAME);
         UserData.RegisterType<LuaScriptGraphicElement>(InteropAccessMode.Preoptimized, LuaScriptGraphicElement.CLASSNAME);
         UserData.RegisterType<LuaHudElement>(InteropAccessMode.Preoptimized, LuaHudElement.CLASSNAME);
         UserData.RegisterType<LuaMessageHudElement>(InteropAccessMode.Preoptimized, LuaMessageHudElement.CLASSNAME);
@@ -79,6 +82,7 @@ public static class Lua {
         script.Globals[LuaLogger.CLASSNAME] = UserData.CreateStatic<LuaLogger>();
         script.Globals[LuaScript.CLASSNAME] = UserData.CreateStatic<LuaScript>();
         script.Globals[LuaFmt.CLASSNAME] = UserData.CreateStatic<LuaFmt>();
+        script.Globals[LuaSettings.CLASSNAME] = UserData.CreateStatic<LuaSettings>();
         script.Globals[LuaControls.CLASSNAME] = UserData.CreateStatic<LuaControls>();
         script.Globals[LuaAudio.CLASSNAME] = UserData.CreateStatic<LuaAudio>();
         script.Globals[LuaHud.CLASSNAME] = UserData.CreateStatic<LuaHud>();
@@ -123,6 +127,7 @@ public static class Lua {
 
         script.DoString(
             @"function target:open() end
+            function target:update() end
             function target:draw() end
             function target:handle_input() end"
         );

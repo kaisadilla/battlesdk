@@ -28,7 +28,7 @@ public static class Screen {
     public static ScriptScreenLayer MainMenu { get; private set; } = null!;
     public static ScriptScreenLayer Bag { get; private set; } = null!;
     public static ScriptScreenLayer SaveGame { get; private set; } = null!;
-    public static ScriptScreenLayer? Shop { get; private set; } = null!;
+    public static ScriptScreenLayer Options { get; private set; } = null!;
 
     /// <summary>
     /// The renderer that works on the game's main window.
@@ -50,14 +50,15 @@ public static class Screen {
             throw new InitializationException("Missing script: 'screens/save_game'.");
         }
 
+        if (Registry.Scripts.TryGetElementByName("screens/options", out var optionsScr) == false) {
+            throw new InitializationException("Missing script: 'screens/save_game'.");
+        }
+
         try {
             MainMenu = new ScriptScreenLayer(MainRenderer, mainMenuScr);
             Bag = new ScriptScreenLayer(MainRenderer, bagScr);
             SaveGame = new ScriptScreenLayer(MainRenderer, saveGameScr);
-
-            if (Registry.Scripts.TryGetElementByName("screens/shop", out var shopScr)) {
-                Shop = new ScriptScreenLayer(MainRenderer, shopScr);
-            }
+            Options = new ScriptScreenLayer(MainRenderer, optionsScr);
         }
         catch (Exception ex) {
             throw new InitializationException("Failed to load screen layer.", ex);
@@ -78,6 +79,10 @@ public static class Screen {
 
     public static void Update () {
         UpdateTransition();
+
+        for (int i = _renderedLayers.Count - 1; i >= 0; i--) {
+            _renderedLayers[i].Update();
+        }
     }
 
     public static void Draw () {
@@ -173,6 +178,8 @@ public interface IScreenLayer {
     /// If true, layers below this one won't be rendered.
     /// </summary>
     bool IsTransparent { get; }
+
+    void Update();
 
     /// <summary>
     /// Draws this layer to the screen.

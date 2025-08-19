@@ -19,6 +19,7 @@ public class ScriptScreenLayer : IScreenLayer, IInputListener {
 
     // These fields contain specific functions in the script.
     private DynValue? _openFunc;
+    private DynValue? _updateFunc;
     private DynValue? _drawFunc;
     private DynValue? _handleInputFunc;
 
@@ -31,6 +32,7 @@ public class ScriptScreenLayer : IScreenLayer, IInputListener {
         _lua = LuaScriptHost.ScreenScript(script, this);
         _lua.Run();
         _openFunc = _lua.GetFunction("target", "open");
+        _updateFunc = _lua.GetFunction("target", "update");
         _drawFunc = _lua.GetFunction("target", "draw");
         _handleInputFunc = _lua.GetFunction("target", "handle_input");
     }
@@ -40,6 +42,10 @@ public class ScriptScreenLayer : IScreenLayer, IInputListener {
         Screen.Push(this);
         InputManager.Push(this);
         if (_openFunc is not null) _lua.RunAsync(_openFunc);
+    }
+
+    public unsafe void Update () {
+        if (_updateFunc is not null) _lua.Run(_updateFunc);
     }
 
     public unsafe void Draw () {

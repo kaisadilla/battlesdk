@@ -10,7 +10,7 @@ public class LuaG {
     /// <summary>
     /// The options chosen by the player for this specific game.
     /// </summary>
-    public static LuaGameSettings game_options => new(G.GameOptions);
+    public static LuaGameSettings game_options => new(G.GameOptions); // TODO: Optimize.
 
     /// <summary>
     /// The current player's name.

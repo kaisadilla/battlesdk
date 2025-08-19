@@ -172,6 +172,18 @@ public static class Music {
     }
 
     /// <summary>
+    /// Sets the volume of the music.
+    /// </summary>
+    /// <param name="volume">A value between 0 (mute) and 1 (max volume). This
+    /// value is expected to be linear (e.g. the caller should not compensate
+    /// for human volume perception, as this function will already do that).</param>
+    public static void SetVolume (float volume) {
+        SDL3_mixer.Mix_VolumeMusic(
+            (int)(MathF.Pow(volume, 2.0f) * SDL3_mixer.MIX_MAX_VOLUME)
+        );
+    }
+
+    /// <summary>
     /// Sets the fade out task resolver to true. This is intended to be used
     /// as a callback in SDL.
     /// </summary>

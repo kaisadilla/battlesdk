@@ -18,7 +18,6 @@ public class Game {
         InitSdl();
         Data.Init();
         Registry.Init();
-        GameSettings.Load();
 
         Debug.Init();
         Time.Init();
@@ -107,8 +106,8 @@ public class Game {
         }
 
         SDL3_mixer.Mix_AllocateChannels(32);
-        //SDL3_mixer.Mix_VolumeMusic(32); // volume 0 to 128.
-        SDL3_mixer.Mix_VolumeMusic(6); // volume 0 to 128.
+        SDL3_mixer.Mix_VolumeMusic(32); // TODO: Settings // volume 0 to 128.
+        //SDL3_mixer.Mix_VolumeMusic(6); // volume 0 to 128.
 
         CustomBlendModes.Init();
     }

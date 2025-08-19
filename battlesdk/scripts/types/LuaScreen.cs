@@ -39,10 +39,10 @@ public class LuaScreen : ILuaType {
     }
 
     /// <summary>
-    /// Opens the shop screen, if it exists.
+    /// Opens the options screen.
     /// </summary>
-    public static void open_shop () {
-        Screen.Shop?.Open();
+    public static void open_options () {
+        Screen.Options.Open();
     }
 
     /// <summary>

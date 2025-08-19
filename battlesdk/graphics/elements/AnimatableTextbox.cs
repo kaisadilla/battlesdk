@@ -4,8 +4,6 @@ using NLog;
 
 namespace battlesdk.graphics.elements;
 public class AnimatableTextbox {
-    private const float CHARS_PER_SECOND = 80;
-
     enum AnimationState {
         None,
         MovingLine,
@@ -177,7 +175,7 @@ public class AnimatableTextbox {
         int lastLine = (int)(_currentFirstLine) + (_visibleLines - 1);
 
         var oldCount = _charCount;
-        _charCount += CHARS_PER_SECOND * Time.DeltaTime;
+        _charCount += (G.GameOptions?.TextSpeed ?? 80) * Time.DeltaTime;
 
         for (int i = (int)oldCount; i < (int)_charCount; i++) {
             if (i >= _text.CharCount) {

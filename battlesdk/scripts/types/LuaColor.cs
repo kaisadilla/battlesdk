@@ -19,6 +19,13 @@ public class LuaColor : ILuaType {
         this.a = a;
     }
 
+    public LuaColor (ColorRGBA col) {
+        r = col.R;
+        g = col.G;
+        b = col.B;
+        a = col.A;
+    }
+
     public static LuaColor @new (int r, int g, int b, int a) {
         return new(r, g, b, a);
     }

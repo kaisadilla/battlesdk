@@ -111,6 +111,8 @@ public class OverworldScreenLayer : IScreenLayer, IInputListener {
         _player.SetRunning(false);
     }
 
+    public void Update () { }
+
     public void Draw () {
         _camera.SetPosition(TileToPixelSpace(G.World.Player.Subposition));
 

@@ -29,6 +29,11 @@ public class GameSettings {
     /// </summary>
     public float SoundVolume { get; private set; } = 1f;
     /// <summary>
+    /// The speed at which text prints to the screen, expressed as amount of
+    /// characters printed per second.
+    /// </summary>
+    public float TextSpeed = 80f;
+    /// <summary>
     /// When false, moves don't have any animation during battle.
     /// </summary>
     public bool BattleAnimations { get; private set; } = true;
@@ -100,16 +105,20 @@ public class GameSettings {
 
     public static GameSettings Load () {
         GameSettings settings = new() {
-            MessageFrame = "ui/frames/dp_textbox_1",
-            BoxFrame = "ui/frames/dp_box",
+            MessageFrame = Data.Misc.MessageFrames[0],
+            BoxFrame = Data.Misc.BoxFrames[0],
             Font = "power_clear"
         };
+
+        settings.SetMusicVolume(settings.MusicVolume);
+        settings.SetSoundVolume(settings.SoundVolume);
 
         return settings;
     }
 
     public void SetWindowScale (float scale) {
         WindowScale = scale;
+        Screen.MainRenderer.SetScale(scale);
     }
 
     public void SetFullScreen (bool active) {
@@ -118,10 +127,16 @@ public class GameSettings {
 
     public void SetMusicVolume (float volume) {
         MusicVolume = volume;
+        Music.SetVolume(volume);
     }
 
     public void SetSoundVolume (float volume) {
         SoundVolume = volume;
+        Audio.SetVolume(volume);
+    }
+
+    public void SetTextSpeed (float speed) {
+        TextSpeed = speed;
     }
 
     public void SetBattleAnimations (bool active) {

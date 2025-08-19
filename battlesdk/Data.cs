@@ -1,5 +1,5 @@
-﻿using NLog;
-using System.Text.Json;
+﻿using battlesdk.json;
+using NLog;
 
 namespace battlesdk;
 
@@ -8,6 +8,11 @@ namespace battlesdk;
 /// must be called once before any data in this class can be read.
 /// </summary>
 public static class Data {
+    public static string ResFolderPath { get; private set; } = "res";
+
+    public const string PATH_MESSAGE_FRAMES = "data/misc/message_frames.json";
+    public const string PATH_BOX_FRAMES = "data/misc/box_frames.json";
+
     // Note: if any of the non-nullable fields in this class contains `null`,
     // that usually means that the field was accessed before Init() was ever
     // called.
@@ -21,11 +26,41 @@ public static class Data {
     /// once before data can be read from this class.
     /// </summary>
     public static void Init () {
+        var messageFrames = ReadMessageFrames();
+        var boxFrames = ReadBoxFrames();
         var timeTints = ReadTimeTints();
 
         Misc = new() {
+            MessageFrames = messageFrames,
+            BoxFrames = boxFrames,
             TimeTints = timeTints,
         };
+    }
+
+    private static List<string> ReadMessageFrames () {
+        var path = Path.Combine(ResFolderPath, PATH_MESSAGE_FRAMES);
+        if (File.Exists(path) == false) {
+            throw new("No message_frames file found."); // TODO: Better exception.
+        }
+
+        var txt = File.ReadAllText(path);
+        var list = Json.Parse<List<string>>(txt)
+            ?? throw new("Failed to read message_frames file.");
+
+        return list;
+    }
+
+    private static List<string> ReadBoxFrames () {
+        var path = Path.Combine(ResFolderPath, PATH_BOX_FRAMES);
+        if (File.Exists(path) == false) {
+            throw new("No box_frames file found."); // TODO: Better exception.
+        }
+
+        var txt = File.ReadAllText(path);
+        var list = Json.Parse<List<string>>(txt)
+            ?? throw new("Failed to read box_frames file.");
+
+        return list;
     }
 
     private static List<ColorRGB>? ReadTimeTints () {
@@ -36,7 +71,7 @@ public static class Data {
 
         try {
             var txt = File.ReadAllText("res/data/misc/time_tints.json");
-            var list = JsonSerializer.Deserialize<List<ColorRGB>>(txt);
+            var list = Json.Parse<List<ColorRGB>>(txt);
 
             if (list is null) return null;
 
@@ -68,5 +103,7 @@ public static class Data {
 }
 
 public class MiscData {
+    public required List<string> MessageFrames { get; init; }
+    public required List<string> BoxFrames { get; init; }
     public required List<ColorRGB>? TimeTints { get; init; }
 }

@@ -54,6 +54,18 @@ public static class Audio {
         _ = SDL3_mixer.Mix_PlayChannel(0, sound, 0);
     }
 
+    /// <summary>
+    /// Sets the volume of sound effects.
+    /// </summary>
+    /// <param name="volume">A value between 0 (mute) and 1 (max volume). This
+    /// value is expected to be linear (e.g. the caller should not compensate
+    /// for human volume perception, as this function will already do that).</param>
+    public static void SetVolume (float volume) {
+        SDL3_mixer.Mix_Volume(0,
+            (int)(MathF.Pow(volume, 2.0f) * SDL3_mixer.MIX_MAX_VOLUME)
+        );
+    }
+
     public static unsafe Mix_Chunk* GetSound (int id) {
         if (_sounds.TryGetValue(id, out var chunk)) return chunk.Raw;
 

@@ -8,6 +8,8 @@ namespace battlesdk.graphics;
 public unsafe class Renderer {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
+    private Window _window;
+
     // These dictionaries map assets by their Registry id to Graphics elements
     // that are loaded into the SDL renderer. This class has methods to obtain
     // elements from these dictionaries, automatically creating new elements
@@ -40,9 +42,11 @@ public unsafe class Renderer {
     /// </summary>
     public float Scale { get; private set; }
 
-    public Renderer (SDL_Window* window, int width, int height, float scale) {
-        SdlRenderer = SDL3.SDL_CreateRenderer(window, (string?)null);
+    public Renderer (Window window, int width, int height, float scale) {
+        SdlRenderer = SDL3.SDL_CreateRenderer(window.SdlWindow, (string?)null);
         SDL3.SDL_SetDefaultTextureScaleMode(SdlRenderer, SDL_ScaleMode.SDL_SCALEMODE_NEAREST);
+
+        _window = window;
 
         Width = width;
         Height = height;
@@ -78,6 +82,12 @@ public unsafe class Renderer {
             (int)(Height * Scale),
             SDL_RendererLogicalPresentation.SDL_LOGICAL_PRESENTATION_INTEGER_SCALE
         );
+    }
+
+    public void SetScale (float scale) {
+        _window.SetScale(scale);
+        Scale = scale;
+        EnableScale();
     }
 
     public unsafe void Render () {

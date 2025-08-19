@@ -27,6 +27,11 @@ public class LuaGameSettings : ILuaType {
     /// </summary>
     public float Sound_volume => _settings.SoundVolume;
     /// <summary>
+    /// The speed at which text prints to the screen, expressed as amount of
+    /// characters printed per second.
+    /// </summary>
+    public float Text_speed => _settings.TextSpeed;
+    /// <summary>
     /// When false, moves don't have any animation during battle.
     /// </summary>
     public bool Battle_animations => _settings.BattleAnimations;
@@ -66,8 +71,28 @@ public class LuaGameSettings : ILuaType {
         _settings.SetMusicVolume(volume);
     }
 
+    public void increase_music_volume (float amount) {
+        _settings.SetMusicVolume(Math.Min(1f, _settings.MusicVolume + amount));
+    }
+
+    public void reduce_music_volume (float amount) {
+        _settings.SetMusicVolume(Math.Max(0f, _settings.MusicVolume - amount));
+    }
+
     public void set_sound_volume (float volume) {
         _settings.SetSoundVolume(volume);
+    }
+
+    public void increase_sound_volume (float amount) {
+        _settings.SetSoundVolume(Math.Min(1f, _settings.SoundVolume + amount));
+    }
+
+    public void reduce_sound_volume (float amount) {
+        _settings.SetSoundVolume(Math.Max(0f, _settings.SoundVolume - amount));
+    }
+
+    public void set_text_speed (float speed) {
+        _settings.SetTextSpeed(speed);
     }
 
     public void set_battle_animations (bool active) {

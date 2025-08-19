@@ -10,6 +10,9 @@ public class LuaData {
     [MoonSharpHidden]
     public const string CLASSNAME = "Data";
 
+    public static List<string> message_frames => Data.Misc.MessageFrames;
+    public static List<string> box_frames => Data.Misc.BoxFrames;
+
     public static LuaItem? get_item (string item_id) {
         if (Registry.Items.TryGetValue(item_id, out var item)) {
             return new(item);

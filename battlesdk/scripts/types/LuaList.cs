@@ -38,6 +38,10 @@ public class LuaList : ILuaType {
         return new(tbl);
     }
 
+    public static int index_of (List<object> list, object element) {
+        return list.IndexOf(element) + 1;
+    }
+
     public object? this[int key] {
         get => _list[key];
         set => _list[key] = value;

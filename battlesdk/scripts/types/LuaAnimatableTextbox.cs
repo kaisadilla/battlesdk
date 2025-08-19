@@ -22,6 +22,14 @@ public class LuaAnimatableTextbox : ILuaType {
         _element = textbox;
     }
 
+    ~LuaAnimatableTextbox () {
+        _element.Destroy();
+    }
+
+    public void update () {
+        _element.Update();
+    }
+
     public void draw () {
         _element.Draw();
     }

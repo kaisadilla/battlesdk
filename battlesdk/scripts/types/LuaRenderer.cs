@@ -158,6 +158,32 @@ public class LuaRenderer : ILuaType {
         ));
     }
 
+    public LuaAnimatableTextbox? get_animatable_textbox (
+        string frame,
+        string font,
+        LuaVec2 pos,
+        LuaVec2 size,
+        string text
+    ) {
+        if (Registry.Sprites.TryGetId(frame, out int frameId) == false) {
+            _logger.Error($"Sprite does not exist: '{frame}'.");
+            return null;
+        }
+        if (Registry.Fonts.TryGetId(font, out int fontId) == false) {
+            _logger.Error($"Font does not exist: '{font}'.");
+            return null;
+        }
+
+        return new(new AnimatableTextbox(
+            _renderer,
+            frameId,
+            fontId,
+            pos.ToIVec2(),
+            size.ToIVec2(),
+            text
+        ));
+    }
+
     public LuaChoiceBox? get_choice_box (
         string frame,
         string font, 
@@ -182,6 +208,10 @@ public class LuaRenderer : ILuaType {
             (AnchorPoint)anchor,
             choices
         ));
+    }
+
+    public LuaScrollbar get_scrollbar (int width, float value) {
+        return new(new(_renderer, width, value));
     }
 
     public LuaScriptGraphicElement? get_script_element (string script_name) {
