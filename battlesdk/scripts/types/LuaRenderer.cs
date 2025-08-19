@@ -85,6 +85,28 @@ public class LuaRenderer : ILuaType {
     }
 
     /// <summary>
+    /// Returns the default frame for messages. This function can only be
+    /// called during gameplay.
+    /// </summary>
+    public LuaFrameSprite? get_default_message_frame () {
+        var frame = _renderer.GetFrame(G.GameOptions.MessageFrameId);
+        if (frame is null) throw new("No default message frame exists.");
+
+        return new(frame);
+    }
+
+    /// <summary>
+    /// Returns the default frame for boxes. This function can only be called
+    /// during gameplay.
+    /// </summary>
+    public LuaFrameSprite? get_default_box_frame () {
+        var frame = _renderer.GetFrame(G.GameOptions.BoxFrameId);
+        if (frame is null) throw new("No default box frame exists.");
+
+        return new(frame);
+    }
+
+    /// <summary>
     /// Returns the font with the name given, or null if no such font exists.
     /// </summary>
     /// <param name="name">The name of the font.</param>
@@ -100,10 +122,11 @@ public class LuaRenderer : ILuaType {
     }
 
     /// <summary>
-    /// Returns the default text font of the game.
+    /// Returns the default text font of the game. This function can only be
+    /// called during gameplay.
     /// </summary>
     public LuaFont get_default_font () {
-        var font = _renderer.GetFont(PlayerSettings.TextFont);
+        var font = _renderer.GetFont(G.GameOptions.FontId);
         if (font is null) throw new("No default font exists.");
 
         return new(font);

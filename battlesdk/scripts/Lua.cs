@@ -30,6 +30,7 @@ public static class Lua {
         UserData.RegisterType<LuaScreen>(InteropAccessMode.Preoptimized, LuaScreen.CLASSNAME);
         UserData.RegisterType<LuaData>(InteropAccessMode.Preoptimized, LuaData.CLASSNAME);
         UserData.RegisterType<LuaG>(InteropAccessMode.Preoptimized, LuaG.CLASSNAME);
+        UserData.RegisterType<LuaGameSettings>(InteropAccessMode.Preoptimized, LuaGameSettings.CLASSNAME);
 
         UserData.RegisterType<LuaVec2>(InteropAccessMode.Preoptimized, LuaVec2.CLASSNAME);
         UserData.RegisterType<LuaRect>(InteropAccessMode.Preoptimized, LuaRect.CLASSNAME);
@@ -84,6 +85,7 @@ public static class Lua {
         script.Globals[LuaScreen.CLASSNAME] = UserData.CreateStatic<LuaScreen>();
         script.Globals[LuaData.CLASSNAME] = UserData.CreateStatic<LuaData>();
         script.Globals[LuaG.CLASSNAME] = UserData.CreateStatic<LuaG>();
+        script.Globals[LuaGameSettings.CLASSNAME] = UserData.CreateStatic<LuaGameSettings>();
         script.Globals[LuaEntity.CLASSNAME] = UserData.CreateStatic<LuaEntity>();
         script.Globals[LuaScriptGraphicElement.CLASSNAME] = UserData.CreateStatic<LuaScriptGraphicElement>();
 

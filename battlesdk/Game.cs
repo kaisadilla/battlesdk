@@ -18,7 +18,7 @@ public class Game {
         InitSdl();
         Data.Init();
         Registry.Init();
-        PlayerSettings.Init();
+        GameSettings.Load();
 
         Debug.Init();
         Time.Init();

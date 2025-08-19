@@ -38,7 +38,7 @@ public class ChoiceMessageHudElement : IHudElement, IInputListener {
         _message = new(renderer, textboxId, fontId, text);
         _choice = new(
             renderer,
-            PlayerSettings.BoxFrame,
+            G.GameOptions.BoxFrameId,
             fontId,
             new(renderer.Width - 3, renderer.Height - 50),
             AnchorPoint.BottomRight,

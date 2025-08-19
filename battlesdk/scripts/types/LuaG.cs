@@ -8,6 +8,11 @@ public class LuaG {
     public const string CLASSNAME = "G";
 
     /// <summary>
+    /// The options chosen by the player for this specific game.
+    /// </summary>
+    public static LuaGameSettings game_options => new(G.GameOptions);
+
+    /// <summary>
     /// The current player's name.
     /// </summary>
     public static string name => G.PlayerName;

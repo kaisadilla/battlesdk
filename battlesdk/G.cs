@@ -8,6 +8,10 @@ public static class G {
 
     public static World World { get; private set; } = new();
     /// <summary>
+    /// The options chosen by the player for this specific game.
+    /// </summary>
+    public static GameSettings GameOptions { get; private set; } = null!;
+    /// <summary>
     /// The name of the player.
     /// </summary>
     public static string PlayerName { get; private set; } = "Dawn";
@@ -29,6 +33,7 @@ public static class G {
     public static bool DexUnlocked { get; private set; } = true;
 
     public static void LoadGame () {
+        GameOptions = GameSettings.Load();
         Inventory = Inventory.Load();
 
         // TODO: Remove
